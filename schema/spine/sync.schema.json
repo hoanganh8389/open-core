@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bizcity.vn/schema/spine/sync.schema.json",
+  "title": "bizcity_sync@1-draft — changefeed, digest, resolve (BIZCITY-SPINE-v1.md §4.1)",
+  "$comment": "[2026-11-24 05:08 PM Johnny Chu - Chu Hoàng Anh] SPINE-1 — hình trả về chủ phải mở cho app khác kéo bản sao và đối chiếu.",
+  "$defs": {
+    "cursor": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "ChangeRow": {
+      "type": "object",
+      "required": ["id", "version", "updated_at"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "version": { "type": "integer", "minimum": 1 },
+        "updated_at": { "type": "string", "minLength": 20 },
+        "deleted": { "type": "boolean" },
+        "data": { "type": "object" }
+      }
+    },
+    "ChangePage": {
+      "type": "object",
+      "required": ["data", "meta"],
+      "additionalProperties": false,
+      "properties": {
+        "data": { "type": "array", "items": { "$ref": "#/$defs/ChangeRow" } },
+        "meta": {
+          "type": "object",
+          "required": ["cursor", "as_of"],
+          "properties": {
+            "cursor": { "$ref": "#/$defs/cursor" },
+            "as_of": { "type": "string", "minLength": 20 },
+            "has_more": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "DigestRow": {
+      "type": "object",
+      "required": ["id", "version"],
+      "additionalProperties": false,
+      "properties": { "id": { "type": "string" }, "version": { "type": "integer", "minimum": 1 }, "deleted": { "type": "boolean" } }
+    },
+    "Digest": { "type": "array", "items": { "$ref": "#/$defs/DigestRow" } },
+    "ResolveResult": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["found", "not_found", "ambiguous", "retired"] },
+        "id": { "type": "string" },
+        "code_at": { "type": "string" },
+        "merged_into": { "type": "string" },
+        "finding": { "type": "string", "pattern": "^IN-[A-Z]+-[0-9]{3}$" }
+      }
+    }
+  }
+}
