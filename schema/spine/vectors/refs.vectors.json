@@ -28,8 +28,8 @@
     {
       "name": "uom",
       "schema": "refs.schema.json", "def": "uom",
-      "valid": ["cai", "THUNG", "kg", "thung-24"],
-      "invalid": ["", "cái", "thung 24", "x-this-uom-code-is-too-long"]
+      "valid": ["Cái", "Thùng", "Lốc_6", "Kg", "cai", "thung-24"],
+      "invalid": ["", " Cái", "thung 24", "x-this-uom-code-is-too-long"]
     },
     {
       "name": "branch_code",

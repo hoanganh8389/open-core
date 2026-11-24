@@ -9,7 +9,7 @@
     "sub": { "type": "string", "pattern": "^(wp:[0-9]+|biz:[A-Za-z0-9_-]{1,64})$" },
     "item_id": { "$ref": "#/$defs/ulid" },
     "contact_id": { "$ref": "#/$defs/ulid" },
-    "uom": { "type": "string", "pattern": "^[A-Za-z0-9_.-]{1,20}$" },
+    "uom": { "type": "string", "pattern": "^[^\\s]{1,20}$", "$comment": "1.1: tên ĐVT của chủ, Unicode có dấu (Cái, Thùng), không khoảng trắng" },
     "branch_code": { "type": "string", "pattern": "^[A-Z0-9_.-]{1,20}$" },
     "partner_code": { "type": "string", "pattern": "^[A-Za-z0-9_.-]{1,40}$" },
     "doc_ref": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)*:[A-Za-z0-9_.-]{1,64}$" },
