@@ -1,0 +1,46 @@
+{
+  "$comment": "[2026-11-24 08:10 PM Johnny Chu - Chu Hoàng Anh] SPINE-4 — vector cho bizcity_identity@1 (vé, phiên) và bizcity_knowledge@1 (data, descriptor).",
+  "cases": [
+    {
+      "name": "identity TicketClaims",
+      "schema": "identity.schema.json", "def": "TicketClaims",
+      "valid": [
+        { "sub": "wp:1203", "email": "nv@congty.vn", "name": "Nguyễn Văn A", "login": "nva", "tenant": "abc-shop", "perms": ["catalog:read", "pos:sell"], "aud": "open-ketoan", "iat": 1764000000, "exp": 1764000300 },
+        { "sub": "biz:bridge-01", "email": "may@congty.vn", "iat": 1764000000, "exp": 1764000100 }
+      ],
+      "invalid": [
+        { "email": "nv@congty.vn", "iat": 1764000000, "exp": 1764000300 },
+        { "sub": "1203", "email": "nv@congty.vn", "iat": 1764000000, "exp": 1764000300 },
+        { "sub": "wp:1203", "email": "khong-phai-email", "iat": 1764000000, "exp": 1764000300 },
+        { "sub": "wp:1203", "email": "nv@congty.vn", "perms": ["Catalog Read"], "iat": 1764000000, "exp": 1764000300 },
+        { "sub": "wp:1203", "email": "nv@congty.vn", "tenant": "ABC", "iat": 1764000000, "exp": 1764000300 },
+        { "sub": "wp:1203", "email": "nv@congty.vn", "iat": 1764000000, "exp": 1764000300, "password": "x" }
+      ]
+    },
+    {
+      "name": "knowledge KnowledgeData",
+      "schema": "knowledge.schema.json", "def": "KnowledgeData",
+      "valid": [
+        { "as_of": "2026-11-24T10:00:00Z", "rows": [ { "item_id": "01JD8K2Q4F3M9R7X5T1V0W6Y8Z", "qty": 12 } ], "sources": [ { "kind": "item", "id": "01JD8K2Q4F3M9R7X5T1V0W6Y8Z" } ], "pii_masked": true },
+        { "as_of": "2026-11-24", "rows": [], "sources": [], "pii_masked": true, "cursor": "2026-11-24T10:00:00Z|x" }
+      ],
+      "invalid": [
+        { "as_of": "2026-11-24T10:00:00Z", "rows": [], "sources": [], "pii_masked": false },
+        { "rows": [], "sources": [], "pii_masked": true },
+        { "as_of": "2026-11-24T10:00:00Z", "rows": [], "sources": [ { "kind": "item" } ], "pii_masked": true },
+        { "as_of": "2026-11-24T10:00:00Z", "rows": [], "sources": [ { "kind": "document", "doc_ref": "DOC-ORD-1" } ], "pii_masked": true }
+      ]
+    },
+    {
+      "name": "knowledge ToolDescriptorKnowledge",
+      "schema": "knowledge.schema.json", "def": "ToolDescriptorKnowledge",
+      "valid": [
+        { "name": "ketoan_knowledge_cong_no", "title": "Công nợ theo đối tượng", "description": "Trả công nợ phải thu / phải trả tại ngày cắt, theo mã đối tượng.", "inputSchema": {}, "outputSchema": {}, "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false } }
+      ],
+      "invalid": [
+        { "name": "ketoan_cong_no", "title": "x", "description": "mô tả đủ dài", "inputSchema": {}, "outputSchema": {}, "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true } },
+        { "name": "ketoan_knowledge_cong_no", "title": "x", "description": "mô tả đủ dài", "inputSchema": {}, "outputSchema": {}, "annotations": { "readOnlyHint": false, "destructiveHint": false, "idempotentHint": true } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bizcity.vn/schema/spine/conformance-report.schema.json",
+  "title": "bizcity_conformance_report@1 — kết quả một lần chạy bộ kiểm tương thích (spine-check / spine-contract)",
+  "$comment": "[2026-11-24 08:10 PM Johnny Chu - Chu Hoàng Anh] SPINE-4 — tệp kết quả máy đọc: bizcity.vn hiện nhãn mức C0–C3 và trạng thái từ đây, không gõ tay (DE-XUAT-BO-KIEM-TUONG-THICH §5). Kết luận theo cổng: một phát hiện mức fail là KHÔNG ĐẠT.",
+  "type": "object",
+  "required": ["schema", "tool", "standard", "ran_at", "scope", "findings", "verdict"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "bizcity_conformance_report@1" },
+    "tool": { "enum": ["spine-check", "spine-contract", "spine-house"] },
+    "tool_version": { "type": "string" },
+    "standard": { "type": "string", "pattern": "^bizcity_spine@[0-9]+$" },
+    "ran_at": { "type": "string", "minLength": 20 },
+    "app_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
+    "target": { "type": "string", "maxLength": 300, "$comment": "lane CONTRACT: địa chỉ bản đang chạy; lane MANIFEST: đường tệp" },
+    "scope": { "anyOf": [ { "type": "string" }, { "type": "array", "items": { "type": "string" } } ] },
+    "lane": { "enum": ["MANIFEST", "CONTRACT", "HOUSE"] },
+    "level": { "enum": ["C0", "C1", "C2", "C3"], "$comment": "mức tương thích đạt được (DE-XUAT-BO-KIEM-TUONG-THICH §4); chỉ có khi tool tính được" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^SC-SPINE-[0-9]+$" },
+          "status": { "enum": ["pass", "fail", "warn", "skip"] },
+          "units": { "type": "integer", "minimum": 0 },
+          "note": { "type": "string", "maxLength": 300 }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "level", "where", "msg"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^SC-SPINE-[0-9]+$" },
+          "level": { "enum": ["fail", "warn", "info"] },
+          "where": { "type": "string", "maxLength": 500 },
+          "msg": { "type": "string", "maxLength": 1000 },
+          "evidence": { "type": "object" }
+        }
+      }
+    },
+    "verdict": { "enum": ["ĐẠT", "KHÔNG ĐẠT"] }
+  }
+}
