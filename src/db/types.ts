@@ -1989,7 +1989,13 @@ export interface ItemClassificationTable {
   note: Generated<string>;
 }
 
-export interface Database {
+// [2026-11-24 06:28 PM Johnny Chu - Chu Hoàng Anh] P2b-4 — bảng của APP gắn vào kiểu Database bằng gộp khai báo (R-PLAT-2), không sửa gói:
+//   declare module '@bizcity/platform/db/types' { interface AppDatabase { catalog_items: CatalogItemsTable } }
+//   ⇒ db.selectFrom('catalog_items') có kiểu ở mọi nơi dùng db / Db. Tên bảng app không được trùng bảng nền (TS báo lỗi khi trùng mà khác kiểu).
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AppDatabase {}
+
+export interface Database extends AppDatabase {
   items: ItemsTable;
   // [2026-11-05 01:50 PM Nguyễn Văn Thủy] PHASE-026 — S026-21: khung nhìn sổ kho theo mã hiện hành, 0069 (đóng góp)
   inventory_movements_cur: InventoryMovementsTable & { snapshot_sku: string; root_item_id: string | null };
