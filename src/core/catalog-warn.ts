@@ -6,7 +6,7 @@
  *   catalog.warn.unacked  — lưu qua API / plugin không kèm lý do (cảnh báo vẫn được trả trong meta.findings).
  * Không có cảnh báo mềm → không ghi gì. Cảnh báo mềm không bao giờ chặn lưu.
  */
-import { applyRuleReview, hintHash, warnCodes, type CatalogFinding, type CatalogWarnAck } from '@ketoan/contracts';
+import { applyRuleReview, hintHash, warnCodes, type CatalogFinding, type CatalogWarnAck } from '@bizcity/contracts';
 import type { Db } from '../db/client.js';
 import type { AuthContext } from './auth.js';
 import { writeAudit } from './audit.js';

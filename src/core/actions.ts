@@ -30,7 +30,7 @@ import { sql, type Transaction } from 'kysely';
 import { asModuleRole } from '../db/module-db.js';
 import { sendNotification, type NotifyInput } from './notify.js';
 import { z } from 'zod';
-import { ERROR_CODES, docRefModule, type IngestResult, type AttachmentRef, type DocLinkRole, type DocRef, type DocumentLink, type DocumentSignature, type DocumentVersion, type ErrorCode, type FileInput, type LedgerQuery, type LedgerQueryRow } from '@ketoan/contracts';
+import { ERROR_CODES, docRefModule, type IngestResult, type AttachmentRef, type DocLinkRole, type DocRef, type DocumentLink, type DocumentSignature, type DocumentVersion, type ErrorCode, type FileInput, type LedgerQuery, type LedgerQueryRow } from '@bizcity/contracts';
 import { db, type Db } from '../db/client.js';
 import type { Database } from '../db/types.js';
 import { env } from '../config/env.js';

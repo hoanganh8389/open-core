@@ -12,7 +12,7 @@
 import { sql } from 'kysely';
 import type { Db } from '../../db/client.js';
 import { Errors } from '../errors.js';
-import { LIBRARY_BINDINGS } from '@ketoan/contracts';
+import { LIBRARY_BINDINGS } from '@bizcity/contracts';
 import { lockedPeriodAt } from '../settings.js';
 import { checkSchema, overrideAt, valueSchemaOf } from './engine.js';
 import type { FindingLevel, Library } from './types.js';

@@ -4,7 +4,7 @@
  * Đối tượng (khách hàng, nhà cung cấp…) và nhóm đối tượng.
  */
 import { sql } from 'kysely';
-import type { PartnerInput } from '@ketoan/contracts';
+import type { PartnerInput } from '@bizcity/contracts';
 import { toNumber, type Db } from '../db/client.js';
 
 export interface PartnerDto {

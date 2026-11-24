@@ -4,7 +4,7 @@
  * Giai đoạn chuyển đổi: users.role là nguồn lần gán vai trò hệ thống; luật của vai trò hệ thống = rolePermissions(role) (code), không
  * chép vào CSDL. Bộ tính mới chạy song song, so với đường cũ (parity) — chỉ chuyển khi không có ALLOW sai (T028-9).
  */
-import { ROLES, type Role } from '@ketoan/contracts';
+import { ROLES, type Role } from '@bizcity/contracts';
 import type { AuthzAssignment, AuthzRole } from './types.js';
 import { rolePermissions } from '../auth.js';
 

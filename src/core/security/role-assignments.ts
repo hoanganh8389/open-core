@@ -10,7 +10,7 @@
  * đổi vai trò hoặc luật — không biết ai đang giữ vai trò).
  */
 import { sql } from 'kysely';
-import type { Role } from '@ketoan/contracts';
+import type { Role } from '@bizcity/contracts';
 import { db, type Db } from '../../db/client.js';
 
 const CACHE_MS = 15_000;

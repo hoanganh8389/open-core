@@ -9,7 +9,7 @@
  */
 import type { FastifyError, FastifyInstance } from 'fastify';
 import { ZodError, z } from 'zod';
-import { ERROR_CATALOG, ERROR_CODES, type ApiSuccess, type ErrorCode, type ErrorReason, type PageMeta } from '@ketoan/contracts';
+import { ERROR_CATALOG, ERROR_CODES, type ApiSuccess, type ErrorCode, type ErrorReason, type PageMeta } from '@bizcity/contracts';
 import { AppError, classifyLedgerTriggerError, withRemedy } from './errors.js';
 import { currentTraceId } from './tracing.js';
 import { ghiKiem } from './nhat-ky-kiem.js';

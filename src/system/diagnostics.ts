@@ -21,12 +21,12 @@
  */
 // [2026-11-02 07:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-022 — W1: DiagCheck.remedy (bizcity_remedy@1, R-FIX-1) — kết quả chẩn đoán trả kèm phương án khắc phục có cấu trúc.
 import { sql } from 'kysely';
-import type { Remedy } from '@ketoan/contracts';
+import type { Remedy } from '@bizcity/contracts';
 import type { Kysely, RawBuilder, Transaction } from 'kysely';
 import { db } from '../db/client.js';
 import type { Database } from '../db/types.js';
 import { pendingMigrations } from '../db/migrate.js';
-import { SCREENS, STOP_THE_LINE_STEP } from '@ketoan/contracts';
+import { SCREENS, STOP_THE_LINE_STEP } from '@bizcity/contracts';
 // [2026-11-09 11:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-032 — B2c-1 (S032-27): tự chẩn đoán L3 lúc 01:00 mỗi đêm, khuôn subscriber như core.conformance-nightly
 import { defineSubscriber } from '../core/events.js';
 import { appendRunLog, pruneRunLog, readRunLog } from '../core/run-log.js';

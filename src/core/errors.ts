@@ -10,7 +10,7 @@
  * (core/http.ts) đổi thành phản hồi { ok: false, error: {...} } với mã HTTP phù hợp.
  */
 import { ZodError } from 'zod';
-import { ERROR_CATALOG, ERROR_CODES, ERROR_CONTEXT_KEYS, ERROR_REMEDY, type ErrorCode, type ErrorContext, type ErrorReason } from '@ketoan/contracts';
+import { ERROR_CATALOG, ERROR_CODES, ERROR_CONTEXT_KEYS, ERROR_REMEDY, type ErrorCode, type ErrorContext, type ErrorReason } from '@bizcity/contracts';
 
 export class AppError extends Error {
   constructor(

@@ -24,7 +24,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { sql } from 'kysely';
-import type { Remedy } from '@ketoan/contracts';
+import type { Remedy } from '@bizcity/contracts';
 import type { Db } from '../db/client.js';
 import { CLOCK_TZ, defineSubscriber } from './events.js';
 import type { DiagCheck } from '../system/diagnostics.js';

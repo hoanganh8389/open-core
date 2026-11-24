@@ -10,7 +10,7 @@
  */
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sql } from 'kysely';
-import type { Role } from '@ketoan/contracts';
+import type { Role } from '@bizcity/contracts';
 import { db, type Db } from '../../db/client.js';
 import { Errors } from '../errors.js';
 import { type AuthContext, type Permission } from '../auth.js';

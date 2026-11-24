@@ -14,7 +14,7 @@
  * Mã khai ở packages/contracts/src/quy-tac/<danh-muc>.ts (hoặc catalog-hint.ts): title / why / fix / okText / field.
  * Phản hồi lỗi: error.details.findings[] (mã, ô, câu, cách sửa) + error.fields (tô đỏ) + requestId; bộ xử lý lỗi chung ghi nhật ký HT19.
  */
-import { CATALOG_HINTS, catalogFinding, type CatalogFinding } from '@ketoan/contracts';
+import { CATALOG_HINTS, catalogFinding, type CatalogFinding } from '@bizcity/contracts';
 import { Errors } from './errors.js';
 
 /** Một phát hiện theo mã quy tắc, kèm ô (field) khai ở quy tắc. */

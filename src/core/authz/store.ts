@@ -9,7 +9,7 @@
  * Không xuất qua index.ts để bộ tính thuần không kéo theo kết nối CSDL.
  */
 import { sql } from 'kysely';
-import type { Role } from '@ketoan/contracts';
+import type { Role } from '@bizcity/contracts';
 import type { Db } from '../../db/client.js';
 import { ADMIN_ROLES, impliedBy } from '../auth.js';
 import { legacyAssignment, systemRole, systemRoles, SYSTEM_ROLE_PREFIX } from './legacy.js';

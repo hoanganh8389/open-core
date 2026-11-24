@@ -13,7 +13,7 @@
  * Số đếm trong tiến trình (`shadowStats`) và số đo Prometheus `bizcity_authz_shadow_total{result}` (PHASE-028 S028-16). Lệch gần nhất
  * xem theo đơn vị ở GET /api/v1/system/authz-shadow (cần users:write).
  */
-import type { Role } from '@ketoan/contracts';
+import type { Role } from '@bizcity/contracts';
 import { db, type Db } from '../../db/client.js';
 import { currentSiteId, siteScopedKey } from '../../db/site.js';
 import { getSetting } from '../settings.js';

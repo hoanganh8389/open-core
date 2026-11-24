@@ -22,7 +22,7 @@
  */
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
-import { ERROR_CODES, type Role } from '@ketoan/contracts';
+import { ERROR_CODES, type Role } from '@bizcity/contracts';
 import { db } from '../db/client.js';
 import { AppError, Errors } from './errors.js';
 import { hashApiKey } from './security/password.js';

@@ -18,7 +18,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { DOC_LINK_ROLES, DOC_REF_RE, SIGN_ROLE_RE, type AttachmentRef, type DocLinkRole, type DocRef, type DocumentLink, type DocumentSignature, type DocumentVersion, type FileInput } from '@ketoan/contracts';
+import { DOC_LINK_ROLES, DOC_REF_RE, SIGN_ROLE_RE, type AttachmentRef, type DocLinkRole, type DocRef, type DocumentLink, type DocumentSignature, type DocumentVersion, type FileInput } from '@bizcity/contracts';
 import type { Db } from '../db/client.js';
 import { Errors } from './errors.js';
 import { todayVN } from './date-rules.js';
