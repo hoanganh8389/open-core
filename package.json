@@ -39,5 +39,10 @@
     "@types/node": "20.17.6",
     "@types/pg": "8.11.10",
     "typescript": "5.6.3"
-  }
+  },
+  "files": [
+    "dist",
+    "db",
+    "README.md"
+  ]
 }

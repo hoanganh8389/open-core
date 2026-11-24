@@ -24,3 +24,5 @@ export const SEEDS_CUSTOM = Boolean(process.env.SEEDS_DIR);
 // [2026-11-14 05:53 PM Johnny Chu - Chu Hoàng Anh] PHASE-036 — S036-4: thư mục gói mẫu theo ngành (bizcity_preset@1) — máy chủ chạy gói (core.setup.*); Docker: /app/presets
 export const PRESETS_DIR = process.env.PRESETS_DIR || path.resolve(DB_DIR, '..', 'presets');
 export const PACKS_DIR = process.env.PACKS_DIR || path.join(DB_DIR, 'packs');
+// [2026-11-24 06:15 PM Johnny Chu - Chu Hoàng Anh] P2b-2 — migration NỀN đóng kèm gói (dải 00xx, D-PLAT-5): app khai làm nguồn đầu tiên — runMigrations({ sources: [{ name: 'platform', dir: PLATFORM_MIGRATIONS_DIR }, { name: '<app>', dir: … }] }).
+export const PLATFORM_MIGRATIONS_DIR = path.resolve(here, '../../db/migrations');
