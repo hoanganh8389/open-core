@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://bizcity.vn/schema/spine/refs.schema.json",
-  "title": "bizcity_spine@1-draft — định danh và hình thức tham chiếu trên dây",
+  "title": "bizcity_spine@1 — định danh và hình thức tham chiếu trên dây",
   "$comment": "[2026-11-24 05:08 PM Johnny Chu - Chu Hoàng Anh] SPINE-1 — tám trục (BIZCITY-SPINE-v1.md §2) và bốn hình thức *Ref (§3). Máy đọc cho mọi ngôn ngữ.",
   "$defs": {
     "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
