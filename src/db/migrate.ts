@@ -5,158 +5,122 @@
 // [2026-10-30 09:58 AM Johnny Chu - Chu Hoàng Anh] PHASE-002 — nhãn lớp @bizcity-layer, đồ thị phụ thuộc mốc, bản nháp API module-sdk.
 // [2026-10-30 09:23 PM Johnny Chu - Chu Hoàng Anh] PHASE-007 — cô lập đơn vị bằng RLS.
 // [2026-11-01 04:20 PM Johnny Chu - Chu Hoàng Anh] PHASE-010 — dời từ apps/api/src/db/migrate.ts sang packages/platform (@bizcity/platform, D010-7 chặng 2); import tương đối viết lại theo chỗ mới
+// [2026-11-22 11:16 AM Johnny Chu - Chu Hoàng Anh] PHASE-039 — B3 (D039-11/12, R-SITE-9): chuỗi kết nối + thư mục theo tham số; phiên bản lược đồ = tên migration cuối.
+// [2026-11-24 06:03 PM Johnny Chu - Chu Hoàng Anh] P2b-1 — trình chạy CHUNG mọi app: nhiều nguồn (sources: nền 00xx + app 01xx…, trùng tên ⇒ dừng, D-PLAT-5);
+//   phần riêng của open-ketoan (gộp file gốc, đổi tên, xuất nhật ký cũ) ra cổng `hooks` (R-PLAT-2) — xem migrate-ketoan-legacy.ts.
 /**
- * Chạy migration: áp lần lượt các file db/migrations/NNNN_ten.sql chưa chạy.
+ * Chạy migration: áp lần lượt các file NNNN_ten.sql chưa chạy, gộp từ một hoặc nhiều thư mục nguồn, theo thứ tự tên.
  *
  * - Mỗi file chạy trong một giao dịch; lỗi thì dừng, không ghi nhận.
- * - Đã chạy thì ghi vào bảng schema_migrations, lần sau bỏ qua.
+ * - Đã chạy thì ghi vào bảng schema_migrations (tên tệp), lần sau bỏ qua.
+ * - Hai nguồn có cùng tên tệp ⇒ dừng trước khi chạm DB (mỗi app một dải số).
  * - Không sửa file đã chạy ở môi trường thật; muốn đổi thì thêm file mới.
- *
- * Dùng: npm run db:migrate · Docker: job db-migrate (dist/db/setup.js) · API tự chạy khi AUTO_MIGRATE=1 (dev).
  */
 import { readdirSync } from 'node:fs';
-import { readdir, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { env } from '../config/env.js';
-import { pool } from './client.js';
 import { MIGRATIONS_DIR } from './paths.js';
-import { appendRunLog } from '../core/run-log.js';
 
-/**
- * Các file GỐC: cấu trúc nền (23/10/2026) gộp từ 67 migration lịch sử, chia theo mảng (nền tảng, danh mục, cấu hình định
- * khoản, kỳ, chứng từ, sổ cái, bán hàng, thuế, tài sản). Cơ sở dữ liệu đang chạy đã áp đủ migration cũ (có LAST_OLD trong
- * schema_migrations) thì KHÔNG chạy các file gốc, chỉ ghi nhận là đã có. Đang dở giữa chừng (có migration cũ nhưng chưa
- * tới LAST_OLD) thì dừng: phải cập nhật bằng bản phần mềm trước rồi mới lên bản này.
- */
-const BASELINE = [
-  '0001_goc_nen_tang.sql', '0002_goc_danh_muc.sql', '0003_goc_cau_hinh_dinh_khoan.sql', '0004_goc_ky_ke_toan.sql', '0005_goc_chung_tu.sql',
-  '0006_goc_so_cai.sql', '0007_goc_kho_ban_hang.sql', '0008_goc_thue.sql', '0009_goc_tai_san.sql',
-];
-const LAST_OLD = '0067_danh_muc_hang_chuan.sql';
+const FILE_RE = /^\d{4}_.+\.sql$/;
 
-/**
- * File đã ĐỔI TÊN (sửa trùng số, R-DB-3): tên mới → tên cũ. Cơ sở dữ liệu đã áp tên cũ thì chỉ ghi nhận tên mới, không chạy lại.
- * Chỉ thêm vào danh sách này, không xoá (bản cài cũ cần nó khi nâng cấp).
- */
-const RENAMED: Readonly<Record<string, string>> = {
-  '0031_thue_kkkn.sql': '0028_thue_kkkn.sql',
-  // 2026-11-08: 0080 bị trùng giữa PHASE-031 W2a (0080_kiem_chinh_sach_su_viec) và gói K3 — K3 merge sau nên đổi số.
-  '0081_nguoi_tao_su_viec_bat_buoc.sql': '0080_nguoi_tao_su_viec_bat_buoc.sql',
-  '0082_khoa_ky_o_csdl.sql': '0081_khoa_ky_o_csdl.sql',
-  // 2026-11-19: main có 0149_vai_tro_nhan_vien, 0150_pham_vi_so_do_to_chuc — nhánh giá vốn / sổ chứng từ / hợp đồng mua (chưa lên server) lùi 2 số.
-  '0151_don_vi_gia_von_theo_co_cau.sql': '0149_don_vi_gia_von_theo_co_cau.sql',
-  '0152_lan_tinh_gia_von.sql': '0150_lan_tinh_gia_von.sql',
-  '0153_pham_vi_gia_von_tuy_chon.sql': '0151_pham_vi_gia_von_tuy_chon.sql',
-  '0154_gia_von_chi_tiet_dau_ky.sql': '0152_gia_von_chi_tiet_dau_ky.sql',
-  '0155_cong_thuc_gia_von_tuy_chon.sql': '0153_cong_thuc_gia_von_tuy_chon.sql',
-  '0156_chenh_lech_tra_ncc.sql': '0154_chenh_lech_tra_ncc.sql',
-  '0157_gia_von_theo_loai_kho.sql': '0155_gia_von_theo_loai_kho.sql',
-  '0158_so_chung_tu_chung.sql': '0156_so_chung_tu_chung.sql',
-  '0159_gom_bang_vao_loi.sql': '0157_gom_bang_vao_loi.sql',
-  '0160_phien_ban_chinh_sach_mua_chung.sql': '0158_phien_ban_chinh_sach_mua_chung.sql',
-  '0161_nguong_duyet_tt_vao_cau_hinh.sql': '0159_nguong_duyet_tt_vao_cau_hinh.sql',
-  '0162_dau_xoa_va_sao_luu_vao_thung_rac.sql': '0160_dau_xoa_va_sao_luu_vao_thung_rac.sql',
-  '0163_bo_bang_van_hanh.sql': '0161_bo_bang_van_hanh.sql',
-  '0164_so_chung_tu_duyet_lien_ket.sql': '0162_so_chung_tu_duyet_lien_ket.sql',
-  '0165_hop_dong_mua_xuyen_suot.sql': '0163_hop_dong_mua_xuyen_suot.sql',
-};
+/** Một thư mục migration có tên (vd `platform`, `cake`). */
+export interface MigrationSource { name: string; dir: string }
 
-/** Ghi nhận tên mới cho file đã đổi tên mà tên cũ đã áp. Trả danh sách vừa ghi nhận. */
-async function adoptRenamed(client: { query: typeof pool.query }, done: Set<string>): Promise<string[]> {
-  const adopted: string[] = [];
-  for (const [now, was] of Object.entries(RENAMED)) {
-    if (done.has(was) && !done.has(now)) {
-      await client.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING', [now]);
-      done.add(now);
-      adopted.push(`${was} → ${now}`);
-    }
-  }
-  return adopted;
+/** Phần client tối thiểu trình chạy cần — hook nhận cùng kiểu. */
+export interface MigrationClient { query<R extends pg.QueryResultRow = pg.QueryResultRow>(text: string, values?: unknown[]): Promise<pg.QueryResult<R>> }
+
+/** Cổng cho phần riêng của từng app (R-PLAT-2). Mặc định không có gì. */
+export interface MigrationHooks {
+  /** Trước khi áp: ghi nhận file đã có bằng đường khác (gộp gốc, đổi tên…), thêm vào `done`. */
+  beforeApply?(c: MigrationClient, done: Set<string>, log: (m: string) => void): Promise<void>;
+  /** Sau khi áp xong (vẫn giữ khoá). */
+  afterApply?(c: MigrationClient, log: (m: string) => void): Promise<void>;
+  /** Cho pendingMigrations: file này coi như đã áp dù chưa có trong schema_migrations. */
+  isApplied?(file: string, done: Set<string>): boolean;
 }
 
-/** Ghi nhận các file gốc cho cơ sở dữ liệu đang chạy (đã đủ migration cũ). Trả true nếu vừa ghi nhận. */
-async function adoptBaseline(client: { query: typeof pool.query }, done: Set<string>): Promise<boolean> {
-  if (done.size === 0 || BASELINE.every((f) => done.has(f))) return false;
-  if (!done.has(LAST_OLD)) {
-    throw new Error(`Cơ sở dữ liệu đang ở bản cũ chưa đủ migration (thiếu ${LAST_OLD}): cập nhật bằng bản phần mềm trước ngày 23/10/2026 rồi mới lên bản này.`);
-  }
-  for (const f of BASELINE) {
-    await client.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING', [f]);
-    done.add(f);
-  }
-  return true;
+export interface MigrationSet {
+  /** Một thư mục (cách cũ); trống = db/migrations. Bỏ qua khi có `sources`. */
+  dir?: string;
+  /** Nhiều thư mục — gộp theo tên tệp. */
+  sources?: MigrationSource[];
 }
 
-// [2026-11-22 11:16 AM Johnny Chu - Chu Hoàng Anh] PHASE-039 — B3 (D039-12): nhận chuỗi kết nối (migration từng database site) và thư mục migration (ca kiểm); mặc định như trước
-export interface RunMigrationsOptions {
+export interface RunMigrationsOptions extends MigrationSet {
   /** Database cần nâng; trống = DATABASE_URL. */
   connectionString?: string;
-  /** Thư mục migration; trống = db/migrations. */
-  dir?: string;
+  hooks?: MigrationHooks;
+}
+
+export type PlannedMigration = { file: string; source: string; full: string };
+
+const sourcesOf = (o: MigrationSet): MigrationSource[] => (o.sources?.length ? o.sources : [{ name: 'app', dir: o.dir ?? MIGRATIONS_DIR }]);
+
+/** Danh sách tệp của mọi nguồn, theo tên. Trùng tên giữa hai nguồn ⇒ lỗi (D-PLAT-5: mỗi app một dải số). */
+export function planMigrations(o: MigrationSet = {}): PlannedMigration[] {
+  const seen = new Map<string, string>();
+  const out: PlannedMigration[] = [];
+  for (const s of sourcesOf(o)) {
+    for (const file of readdirSync(s.dir).filter((f) => FILE_RE.test(f))) {
+      const other = seen.get(file);
+      if (other !== undefined) throw new Error(`Migration ${file} có ở cả nguồn "${other}" và "${s.name}" — mỗi app một dải số (D-PLAT-5).`);
+      seen.set(file, s.name);
+      out.push({ file, source: s.name, full: path.join(s.dir, file) });
+    }
+  }
+  return out.sort((a, b) => a.file.localeCompare(b.file));
 }
 
 export async function runMigrations(log: (msg: string) => void = console.log, opts: RunMigrationsOptions = {}): Promise<string[]> {
   // Kết nối RIÊNG bằng vai trò của DATABASE_URL (chủ sở hữu bảng), không mượn pool của API: kết nối trong pool có thể đã chuyển
-  // sang vai trò ứng dụng (DB_SET_ROLE) hoặc gắn đơn vị (RLS, PHASE-007) — migration cần quyền DDL và thấy đủ mọi đơn vị.
-  const dir = opts.dir ?? MIGRATIONS_DIR;
+  // sang vai trò ứng dụng (DB_SET_ROLE) hoặc gắn đơn vị (RLS) — migration cần quyền DDL và thấy đủ mọi đơn vị.
+  const plan = planMigrations(opts);
   const client = new pg.Client({ connectionString: opts.connectionString ?? env.DATABASE_URL });
   await client.connect();
   const applied: string[] = [];
   try {
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS schema_migrations (
-        name text PRIMARY KEY,
-        applied_at timestamptz NOT NULL DEFAULT now()
-      )`);
+    await client.query('CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
     // Khoá để hai tiến trình khởi động cùng lúc không chạy migration hai lần.
     await client.query('SELECT pg_advisory_lock(727001)');
-
-    const done = new Set((await client.query<{ name: string }>('SELECT name FROM schema_migrations')).rows.map((r) => r.name));
-    if (await adoptBaseline(client as unknown as { query: typeof pool.query }, done)) log(`→ Cơ sở dữ liệu đã đủ cấu trúc (tới ${LAST_OLD}): ghi nhận ${BASELINE.length} file gốc, không chạy lại`);
-    for (const r of await adoptRenamed(client as unknown as { query: typeof pool.query }, done)) log(`→ File đã đổi tên, đã áp từ trước: ${r} (ghi nhận, không chạy lại)`);
-    const files = (await readdir(dir)).filter((f) => /^\d{4}_.+\.sql$/.test(f)).sort();
-
-    for (const file of files) {
-      if (done.has(file)) continue;
-      const sql = await readFile(path.join(dir, file), 'utf8');
-      log(`→ Áp migration ${file}`);
-      await client.query('BEGIN');
-      try {
-        await client.query(sql);
-        await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);
-        await client.query('COMMIT');
-        applied.push(file);
-      } catch (err) {
-        await client.query('ROLLBACK');
-        // [2026-11-22 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-038 — B1b (G12): giữ lỗi gốc của Postgres (mã PG, bảng, ràng buộc, stack) trong cause — logs/db-migrate.log đọc được
-        throw new Error(`Migration ${file} lỗi: ${(err as Error).message}`, { cause: err });
+    try {
+      const done = new Set((await client.query<{ name: string }>('SELECT name FROM schema_migrations')).rows.map((r) => r.name));
+      await opts.hooks?.beforeApply?.(client, done, log);
+      for (const m of plan) {
+        if (done.has(m.file)) continue;
+        const sql = await readFile(m.full, 'utf8');
+        log(`→ Áp migration ${m.file}${m.source === 'app' ? '' : ` (${m.source})`}`);
+        await client.query('BEGIN');
+        try {
+          await client.query(sql);
+          await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [m.file]);
+          await client.query('COMMIT');
+          applied.push(m.file);
+        } catch (err) {
+          await client.query('ROLLBACK');
+          // [2026-11-22 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-038 — B1b (G12): giữ lỗi gốc của Postgres (mã PG, bảng, ràng buộc, stack) trong cause
+          throw new Error(`Migration ${m.file} lỗi: ${(err as Error).message}`, { cause: err });
+        }
       }
+      await opts.hooks?.afterApply?.(client, log);
+    } finally {
+      await client.query('SELECT pg_advisory_unlock(727001)');
     }
-    // [2026-11-18 Nguyễn Văn Thủy] 0161: dòng nhật ký cũ (tự chẩn đoán, Kiểm chuẩn, số đếm thư viện) ra JSONL rồi bỏ bảng tạm (đóng góp)
-    const exp = await client.query<{ t: string | null }>(`SELECT to_regclass('_run_log_export')::text AS t`);
-    if (exp.rows[0]?.t) {
-      const rows = (await client.query<{ stream: string; tenant_id: string; at: Date; data: unknown }>('SELECT stream, tenant_id::text, at, data FROM _run_log_export ORDER BY at')).rows;
-      for (const r of rows) await appendRunLog(r.stream, r.tenant_id, r.data, new Date(r.at));
-      await client.query('DROP TABLE _run_log_export');
-      if (rows.length) log(`→ Ghi ${rows.length} dòng nhật ký cũ ra JSONL (DATA_DIR/nhat-ky)`);
-    }
-    await client.query('SELECT pg_advisory_unlock(727001)');
     return applied;
   } finally {
     await client.end();
   }
 }
 
-// [2026-11-22 11:16 AM Johnny Chu - Chu Hoàng Anh] PHASE-039 — B3 (D039-11, R-SITE-9): phiên bản lược đồ = tên migration Core cuối cùng
-/** Phiên bản lược đồ bản ứng dụng này cần: tên tệp migration Core cuối cùng trong thư mục (cổng lược đồ, R-SITE-9). */
-export function requiredSchemaVersion(dir: string = MIGRATIONS_DIR): string {
-  const files = readdirSync(dir).filter((f) => /^\d{4}_.+\.sql$/.test(f)).sort();
-  return files[files.length - 1] ?? '';
+/** Phiên bản lược đồ bản ứng dụng này cần: tên tệp migration cuối cùng của mọi nguồn (cổng lược đồ, R-SITE-9). */
+export function requiredSchemaVersion(set: string | MigrationSet = {}): string {
+  const plan = planMigrations(typeof set === 'string' ? { dir: set } : set);
+  return plan[plan.length - 1]?.file ?? '';
 }
 
-/** Phiên bản lược đồ của một database: tên migration Core lớn nhất đã áp (không tính migration module `key/…`). Chưa có bảng schema_migrations → null. */
+/** Phiên bản lược đồ của một database: tên migration lớn nhất đã áp (không tính migration module `key/…`). Chưa có bảng schema_migrations → null. */
 export async function appliedSchemaVersion(c: { query: (q: string) => Promise<{ rows: Array<{ v: string | null }> }> }): Promise<string | null> {
   if (!(await c.query("SELECT to_regclass('public.schema_migrations')::text AS v")).rows[0]?.v) return null;
   const r = await c.query("SELECT max(name) AS v FROM schema_migrations WHERE name ~ '^[0-9]{4}_'");
@@ -164,27 +128,17 @@ export async function appliedSchemaVersion(c: { query: (q: string) => Promise<{ 
 }
 
 /** Các file migration CHƯA áp (API dùng khi khởi động: thiếu thì không chạy, báo chạy job db-migrate). */
-export async function pendingMigrations(): Promise<string[]> {
-  const files = (await readdir(MIGRATIONS_DIR)).filter((f) => /^\d{4}_.+\.sql$/.test(f)).sort();
-  const has = await pool.query<{ ok: boolean }>("SELECT to_regclass('schema_migrations') IS NOT NULL AS ok");
+export async function pendingMigrations(q: MigrationClient, opts: MigrationSet & { hooks?: MigrationHooks } = {}): Promise<string[]> {
+  const files = planMigrations(opts).map((m) => m.file);
+  const has = await q.query<{ ok: boolean }>("SELECT to_regclass('schema_migrations') IS NOT NULL AS ok");
   if (!has.rows[0]?.ok) return files;
-  const done = new Set((await pool.query<{ name: string }>('SELECT name FROM schema_migrations')).rows.map((r) => r.name));
-  // Cơ sở dữ liệu đã đủ migration cũ coi như đã có file nền (job db-migrate sẽ ghi nhận).
-  if (done.has(LAST_OLD)) BASELINE.forEach((f) => done.add(f));
-  // File đã đổi tên mà tên cũ đã áp: không tính là còn thiếu (job db-migrate sẽ ghi nhận tên mới).
-  for (const [now, was] of Object.entries(RENAMED)) if (done.has(was)) done.add(now);
-  return files.filter((f) => !done.has(f));
+  const done = new Set((await q.query<{ name: string }>('SELECT name FROM schema_migrations')).rows.map((r) => r.name));
+  return files.filter((f) => !done.has(f) && !opts.hooks?.isApplied?.(f, done));
 }
 
-// Chạy trực tiếp bằng dòng lệnh.
+// Chạy trực tiếp bằng dòng lệnh: một thư mục (DB_DIR/migrations), không hook.
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   runMigrations()
-    .then((list) => {
-      console.log(list.length ? `Đã áp ${list.length} migration.` : 'Cơ sở dữ liệu đã mới nhất.');
-      return pool.end();
-    })
-    .catch((err) => {
-      console.error(err.message);
-      process.exit(1);
-    });
+    .then((list) => console.log(list.length ? `Đã áp ${list.length} migration.` : 'Cơ sở dữ liệu đã mới nhất.'))
+    .catch((err) => { console.error(err.message); process.exit(1); });
 }

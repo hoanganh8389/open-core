@@ -23,7 +23,7 @@
 import { sql } from 'kysely';
 import type { Remedy } from '@bizcity/contracts';
 import type { Kysely, RawBuilder, Transaction } from 'kysely';
-import { db } from '../db/client.js';
+import { db, pool } from '../db/client.js';
 import type { Database } from '../db/types.js';
 import { pendingMigrations } from '../db/migrate.js';
 import { SCREENS, STOP_THE_LINE_STEP } from '@bizcity/contracts';
@@ -351,7 +351,7 @@ export const PLATFORM_DIAGNOSTICS: DiagCheck[] = [
     title: 'Mọi tệp db/migrations đã áp vào CSDL',
     fix: 'Code mới cần bảng / cột chưa có, màn hình sẽ lỗi. Chạy job db-migrate (docker compose up db-migrate) hoặc npm run db:migrate.',
     async run() {
-      const pending = await pendingMigrations();
+      const pending = await pendingMigrations(pool); // [2026-11-24 06:03 PM Johnny Chu - Chu Hoàng Anh] P2b-1 — truyền kết nối (trình chạy không tự mượn pool)
       return { examined: 1, count: pending.length, sample: pending };
     },
   },
