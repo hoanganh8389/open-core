@@ -14,19 +14,14 @@ import { PERMISSIONS, impliersOf, listModulePermissions, type CorePermission } f
 
 type CoreMeta = Omit<AuthzPermissionDef, 'key' | 'label' | 'module'> & { label: string; defaults?: AuthzConditions };
 
-/** Siêu dữ liệu 18 quyền Core — chuỗi quyền giữ nguyên (D-AUTH-02). `high`: không mẫu *, không khoá API / trợ lý (AUTHZ-09). */
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — còn 12 quyền NỀN; siêu dữ liệu 6 quyền kế toán chuyển sang ketoanAuthzPreset (khai như quyền module, giữ nguyên rủi ro / tài nguyên / bí danh).
+/** Siêu dữ liệu quyền Core — chuỗi quyền giữ nguyên (D-AUTH-02). `high`: không mẫu *, không khoá API / trợ lý (AUTHZ-09). */
 export const CORE_PERMISSION_META: Record<CorePermission, CoreMeta> = {
-  'catalog:read': { label: 'Xem danh mục', risk: 'low', resource: 'catalog', operation: 'read' },
-  'catalog:write': { label: 'Thêm / sửa danh mục', risk: 'low', resource: 'catalog', operation: 'update' },
   'documents:read': { label: 'Xem chứng từ', risk: 'low', resource: 'document', operation: 'read', scopeKinds: ['branch', 'warehouse'] },
   'documents:write': { label: 'Lập / sửa / huỷ chứng từ', risk: 'low', resource: 'document', operation: 'update', scopeKinds: ['branch', 'warehouse'] },
   'documents:edit-all': { label: 'Sửa / huỷ phiếu của người khác', risk: 'high', resource: 'document', operation: 'update', scopeKinds: ['branch', 'warehouse'], aliases: ['tgs:HT21', 'tgs:ACC3F'] },
   'documents:bypass-date-lock': { label: 'Vượt khoá dữ liệu theo ngày', risk: 'high', resource: 'document', operation: 'update', aliases: ['tgs:HT9', 'tgs:HT10', 'tgs:HT47'] },
-  'ledger:read': { label: 'Xem sổ cái', risk: 'low', resource: 'ledger', operation: 'read', aliases: ['tgs:ACC3', 'tgs:ACC88'] },
   'reports:read': { label: 'Xem báo cáo', risk: 'low', resource: 'report', operation: 'read', scopeKinds: ['branch', 'warehouse'] },
-  'payments:approve': { label: 'Duyệt yêu cầu thanh toán cấp 1', risk: 'high', resource: 'payment_request', operation: 'approve', scopeKinds: ['branch'] },
-  'payments:approve-final': { label: 'Duyệt yêu cầu thanh toán cấp 2 (vượt ngưỡng)', risk: 'high', resource: 'payment_request', operation: 'approve', scopeKinds: ['branch'] },
-  'periods:lock': { label: 'Khoá / mở kỳ kế toán', risk: 'high', resource: 'period', operation: 'manage' },
   'settings:write': { label: 'Cấu hình đơn vị', risk: 'high', resource: 'settings', operation: 'configure', aliases: ['tgs:CH10'] },
   'users:write': { label: 'Quản trị người dùng, khoá API', risk: 'high', resource: 'user', operation: 'manage', aliases: ['tgs:HT4', 'tgs:HT14'] },
   'conformance:read': { label: 'Xem Kiểm chuẩn', risk: 'low', resource: 'conformance', operation: 'read' },

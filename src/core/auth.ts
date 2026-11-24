@@ -22,7 +22,10 @@
  */
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
-import { ERROR_CODES, type Role } from '@bizcity/contracts';
+import { ERROR_CODES } from '@bizcity/contracts';
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — vai, vai quản trị cao, phạm vi khoá API đọc từ sổ đăng ký (roles.ts), không còn bảng vai kế toán viết cứng.
+import { ADMIN_ROLES, registerApiScopes, roleDef, scopePermissionKeys, type Role } from './roles.js';
+export { ADMIN_ROLES, type Role } from './roles.js';
 import { db } from '../db/client.js';
 import { AppError, Errors } from './errors.js';
 import { hashApiKey } from './security/password.js';
@@ -34,21 +37,15 @@ import { extraAuthz, type ExtraAuthz } from './security/role-assignments.js';
 import { matchPattern } from './authz/engine.js';
 
 /** Danh sách quyền. Thêm quyền mới: khai ở đây và gán cho vai trò bên dưới. */
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — quyền NỀN chỉ còn phần chung mọi app; catalog:*, ledger:read, payments:*, periods:lock là quyền module của open-ketoan (ketoanAuthzPreset).
 export const PERMISSIONS = [
-  'catalog:read',
-  'catalog:write',
   'documents:read',
   'documents:write',
   /** Sửa / huỷ phiếu nhập tay do người khác lập. Không có quyền này: chỉ sửa / huỷ phiếu của mình. */
   'documents:edit-all',
   /** Không bị chặn bởi khoá dữ liệu theo ngày (khoá đến ngày, chỉ sửa trong N ngày, chỉ lập phiếu hôm nay, cấm huỷ). */
   'documents:bypass-date-lock',
-  'ledger:read',
   'reports:read',
-  /** Duyệt yêu cầu thanh toán cấp 1 / cấp 2 (cấp 2: yêu cầu vượt ngưỡng). */
-  'payments:approve',
-  'payments:approve-final',
-  'periods:lock',
   'settings:write',
   'users:write',
   /** Xem kết quả Kiểm chuẩn (Conformance Engine, ADR-0012). */
@@ -70,7 +67,11 @@ export type CorePermission = (typeof PERMISSIONS)[number];
 export type ModulePermission = `${string}:${string}`;
 export type Permission = CorePermission | ModulePermission;
 
-export interface ModulePermissionDef { key: string; label: string; roles?: string[]; risk?: 'low' | 'high' }
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — quyền module mang được đủ siêu dữ liệu sổ quyền (catalog.ts đã đọc các trường này như tuỳ chọn).
+export interface ModulePermissionDef {
+  key: string; label: string; roles?: string[]; risk?: 'low' | 'high';
+  resource?: string; operation?: string; sensitive?: 'field' | 'pii'; scopeKinds?: ('branch' | 'warehouse' | 'org_unit')[]; aliases?: string[];
+}
 const modulePermissions = new Map<string, ModulePermissionDef & { module: string }>();
 const MODULE_PERM_RE = /^([a-z][a-z0-9-]*):[a-z][a-z0-9-]*$/;
 
@@ -160,11 +161,11 @@ export const isHighRiskPermission = (p: string): boolean => modulePermissions.ge
  * Vai trò quản trị cao (ADR-0027 D-AUTH-03): nhận mọi quyền module, kể cả quyền module không khai `roles`. Vai trò khác chỉ nhận quyền
  * module khai mình trong `roles` — không khai là mặc định cấm. Thêm vai trò quản trị (vd `admin`) = thêm vào tập này.
  */
-export const ADMIN_ROLES: ReadonlySet<Role> = new Set<Role>(['owner']);
 
 /** Quyền của vai trò: quyền Core theo bảng + quyền module có vai trò trong `roles` (vai trò quản trị cao: mọi quyền module). */
 export function rolePermissions(role: Role): Set<Permission> {
-  const out = new Set<Permission>(ROLE_PERMISSIONS[role] ?? []);
+  const def = roleDef(role);
+  const out = new Set<Permission>(def?.admin ? PERMISSIONS : ((def?.permissions ?? []) as Permission[]));
   for (const p of modulePermissions.values()) if (ADMIN_ROLES.has(role) || p.roles?.includes(role)) out.add(p.key as Permission);
   // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1 (80 D-AUTH-19): kéo theo quyền chứng từ chi tiết (vai trò có documents:write giữ nguyên khả năng nộp mọi loại phiếu)
   return withImplied(out);
@@ -193,33 +194,17 @@ export function effectivePermissionsWithTenantRoles(roles: readonly Role[], extr
   return out;
 }
 
-const VIEWER_PERMISSIONS: readonly Permission[] = ['catalog:read', 'documents:read', 'ledger:read', 'reports:read', 'conformance:read'];
-
-const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
-  owner: PERMISSIONS,
-  chief_accountant: ['catalog:read', 'catalog:write', 'documents:read', 'documents:write', 'documents:edit-all', 'documents:bypass-date-lock', 'payments:approve', 'ledger:read', 'reports:read', 'periods:lock', 'settings:write', 'conformance:read', 'conformance:run', 'conformance:approve', 'review:read'],
-  accountant: ['catalog:read', 'catalog:write', 'documents:read', 'documents:write', 'ledger:read', 'reports:read', 'conformance:read', 'conformance:run', 'review:read'],
-  viewer: VIEWER_PERMISSIONS,
-  // Nhà phát triển (Q019-1 = b): xem như viewer + Bàn điều tra; không ghi chứng từ, không cấu hình.
-  developer: [...VIEWER_PERMISSIONS, 'devtools:read'],
-  // Kiểm soát / ban kiểm soát (Q022-1): xem như viewer + Bàn đánh giá; không ghi, không cấu hình.
-  auditor: [...VIEWER_PERMISSIONS, 'review:read'],
-  // [2026-11-17 02:25 PM khanhtd] NT-HT-003 — Nhân viên: chỉ danh mục; không ledger:read / reports:read / documents:read toàn đơn vị — quyền bán, kho, báo cáo do vai trò gán tại chi nhánh
-  staff: ['catalog:read'],
-};
-
-/** Phạm vi của khoá API → quyền tương ứng. */
-const SCOPE_PERMISSIONS: Record<string, readonly Permission[]> = {
-  'documents:write': ['documents:write', 'documents:edit-all', 'documents:read', 'catalog:read'],
-  'reports:read': ['reports:read', 'ledger:read', 'catalog:read', 'conformance:read'],
-  'catalog:write': ['catalog:write', 'catalog:read'],
-};
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — phạm vi khoá API của NỀN; app cộng thêm bằng registerApiScopes (cùng phạm vi ⇒ hợp quyền).
+registerApiScopes('platform', {
+  'documents:write': ['documents:write', 'documents:edit-all', 'documents:read'],
+  'reports:read': ['reports:read', 'conformance:read'],
+});
 
 // [2026-11-09 01:52 PM kiennt] PHASE-028 — S028-13: lộ ánh xạ phạm vi khoá → quyền để lúc tạo khoá kiểm người tạo có đủ các quyền đó
 /** Quyền mà một tập phạm vi khoá API mang theo (cùng bảng với lúc xác thực khoá). */
 export function scopePermissions(scopes: readonly string[]): Set<Permission> {
   // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1: gồm cả quyền chứng từ kéo theo — người bị Cấm một loại phiếu không tạo được khoá documents:write để lách
-  return withImplied(new Set<Permission>(scopes.flatMap((s) => SCOPE_PERMISSIONS[s] ?? [])));
+  return withImplied(new Set<Permission>(scopes.flatMap((s) => scopePermissionKeys(s) as Permission[])));
 }
 
 /**
@@ -287,8 +272,9 @@ async function resolveAuth(req: FastifyRequest): Promise<AuthContext | null> {
     void db.updateTable('api_keys').set({ last_used_at: new Date() }).where('id', '=', row.id).execute();
     // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1 (80 D-AUTH-19): khoá API / app có documents:write giữ nguyên khả năng nộp mọi loại phiếu (kéo theo quyền chi tiết)
     const perms = withImplied(row.app_key
-      ? new Set<Permission>((row.app_permissions ?? []).filter((p): p is Permission => (PERMISSIONS as readonly string[]).includes(p)))
-      : new Set<Permission>(row.scopes.flatMap((s) => SCOPE_PERMISSIONS[s] ?? [])));
+      // [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — khoá app: quyền đã đồng ý còn trong sổ (Core + module), trừ quyền rủi ro cao (không cho khoá API, BIZCITY-MODULE §3)
+      ? new Set<Permission>((row.app_permissions ?? []).filter((p): p is Permission => isKnownPermission(p) && !isHighRiskPermission(p)))
+      : new Set<Permission>(row.scopes.flatMap((s) => scopePermissionKeys(s) as Permission[])));
     return {
       tenantId: row.tenant_id, actor: `apikey:${row.id}`, actorName: row.name, kind: 'apikey', role: null, permissions: perms,
       ...(row.app_key ? { app: row.app_key } : {}),

@@ -4,12 +4,13 @@
  * Giai đoạn chuyển đổi: users.role là nguồn lần gán vai trò hệ thống; luật của vai trò hệ thống = rolePermissions(role) (code), không
  * chép vào CSDL. Bộ tính mới chạy song song, so với đường cũ (parity) — chỉ chuyển khi không có ALLOW sai (T028-9).
  */
-import { ROLES, type Role } from '@bizcity/contracts';
+import { listRoles, type Role } from '../roles.js';
 import type { AuthzAssignment, AuthzRole } from './types.js';
 import { rolePermissions } from '../auth.js';
 
 export const SYSTEM_ROLE_PREFIX = 'system:';
-export const SYSTEM_ROLES = Object.values(ROLES) as Role[];
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — vai hệ thống = vai trong sổ đăng ký (nền + app), không còn ROLES của kế toán
+export const systemRoleKeys = (): Role[] => listRoles().map((r) => r.key);
 
 /** Vai trò hệ thống của code dưới dạng AuthzRole: mỗi quyền cũ = một luật Cho đích danh (không điều kiện, giữ đúng hành vi hôm nay). */
 export function systemRole(role: Role): AuthzRole {
@@ -20,7 +21,7 @@ export function systemRole(role: Role): AuthzRole {
 }
 
 export function systemRoles(): Map<string, AuthzRole> {
-  return new Map(SYSTEM_ROLES.map((r) => [`${SYSTEM_ROLE_PREFIX}${r}`, systemRole(r)]));
+  return new Map(systemRoleKeys().map((r) => [`${SYSTEM_ROLE_PREFIX}${r}`, systemRole(r)]));
 }
 
 /** Lần gán suy từ users.role: toàn đơn vị, mọi mục đích — đúng phạm vi hôm nay (một vai trò, không phạm vi). */
