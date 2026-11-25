@@ -8,7 +8,7 @@
   "additionalProperties": false,
   "properties": {
     "schema": { "const": "bizcity_conformance_report@1" },
-    "tool": { "enum": ["spine-check", "spine-contract", "spine-house", "standard-check", "users-check", "delivery-check"], "$comment": "[2026-11-25 01:39 PM Johnny Chu - Chu Hoàng Anh] STD-8 — thêm delivery-check · [2026-11-25 10:34 AM Johnny Chu - Chu Hoàng Anh] USERS-1 — thêm users-check · [2026-11-24 11:48 PM Johnny Chu - Chu Hoàng Anh] STD-1 — thêm standard-check (khuôn repo, bizcity_standard_map@1)" },
+    "tool": { "enum": ["spine-check", "spine-contract", "spine-house", "standard-check", "users-check", "delivery-check", "failure-check"], "$comment": "[2026-11-25 05:18 PM Johnny Chu - Chu Hoàng Anh] STD-10 — thêm failure-check · [2026-11-25 01:39 PM Johnny Chu - Chu Hoàng Anh] STD-8 — thêm delivery-check · [2026-11-25 10:34 AM Johnny Chu - Chu Hoàng Anh] USERS-1 — thêm users-check · [2026-11-24 11:48 PM Johnny Chu - Chu Hoàng Anh] STD-1 — thêm standard-check (khuôn repo, bizcity_standard_map@1)" },
     "tool_version": { "type": "string" },
     "standard": { "type": "string", "pattern": "^bizcity_(spine|standard_map)@[0-9]+$" },
     "ran_at": { "type": "string", "minLength": 20 },
