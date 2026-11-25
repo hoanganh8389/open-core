@@ -1,0 +1,98 @@
+{
+  "$comment": "[2026-11-25 06:00 PM Johnny Chu - Chu Hoàng Anh] ORDER-2 — vector SC-ORD-1 cho bizcity_order_flow@1. Mỗi ca kiểm một $defs (def); valid phải qua, invalid phải bị chặn. Dữ liệu mẫu Shop Hoa Mai, không có người thật.",
+  "cases": [
+    {
+      "name": "yêu cầu đặt hàng",
+      "def": "orderRequest",
+      "valid": [
+        {
+          "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y",
+          "version": 1,
+          "tenant": "hoa-mai",
+          "branchCode": "Q3",
+          "channel": "zalo",
+          "customer": {
+            "partner": { "code": "0909123456" },
+            "identity": { "kind": "phone", "value": "sha256:9f2c4a1b3d5e7f90a1b2c3d4e5f60718293a4b5c6d7e8f9012a3b4c5d6e7f809", "proof": "otp" },
+            "name": "Chị Lan",
+            "shipTo": { "name": "Chị Lan", "phone": "0909123456", "address": "12 Lê Lợi, P. Bến Nghé, Q.1, TP.HCM" }
+          },
+          "lines": [{ "line": 1, "item": { "id": "01JD8K2Q4F3M9R7X5T1V0W6Y8Z", "code": "SP-0042" }, "uom": "Cái", "qty": 2, "proposedPrice": 450000, "note": "size M" }],
+          "payment": { "method": "cod", "prepaid": 0 },
+          "shipping": { "method": "carrier", "preferredCarrier": "GHTK" },
+          "note": "giao giờ hành chính",
+          "createdBy": { "sub": "wp:42" },
+          "stockSeen": { "asOf": "2026-11-25T10:31:02Z", "available": { "01JD8K2Q4F3M9R7X5T1V0W6Y8Z": 4 } }
+        },
+        {
+          "docRef": "ocrm.order_request:7781",
+          "version": 3,
+          "tenant": "hoa-mai",
+          "branchCode": "Q3",
+          "channel": "facebook",
+          "customer": { "partner": { "code": "KHACH-LE" }, "name": "Khách lẻ" },
+          "lines": [{ "line": 1, "item": { "code": "SP-0043" }, "uom": "Thùng", "qty": 1 }],
+          "payment": { "method": "pay_at_store" },
+          "shipping": { "method": "pickup" },
+          "createdBy": { "sub": "biz:nv-07" }
+        }
+      ],
+      "invalid": [
+        { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 1, "tenant": "hoa-mai", "tenantId": 7, "branchCode": "Q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A" }, "lines": [{ "line": 1, "item": { "code": "SP-1" }, "uom": "Cái", "qty": 1 }], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } },
+        { "docRef": "pos.order:8812", "version": 1, "tenant": "hoa-mai", "branchCode": "Q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A" }, "lines": [{ "line": 1, "item": { "code": "SP-1" }, "uom": "Cái", "qty": 1 }], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } },
+        { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 1, "tenant": "hoa-mai", "branchCode": "Q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A" }, "lines": [{ "line": 1, "item": { "code": "SP-1" }, "uom": "Cái", "qty": 0 }], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } },
+        { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 1, "tenant": "hoa-mai", "branchCode": "Q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A" }, "lines": [{ "line": 1, "item": {}, "uom": "Cái", "qty": 1 }], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } },
+        { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 1, "tenant": "hoa-mai", "branchCode": "Q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A", "contactId": "01JF3X8K2Q4F3M9R7X5T1V0W6Y" }, "lines": [{ "line": 1, "item": { "code": "SP-1" }, "uom": "Cái", "qty": 1 }], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } },
+        { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 1, "tenant": "hoa-mai", "branchCode": "Q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A", "identity": { "kind": "phone", "value": "0909123456" } }, "lines": [{ "line": 1, "item": { "code": "SP-1" }, "uom": "Cái", "qty": 1 }], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } },
+        { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 0, "tenant": "hoa-mai", "branchCode": "q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A" }, "lines": [], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } },
+        { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 1, "tenant": "hoa-mai", "branchCode": "Q3", "channel": "zalo", "customer": { "partner": { "code": "KHACH-LE" }, "name": "A" }, "lines": [{ "line": 1, "item": { "code": "SP-1" }, "uom": "Cái", "qty": 1, "costPrice": 100 }], "payment": { "method": "cod" }, "shipping": { "method": "pickup" }, "createdBy": { "sub": "wp:1" } }
+      ]
+    },
+    {
+      "name": "dòng tồn",
+      "def": "stockRow",
+      "valid": [
+        { "item": { "id": "01JD8K2Q4F3M9R7X5T1V0W6Y8Z", "code": "SP-0042" }, "branchCode": "Q3", "uom": "Cái", "onHand": 5, "pendingOut": 1, "held": 0, "available": 4 },
+        { "item": { "code": "SP-9999" }, "branchCode": "Q3", "uom": "Cái", "onHand": 0, "pendingOut": 0, "held": 0, "available": 0, "error": "IN-ITEM-008" },
+        { "item": { "code": "SP-0044" }, "branchCode": "Q3", "uom": "Cái", "onHand": -2, "pendingOut": 0, "held": 0, "available": -2 }
+      ],
+      "invalid": [
+        { "item": { "code": "SP-0042" }, "branchCode": "Q3", "uom": "Cái", "onHand": 5, "available": 5 },
+        { "item": { "code": "SP-0042" }, "branchCode": "Q3", "uom": "Cái", "onHand": 5, "pendingOut": 0, "held": 0, "available": 5, "unitCost": 120000 },
+        { "item": { "code": "SP-0042" }, "branchCode": "Q3", "uom": "Cái", "onHand": 5, "pendingOut": -1, "held": 0, "available": 6 }
+      ]
+    },
+    {
+      "name": "trả lời nhận đơn",
+      "def": "accepted",
+      "valid": [{ "status": "pending", "posRef": "pos.order_request:7731", "expiresAt": "2026-11-28T10:31:05Z" }],
+      "invalid": [{ "status": "waiting", "posRef": "pos.order_request:7731" }, { "status": "pending", "posRef": "7731" }]
+    },
+    {
+      "name": "huỷ",
+      "def": "cancel",
+      "valid": [{ "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "reason": "khách đổi ý" }],
+      "invalid": [{ "posRef": "pos.order_request:7731" }]
+    },
+    {
+      "name": "dòng trạng thái",
+      "def": "statusRow",
+      "valid": [{ "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 2, "status": "shipped", "posRef": "pos.order_request:7731", "orderRef": "pos.order:8812", "shipments": ["pos.shipment:5501"], "updatedAt": "2026-11-26T09:00:00+07:00" }],
+      "invalid": [{ "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "version": 2, "status": "done", "posRef": "pos.order_request:7731", "updatedAt": "2026-11-26T09:00:00Z" }]
+    },
+    {
+      "name": "sự kiện POS → CRM",
+      "def": "event",
+      "valid": [
+        { "id": "evt-01JF4A000001", "type": "pos.order_request.received", "occurredAt": "2026-11-25T10:31:05Z", "tenant": "hoa-mai", "data": { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "posRef": "pos.order_request:7731", "version": 1, "expiresAt": "2026-11-28T10:31:05Z" } },
+        { "id": "evt-01JF4A000002", "type": "pos.order.shipped", "occurredAt": "2026-11-25T15:02:00Z", "tenant": "hoa-mai", "data": { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "posRef": "pos.order_request:7731", "version": 1, "shipmentRef": "pos.shipment:5501", "carrier": "GHTK", "waybill": "S123456.SG01", "codAmount": 900000, "ledgerDocKey": "btsoft:3:sale:8812" } },
+        { "id": "evt-01JF4A000003", "type": "pos.order.cancelled", "occurredAt": "2026-11-25T11:00:00Z", "tenant": "hoa-mai", "data": { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "posRef": "pos.order_request:7731", "version": 1, "stage": "pending", "reason": "khách đổi ý" } }
+      ],
+      "invalid": [
+        { "id": "evt-01JF4A000004", "type": "pos.order.shipped", "occurredAt": "2026-11-25T15:02:00Z", "tenant": "hoa-mai", "data": { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "posRef": "pos.order_request:7731", "version": 1, "carrier": "GHTK" } },
+        { "id": "evt-01JF4A000005", "type": "pos.order.paid", "occurredAt": "2026-11-25T15:02:00Z", "tenant": "hoa-mai", "data": { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "posRef": "pos.order_request:7731", "version": 1 } },
+        { "id": "evt-01JF4A000006", "type": "pos.order_request.rejected", "occurredAt": "2026-11-25T15:02:00Z", "tenant": "hoa-mai", "data": { "docRef": "cake.order_request:01JF3X8K2Q4F3M9R7X5T1V0W6Y", "posRef": "pos.order_request:7731", "version": 1, "reasonCode": "HET-HANG" } }
+      ]
+    }
+  ]
+}

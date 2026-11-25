@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bizcity.vn/schema/order/order-flow.schema.json",
+  "$comment": "[2026-11-25 06:00 PM Johnny Chu - Chu Hoàng Anh] ORDER-2 — hình trên dây của bizcity_order_flow@1 (docs/standard/BIZCITY-ORDER-FLOW-v1.md): bizcity_stock_read@1 + bizcity_order_request@1 + sự kiện POS → CRM. Đổi tệp này ⇒ đổi chuẩn + vector cùng PR, chạy node tools/order-flow-check.mjs.",
+  "title": "bizcity_order_flow@1",
+  "$defs": {
+    "ulid": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant": { "type": "string", "pattern": "^[a-z][a-z0-9-]{2,29}$" },
+    "branchCode": { "type": "string", "pattern": "^[A-Z0-9_.-]{1,20}$" },
+    "uom": { "type": "string", "pattern": "^[^\\s]{1,20}$" },
+    "docRef": { "type": "string", "pattern": "^(cake|ocrm)\\.order_request:[A-Za-z0-9_.-]{1,64}$" },
+    "posRef": { "type": "string", "pattern": "^pos\\.(order_request|order|shipment):[A-Za-z0-9_.-]{1,64}$" },
+    "isoTime": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$" },
+    "money": { "type": "number", "minimum": 0 },
+    "status": { "type": "string", "enum": ["pending", "confirmed", "shipped", "delivered", "returned", "rejected", "expired", "cancelled"] },
+    "itemRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/ulid" },
+        "code": { "type": "string", "pattern": "^[A-Za-z0-9_.-]{1,40}$" }
+      },
+      "anyOf": [{ "required": ["id"] }, { "required": ["code"] }]
+    },
+
+    "stockRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item", "branchCode", "uom", "onHand", "pendingOut", "held", "available"],
+      "properties": {
+        "item": { "$ref": "#/$defs/itemRef" },
+        "branchCode": { "$ref": "#/$defs/branchCode" },
+        "uom": { "$ref": "#/$defs/uom" },
+        "onHand": { "type": "number" },
+        "pendingOut": { "type": "number", "minimum": 0 },
+        "held": { "type": "number", "minimum": 0 },
+        "available": { "type": "number" },
+        "error": { "type": "string", "pattern": "^IN-[A-Z]+-[0-9]{3}$" }
+      }
+    },
+    "stockResponse": {
+      "type": "object",
+      "required": ["ok", "data", "meta"],
+      "properties": {
+        "ok": { "const": true },
+        "data": { "type": "array", "maxItems": 100, "items": { "$ref": "#/$defs/stockRow" } },
+        "meta": {
+          "type": "object",
+          "required": ["asOf", "tenant"],
+          "properties": { "asOf": { "$ref": "#/$defs/isoTime" }, "tenant": { "$ref": "#/$defs/tenant" } }
+        }
+      }
+    },
+
+    "orderLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line", "item", "uom", "qty"],
+      "properties": {
+        "line": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "item": { "$ref": "#/$defs/itemRef" },
+        "uom": { "$ref": "#/$defs/uom" },
+        "qty": { "type": "number", "minimum": 0.001 },
+        "proposedPrice": { "$ref": "#/$defs/money" },
+        "note": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "orderRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["docRef", "version", "tenant", "branchCode", "channel", "customer", "lines", "payment", "shipping", "createdBy"],
+      "properties": {
+        "docRef": { "$ref": "#/$defs/docRef" },
+        "version": { "type": "integer", "minimum": 1 },
+        "tenant": { "$ref": "#/$defs/tenant" },
+        "branchCode": { "$ref": "#/$defs/branchCode" },
+        "channel": { "type": "string", "enum": ["zalo", "facebook", "website", "phone", "store", "other"] },
+        "customer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["partner", "name"],
+          "properties": {
+            "partner": {
+              "type": "object", "additionalProperties": false, "required": ["code"],
+              "properties": { "code": { "type": "string", "pattern": "^[A-Za-z0-9_.-]{1,40}$" } }
+            },
+            "identity": {
+              "type": "object", "additionalProperties": false, "required": ["kind", "value"],
+              "properties": {
+                "kind": { "type": "string", "enum": ["phone", "email", "tax_code", "zalo_uid", "fb_psid"] },
+                "value": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+                "proof": { "type": "string", "enum": ["otp", "channel", "document", "manual"] }
+              }
+            },
+            "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "shipTo": {
+              "type": "object", "additionalProperties": false, "required": ["name", "phone", "address"],
+              "properties": {
+                "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+                "phone": { "type": "string", "pattern": "^\\+?[0-9]{8,15}$" },
+                "address": { "type": "string", "minLength": 5, "maxLength": 300 }
+              }
+            }
+          }
+        },
+        "lines": { "type": "array", "minItems": 1, "maxItems": 200, "items": { "$ref": "#/$defs/orderLine" } },
+        "payment": {
+          "type": "object", "additionalProperties": false, "required": ["method"],
+          "properties": {
+            "method": { "type": "string", "enum": ["cod", "prepaid", "bank_transfer", "pay_at_store"] },
+            "prepaid": { "$ref": "#/$defs/money" }
+          }
+        },
+        "shipping": {
+          "type": "object", "additionalProperties": false, "required": ["method"],
+          "properties": {
+            "method": { "type": "string", "enum": ["carrier", "pickup"] },
+            "preferredCarrier": { "type": "string", "pattern": "^[A-Z0-9_]{2,20}$" }
+          }
+        },
+        "note": { "type": "string", "maxLength": 500 },
+        "createdBy": {
+          "type": "object", "additionalProperties": false, "required": ["sub"],
+          "properties": { "sub": { "type": "string", "pattern": "^(wp:[0-9]+|biz:[A-Za-z0-9_-]{1,64})$" } }
+        },
+        "stockSeen": {
+          "type": "object", "additionalProperties": false, "required": ["asOf"],
+          "properties": { "asOf": { "$ref": "#/$defs/isoTime" }, "available": { "type": "object" } }
+        }
+      }
+    },
+    "accepted": {
+      "type": "object",
+      "required": ["status", "posRef"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "posRef": { "$ref": "#/$defs/posRef" },
+        "expiresAt": { "$ref": "#/$defs/isoTime" }
+      }
+    },
+    "cancel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["docRef"],
+      "properties": { "docRef": { "$ref": "#/$defs/docRef" }, "reason": { "type": "string", "maxLength": 300 } }
+    },
+    "statusRow": {
+      "type": "object",
+      "required": ["docRef", "version", "status", "posRef", "updatedAt"],
+      "properties": {
+        "docRef": { "$ref": "#/$defs/docRef" },
+        "version": { "type": "integer", "minimum": 1 },
+        "status": { "$ref": "#/$defs/status" },
+        "posRef": { "$ref": "#/$defs/posRef" },
+        "orderRef": { "$ref": "#/$defs/posRef" },
+        "shipments": { "type": "array", "items": { "$ref": "#/$defs/posRef" } },
+        "updatedAt": { "$ref": "#/$defs/isoTime" }
+      }
+    },
+
+    "eventBase": {
+      "type": "object",
+      "required": ["docRef", "posRef", "version"],
+      "properties": {
+        "docRef": { "$ref": "#/$defs/docRef" },
+        "posRef": { "$ref": "#/$defs/posRef" },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "type", "occurredAt", "tenant", "data"],
+      "properties": {
+        "id": { "type": "string", "minLength": 8, "maxLength": 64 },
+        "type": { "type": "string", "enum": ["pos.order_request.received", "pos.order_request.rejected", "pos.order_request.expired", "pos.order.confirmed", "pos.order.shipped", "pos.order.delivered", "pos.order.returned", "pos.order.cancelled"] },
+        "occurredAt": { "$ref": "#/$defs/isoTime" },
+        "tenant": { "$ref": "#/$defs/tenant" },
+        "data": { "$ref": "#/$defs/eventBase" }
+      },
+      "oneOf": [
+        { "properties": { "type": { "const": "pos.order_request.received" }, "data": { "required": ["expiresAt"] } } },
+        { "properties": { "type": { "const": "pos.order_request.rejected" }, "data": { "required": ["reasonCode"], "properties": { "reasonCode": { "enum": ["ORD-OUT-OF-STOCK", "ORD-PRICE", "ORD-ADDRESS", "ORD-OTHER"] } } } } },
+        { "properties": { "type": { "const": "pos.order_request.expired" } } },
+        { "properties": { "type": { "const": "pos.order.confirmed" }, "data": { "required": ["orderRef", "lines", "total"] } } },
+        { "properties": { "type": { "const": "pos.order.shipped" }, "data": { "required": ["shipmentRef", "carrier", "waybill", "ledgerDocKey"] } } },
+        { "properties": { "type": { "const": "pos.order.delivered" }, "data": { "required": ["shipmentRef", "deliveredAt"] } } },
+        { "properties": { "type": { "const": "pos.order.returned" }, "data": { "required": ["shipmentRef", "returnDocKey"] } } },
+        { "properties": { "type": { "const": "pos.order.cancelled" }, "data": { "required": ["stage"], "properties": { "stage": { "enum": ["pending", "confirmed"] } } } } }
+      ]
+    }
+  }
+}
