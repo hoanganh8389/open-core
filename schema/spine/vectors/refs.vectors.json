@@ -367,6 +367,37 @@
           ],
           "findings": [],
           "verdict": "ĐẠT"
+        },
+        {
+          "schema": "bizcity_conformance_report@1",
+          "tool": "standard-check",
+          "standard": "bizcity_standard_map@1",
+          "ran_at": "2026-11-24T17:00:00.000Z",
+          "scope": [
+            "."
+          ],
+          "lane": "HOUSE",
+          "app_id": "open-cake",
+          "level": "S1",
+          "checks": [
+            {
+              "id": "SC-STD-1",
+              "status": "pass"
+            },
+            {
+              "id": "SC-STD-REL-1",
+              "status": "warn"
+            }
+          ],
+          "findings": [
+            {
+              "id": "SC-STD-REL-1",
+              "level": "warn",
+              "where": "CHANGELOG.md",
+              "msg": "thiếu mục chưa phát hành"
+            }
+          ],
+          "verdict": "ĐẠT"
         }
       ],
       "invalid": [
@@ -396,7 +427,7 @@
           "scope": "vectors",
           "findings": [
             {
-              "id": "SC-X-1",
+              "id": "sc-spine-1",
               "level": "fail",
               "where": "a",
               "msg": "b"

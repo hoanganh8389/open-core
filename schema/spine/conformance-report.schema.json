@@ -8,15 +8,15 @@
   "additionalProperties": false,
   "properties": {
     "schema": { "const": "bizcity_conformance_report@1" },
-    "tool": { "enum": ["spine-check", "spine-contract", "spine-house"] },
+    "tool": { "enum": ["spine-check", "spine-contract", "spine-house", "standard-check"], "$comment": "[2026-11-24 11:48 PM Johnny Chu - Chu Hoàng Anh] STD-1 — thêm standard-check (khuôn repo, bizcity_standard_map@1)" },
     "tool_version": { "type": "string" },
-    "standard": { "type": "string", "pattern": "^bizcity_spine@[0-9]+$" },
+    "standard": { "type": "string", "pattern": "^bizcity_(spine|standard_map)@[0-9]+$" },
     "ran_at": { "type": "string", "minLength": 20 },
     "app_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
     "target": { "type": "string", "maxLength": 300, "$comment": "lane CONTRACT: địa chỉ bản đang chạy; lane MANIFEST: đường tệp" },
     "scope": { "anyOf": [ { "type": "string" }, { "type": "array", "items": { "type": "string" } } ] },
     "lane": { "enum": ["MANIFEST", "CONTRACT", "HOUSE"] },
-    "level": { "enum": ["C0", "C1", "C2", "C3"], "$comment": "mức tương thích đạt được (DE-XUAT-BO-KIEM-TUONG-THICH §4); chỉ có khi tool tính được" },
+    "level": { "enum": ["C0", "C1", "C2", "C3", "S0", "S1", "S2", "S3"], "$comment": "mức tương thích đạt được (DE-XUAT-BO-KIEM-TUONG-THICH §4); chỉ có khi tool tính được" },
     "checks": {
       "type": "array",
       "items": {
@@ -24,7 +24,7 @@
         "required": ["id", "status"],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^SC-SPINE-[0-9]+$" },
+          "id": { "type": "string", "pattern": "^SC-[A-Z]+(-[A-Z]+)*-[A-Z]?[0-9]+$" },
           "status": { "enum": ["pass", "fail", "warn", "skip"] },
           "units": { "type": "integer", "minimum": 0 },
           "note": { "type": "string", "maxLength": 300 }
@@ -38,7 +38,7 @@
         "required": ["id", "level", "where", "msg"],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^SC-SPINE-[0-9]+$" },
+          "id": { "type": "string", "pattern": "^SC-[A-Z]+(-[A-Z]+)*-[A-Z]?[0-9]+$" },
           "level": { "enum": ["fail", "warn", "info"] },
           "where": { "type": "string", "maxLength": 500 },
           "msg": { "type": "string", "maxLength": 1000 },
