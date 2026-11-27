@@ -1,0 +1,35 @@
+{
+  "name": "@bizcity/contracts",
+  "version": "0.3.0",
+  "license": "GPL-2.0-or-later",
+  "private": true,
+  "description": "Hợp đồng dữ liệu dùng chung giữa API, giao diện và hệ thống bên ngoài: khuôn chứng từ, kiểu trả về, mã lỗi.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hoanganh8389/open-core.git",
+    "directory": "packages/contracts"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
