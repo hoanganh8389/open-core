@@ -2,6 +2,11 @@
 
 ## [Chưa phát hành]
 
+## [0.3.1] — 2026-11-28
+
+### Thêm (C3 — gom bản nền mới của open-ketoan)
+- <!-- [2026-11-28 12:18 AM Johnny Chu - Chu Hoàng Anh] C3 --> Gộp ba chiều (gốc = open-ketoan `6ad77b6`, ta = open-core 0.3.0, họ = open-ketoan `dev` `4e5cbc8`): **platform.secrets** (`core/secrets.ts`, `ctx.secrets`, quyền `secrets:read:<module>`, migration lõi **0004** `tenant_secret_keys` + `tenant_secrets`, bỏ GRANT vai `ketoan_app`), **`users.external_sub`** (migration lõi **0003**), `config/env.ts`, `core/apps.ts`, `security/tool-password.ts`, `core/actions.ts` + `db/types.ts` gộp tự động, `core/auth.ts` gỡ tay, contracts `errors.ts` (`KHO_STOCK_SHORT`, `SECRETS_*`). Test gói 11/11; open-cake 199/199 trên tgz 0.3.1.
+
 ## [0.3.0] — 2026-11-27
 
 ### Thêm
