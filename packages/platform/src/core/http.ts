@@ -1,0 +1,175 @@
+// @bizcity-layer P actions
+// [2026-10-29 10:24 PM Johnny Chu - Chu Hoàng Anh] INIT — khởi tạo Bizcity Core Framework: sổ cái chỉ thêm, cửa nạp sự việc, CANON, hợp đồng, bộ kiểm chuẩn.
+// [2026-10-30 09:58 AM Johnny Chu - Chu Hoàng Anh] PHASE-002 — nhãn lớp @bizcity-layer, đồ thị phụ thuộc mốc, bản nháp API module-sdk.
+// [2026-10-30 12:10 PM Johnny Chu - Chu Hoàng Anh] ADR-0007 — chuẩn hoá mã lỗi, quan sát, bộ giám sát, cài nhanh, kiến trúc, đóng góp.
+// [2026-11-01 04:13 PM Johnny Chu - Chu Hoàng Anh] ADR-0010 — OpenTelemetry từ lõi (PHASE-018 W5): span ở khớp nối Platform + cổng Kernel, lọc thuộc tính, traceparent qua outbox
+// [2026-11-01 04:20 PM Johnny Chu - Chu Hoàng Anh] PHASE-010 — dời từ apps/api/src/core/http.ts sang packages/platform (@bizcity/platform, D010-7 chặng 2); import tương đối viết lại theo chỗ mới
+/**
+ * Tiện ích HTTP dùng chung: khuôn phản hồi, phân trang, bộ xử lý lỗi.
+ */
+import type { FastifyError, FastifyInstance } from 'fastify';
+import { ZodError, z } from 'zod';
+import { ERROR_CATALOG, ERROR_CODES, type ApiSuccess, type ErrorCode, type ErrorReason, type PageMeta } from '@bizcity/contracts';
+import { AppError, classifyLedgerTriggerError, withRemedy } from './errors.js';
+import { currentTraceId } from './tracing.js';
+import { ghiKiem } from './nhat-ky-kiem.js';
+
+/** Phản hồi thành công. */
+export function ok<T>(data: T, meta?: ApiSuccess<T>['meta']): ApiSuccess<T> {
+  return meta ? { ok: true, data, meta } : { ok: true, data };
+}
+
+/**
+ * Tham số true/false trên URL. KHÔNG dùng z.coerce.boolean() vì nó biến chuỗi "false" thành true.
+ * Nhận: true/false/1/0 (không phân biệt hoa thường); bỏ trống = undefined.
+ */
+export const queryBool = z
+  .union([z.boolean(), z.string()])
+  .optional()
+  .transform((v) => (v === undefined || v === '' ? undefined : typeof v === 'boolean' ? v : ['true', '1', 'on', 'yes'].includes(v.toLowerCase())));
+
+/** Tham số phân trang chuẩn cho mọi danh sách. */
+/** Mã id trong đường dẫn (/…/:id): bigint tự tăng (1, 2, 3…), truyền dạng chuỗi số. */
+export const idSchema = z.string().regex(/^[1-9][0-9]{0,18}$/, 'Mã không hợp lệ');
+export const idParamSchema = z.object({ id: idSchema });
+
+export const pageQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  /** Màn danh sách của phần mềm lấy toàn bộ (1.000.000); tích hợp ngoài có thể chia trang nhỏ. */
+  pageSize: z.coerce.number().int().min(1).max(1_000_000).default(50),
+});
+export type PageQuery = z.infer<typeof pageQuerySchema>;
+
+export function pageMeta(q: PageQuery, total: number): PageMeta {
+  return { page: q.page, pageSize: q.pageSize, total };
+}
+
+/** Khuôn mô tả phản hồi cho tài liệu OpenAPI. */
+export function okSchema<T extends z.ZodTypeAny>(data: T) {
+  return z.object({ ok: z.literal(true), data, meta: z.record(z.unknown()).optional() });
+}
+
+/**
+ * Gắn bộ xử lý lỗi chung: mọi lỗi đều về khuôn { ok: false, error: { code, message, requestId, details? } } (bizcity_errors@1).
+ * HTTP status theo ERROR_CATALOG; mọi phản hồi lỗi có requestId (R-ERR-5); lỗi CSDL ánh xạ cố định (R-ERR-8, BIZCITY-ERRORS §5);
+ * 5xx chỉ trả "Lỗi hệ thống", chi tiết vào log (R-ERR-4). Mỗi lỗi ghi log có errCode để Loki / cảnh báo lọc theo mã (R-ERR-9).
+ */
+export function registerErrorHandler(app: FastifyInstance): void {
+  app.setErrorHandler((err: FastifyError | AppError | ZodError, req, reply) => {
+    // [2026-11-02 07:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-021 — W2: send nhận trường phụ (error.intake của lỗi cửa nạp có bể chờ); khuôn details giữ nguyên
+    const send = (code: ErrorCode, message: string, details?: unknown, status = ERROR_CATALOG[code].http, extra?: Record<string, unknown>) => {
+      reply.errCode = code;
+      if (status >= 500) req.log.error({ err, errCode: code }, 'lỗi hệ thống');
+      else req.log.info({ errCode: code, status }, message);
+      // traceId (ADR-0010): tra trace trong Tempo, log trong Loki; chỉ có khi truy vết bật.
+      const traceId = currentTraceId();
+      // [2026-11-19 Nguyễn Văn Thủy] mọi lần GHI bị từ chối (400 / 404 / 409 / 422) của người đã đăng nhập → nhật ký kiểm khai báo (HT19), mọi danh mục / chứng từ
+      // dùng chung: đối tượng theo đường dẫn, mã quy tắc (details.findings) hoặc mã lỗi, mã tra cứu (docs/nghiep-vu/25 §3.5) (đóng góp)
+      if (req.method !== 'GET' && req.auth && [400, 404, 409, 422].includes(status)) {
+        const url = req.routeOptions?.url ?? req.url;
+        const parts = url.replace(/^\/api\/v\d+\//, '').split('/').filter((x) => x && !x.startsWith(':'));
+        const params = (req.params ?? {}) as Record<string, unknown>;
+        const fs = (details as { findings?: { code: string; level?: string; title?: string; field?: string }[] } | undefined)?.findings;
+        void ghiKiem(req.auth.tenantId, {
+          entity: parts.join('/') || url, key: Object.values(params).map(String).join('/'), action: req.method === 'POST' ? 'create' : req.method === 'DELETE' ? 'delete' : 'update', ok: false,
+          failed: Array.isArray(fs) && fs.length ? fs.map((f) => ({ code: f.code, level: f.level ?? 'block', title: f.title ?? '', ...(f.field ? { field: f.field } : {}) })) : [{ code, level: 'block', title: message }],
+          user: req.auth.actorName || req.auth.actor, requestId: String(req.id), source: 'server', method: req.method, path: req.url.split('?')[0], status, message,
+        });
+      }
+      return reply.status(status).send({ ok: false, error: { code, message, requestId: String(req.id), ...(traceId ? { traceId } : {}), ...(details === undefined ? {} : { details }), ...extra } });
+    };
+    const withReason = (reason: ErrorReason, extra?: Record<string, unknown>) => ({ reason, ...extra });
+
+    // [2026-11-19 Nguyễn Văn Thủy] lỗi quy tắc (details.findings có field) → error.fields để giao diện tô đỏ đúng ô (docs/nghiep-vu/25) (đóng góp)
+    if (err instanceof AppError) {
+      const fs = (err.details as { findings?: { field?: string; title?: string; code?: string }[] } | undefined)?.findings;
+      const fields = Array.isArray(fs) ? fs.filter((f) => f.field).map((f) => ({ path: f.field!, message: `${f.title ?? ''} (${f.code ?? ''})` })) : [];
+      return send(err.code, err.message, err.details, err.httpStatus, { ...(err.intake === undefined ? {} : { intake: err.intake }), ...(fields.length ? { fields } : {}) });
+    }
+    // [2026-11-11 Nguyễn Văn Thủy] thêm error.fields [{ path, message }] (đường dẫn trường) để giao diện tô đỏ đúng ô; details giữ nguyên khuôn (đóng góp)
+    if (err instanceof ZodError) return send(ERROR_CODES.VALIDATION, ERROR_CATALOG.VALIDATION_ERROR.message, err.issues.map(issueText), undefined, { fields: err.issues.map(issueField) });
+    // Lỗi kiểm tra dữ liệu của fastify-type-provider-zod
+    const anyErr = err as FastifyError & { validation?: unknown };
+    if (anyErr.validation) return send(ERROR_CODES.VALIDATION, ERROR_CATALOG.VALIDATION_ERROR.message, validationTexts(anyErr.validation), undefined, { fields: validationFields(anyErr.validation) });
+    // Lỗi ràng buộc / trigger ở CSDL: thông điệp tiếng Việt có chủ đích (bút toán không cân, sổ cái chỉ thêm…)
+    const pgCode = (err as { code?: string }).code;
+    // [2026-11-08 02:05 PM Johnny Chu - Chu Hoàng Anh] PHASE-029 — S029-33: trigger sổ cái (cân, khoá kỳ, chỉ thêm) ra đúng mã §5 trước khi rơi về POSTING_FAILED
+    const trigger = classifyLedgerTriggerError(err);
+    // [2026-11-10 10:50 AM Johnny Chu - Chu Hoàng Anh] PHASE-022 — S022-17 (RV-R1-06): lỗi từ trigger CSDL mang step = db-trigger và phương án khắc phục (BIZCITY-ERRORS-v1 §4b mục 4)
+    const dbStep = { context: { step: 'db-trigger' } };
+    if (trigger) return send(trigger.code, err.message, withRemedy(trigger.code, { ...(trigger.reason ? withReason(trigger.reason) : {}), ...dbStep }, trigger.reason));
+    if (pgCode === '23514' || pgCode === '42501') return send(ERROR_CODES.POSTING_FAILED, err.message, withRemedy(ERROR_CODES.POSTING_FAILED, dbStep));
+    if (pgCode === '23505') return send(ERROR_CODES.CONFLICT, 'Dữ liệu bị trùng (mã đã tồn tại)', withReason('DB_UNIQUE_VIOLATION'));
+    if (pgCode === '23503' && /update or delete/i.test(err.message)) {
+      // Xoá một mã còn dữ liệu khác trỏ tới.
+      return send(ERROR_CODES.CONFLICT, 'Mã đang được dùng ở dữ liệu khác nên không xoá được: bỏ tích theo dõi / đang dùng để ngừng', withReason('DB_IN_USE'));
+    }
+    if (pgCode === '23503') return send(ERROR_CODES.VALIDATION, 'Tham chiếu tới mã chưa khai báo trong danh mục', withReason('DB_REFERENCE_MISSING'), 422);
+    if (pgCode === 'P0001') {
+      // RAISE EXCEPTION của trigger bảo vệ sổ / bằng chứng: câu đã viết cho người dùng, không phải lỗi hệ thống.
+      return /không cân/i.test(err.message)
+        ? send(ERROR_CODES.UNBALANCED, err.message, withRemedy(ERROR_CODES.UNBALANCED, dbStep))
+        : send(ERROR_CODES.CONFLICT, err.message, withRemedy(ERROR_CODES.CONFLICT, { ...withReason('LEDGER_APPEND_ONLY'), ...dbStep }, 'LEDGER_APPEND_ONLY'));
+    }
+    const status = anyErr.statusCode && anyErr.statusCode < 500 ? anyErr.statusCode : 500;
+    return status >= 500
+      ? send(ERROR_CODES.INTERNAL, ERROR_CATALOG.INTERNAL_ERROR.message, undefined, 500)
+      : send(ERROR_CODES.VALIDATION, err.message, undefined, status);
+  });
+
+  app.setNotFoundHandler((req, reply) => {
+    reply.errCode = ERROR_CODES.NOT_FOUND;
+    reply.status(404).send({ ok: false, error: { code: ERROR_CODES.NOT_FOUND, message: `Không có đường dẫn ${req.method} ${req.url}`, requestId: String(req.id) } });
+  });
+}
+
+declare module 'fastify' {
+  interface FastifyReply {
+    /** Mã lỗi của phản hồi (để log / số đo bizcity_http_errors_total đọc ở onResponse). */
+    errCode?: string;
+  }
+}
+
+/** Tên tiếng Việt của các trường hay gặp trong lỗi kiểm tra dữ liệu. */
+const FIELD_LABEL: Record<string, string> = {
+  items: 'Danh sách', lines: 'Dòng phiếu', code: 'Mã', name: 'Tên', amount: 'Số tiền', note: 'Ghi chú', description: 'Diễn giải',
+  period: 'Kỳ', from: 'Từ ngày', to: 'Đến ngày', docDate: 'Ngày chứng từ', branchCode: 'Chi nhánh', departmentCode: 'Bộ phận',
+  costItemCode: 'Khoản mục', costItem: 'Khoản mục', accountCode: 'Tài khoản', debitAccount: 'TK Nợ', creditAccount: 'TK Có',
+  partnerCode: 'Đối tượng', taxCode: 'Mã số thuế', quantity: 'Số lượng', price: 'Đơn giá', reasonCode: 'Lý do', sku: 'Mã hàng',
+};
+
+/** Câu tiếng Việt cho một lỗi kiểm tra dữ liệu của zod (đường dẫn trường + lý do). */
+function issueText(i: { code: string; path: (string | number)[]; message: string; type?: string; minimum?: unknown; maximum?: unknown; received?: unknown; expected?: unknown; options?: unknown[] }): string {
+  const where = i.path.length ? i.path.map((p) => (typeof p === 'number' ? `dòng ${p + 1}` : FIELD_LABEL[p] ?? p)).join(' › ') : 'dữ liệu';
+  let why = i.message;
+  switch (i.code) {
+    case 'invalid_type': why = i.received === 'undefined' ? 'thiếu' : `sai kiểu (cần ${String(i.expected)})`; break;
+    case 'too_small': why = i.type === 'array' ? `phải có ít nhất ${String(i.minimum)} dòng` : i.type === 'string' ? (Number(i.minimum) <= 1 ? 'không được để trống' : `ít nhất ${String(i.minimum)} ký tự`) : `không được nhỏ hơn ${String(i.minimum)}`; break;
+    case 'too_big': why = i.type === 'array' ? `tối đa ${String(i.maximum)} dòng` : i.type === 'string' ? `tối đa ${String(i.maximum)} ký tự` : `không được lớn hơn ${String(i.maximum)}`; break;
+    case 'invalid_enum_value': why = `phải là một trong: ${(i.options ?? []).join(', ')}`; break;
+    case 'invalid_date': why = 'ngày không hợp lệ'; break;
+    default: if (/^[ -~]*$/.test(why)) why = 'không hợp lệ'; // câu tiếng Anh mặc định của zod
+  }
+  return `${where}: ${why}`;
+}
+
+// [2026-11-02 08:30 PM Johnny Chu - Chu Hoàng Anh] PHASE-021 — W2: xuất zodIssueTexts — cửa nạp tự kiểm khuôn (để giữ chứng từ sai khuôn ở bể chờ) mà error.details vẫn cùng khuôn mảng câu như lỗi kiểm của route
+/** Lỗi zod → danh sách câu tiếng Việt, cùng khuôn error.details với lỗi kiểm của route. */
+export const zodIssueTexts = (err: ZodError): string[] => err.issues.map(issueText);
+
+/** Trường lỗi cho giao diện: đường dẫn dạng a.b.0.c + câu tiếng Việt (cùng câu với details). */
+function issueField(i: Parameters<typeof issueText>[0]): { path: string; message: string } {
+  return { path: i.path.join('.'), message: issueText(i) };
+}
+function validationFields(v: unknown): { path: string; message: string }[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((x: { params?: { issue?: Parameters<typeof issueText>[0] }; instancePath?: string; message?: string }) =>
+    x.params?.issue ? issueField(x.params.issue) : { path: (x.instancePath ?? '').replace(/^\//, '').replace(/\//g, '.'), message: `${x.message ?? 'không hợp lệ'}` });
+}
+
+/** Lỗi kiểm tra của fastify-type-provider-zod → danh sách câu tiếng Việt. */
+function validationTexts(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v.map((x: { params?: { issue?: Parameters<typeof issueText>[0] }; instancePath?: string; message?: string }) =>
+    x.params?.issue ? issueText(x.params.issue) : `${(x.instancePath ?? '').replace(/^\//, '').replace(/\//g, ' › ') || 'dữ liệu'}: ${x.message ?? 'không hợp lệ'}`);
+}

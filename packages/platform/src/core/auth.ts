@@ -1,0 +1,463 @@
+// @bizcity-layer P permissions
+// [2026-11-02 03:10 AM Johnny Chu - Chu Hoàng Anh] PHASE-020 — quyền conformance:read (xem Kiểm chuẩn) và conformance:run (chạy một lượt, lưu ảnh chụp) cho Conformance Engine (ADR-0012, D020-7).
+// [2026-10-29 10:24 PM Johnny Chu - Chu Hoàng Anh] INIT — khởi tạo Bizcity Core Framework: sổ cái chỉ thêm, cửa nạp sự việc, CANON, hợp đồng, bộ kiểm chuẩn.
+// [2026-10-29 11:31 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 — bộ kiểm chuẩn xanh, gia cố R-API-6, R-BOUND-2, R-SEC-11, R-REL-1.
+// [2026-10-30 12:37 AM Johnny Chu - Chu Hoàng Anh] PHASE-001 — migration đúng chuẩn, vai trò CSDL thường cho API, bộ test xanh.
+// [2026-10-30 09:58 AM Johnny Chu - Chu Hoàng Anh] PHASE-002 — nhãn lớp @bizcity-layer, đồ thị phụ thuộc mốc, bản nháp API module-sdk.
+// [2026-10-30 11:45 AM Johnny Chu - Chu Hoàng Anh] PHASE-003 — MCP cho trợ lý AI: POST /mcp, công cụ sinh từ action, xác nhận trước khi ghi (PHASES 2.11, 2.12).
+// [2026-10-30 09:23 PM Johnny Chu - Chu Hoàng Anh] PHASE-007 — cô lập đơn vị bằng RLS.
+// [2026-11-01 04:20 PM Johnny Chu - Chu Hoàng Anh] PHASE-010 — dời từ apps/api/src/core/auth.ts sang packages/platform (@bizcity/platform, D010-7 chặng 2); import tương đối viết lại theo chỗ mới
+// [2026-11-02 10:43 AM Johnny Chu - Chu Hoàng Anh] PHASE-011 — 3.14 (ADR-0011 mức 2): khoá app (api_keys.app_key) — quyền theo app_installations.permissions, kết nối tắt → từ chối; AuthContext.app
+/**
+ * Xác thực và phân quyền.
+ *
+ * Hai cách gọi API:
+ *   1. Người dùng giao diện: header  Authorization: Bearer <jwt>
+ *   2. Hệ thống tích hợp:    header  X-Api-Key: <khoá>
+ *      Khoá của app ngoài tiến trình (ADR-0011 mức 2, api_keys.app_key): quyền = phạm vi đã đồng ý lúc kết nối
+ *      (app_installations.permissions), không theo scopes; kết nối tắt → khoá bị từ chối như khoá thu hồi.
+ *
+ * Sau khi qua bước này, mỗi request có `req.auth` (đơn vị, người gọi, vai trò, phạm vi).
+ * Route khai báo quyền cần bằng `preHandler: requirePermission('documents:write')`.
+ */
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import fp from 'fastify-plugin';
+import { ERROR_CODES } from '@bizcity/contracts';
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — vai, vai quản trị cao, phạm vi khoá API đọc từ sổ đăng ký (roles.ts), không còn bảng vai kế toán viết cứng.
+import { ADMIN_ROLES, registerApiScopes, roleDef, scopePermissionKeys, type Role } from './roles.js';
+export { ADMIN_ROLES, type Role } from './roles.js';
+import { db } from '../db/client.js';
+import { AppError, Errors } from './errors.js';
+import { hashApiKey } from './security/password.js';
+import { getAppManifest } from './apps.js';
+import { verifySession } from './security/tokens.js';
+import { currentRequest } from './request-context.js';
+import { checkSession } from './security/session-state.js';
+import { extraAuthz, type ExtraAuthz } from './security/role-assignments.js';
+import { matchPattern } from './authz/engine.js';
+
+/** Danh sách quyền. Thêm quyền mới: khai ở đây và gán cho vai trò bên dưới. */
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — quyền NỀN chỉ còn phần chung mọi app; catalog:*, ledger:read, payments:*, periods:lock là quyền module của open-ketoan (ketoanAuthzPreset).
+export const PERMISSIONS = [
+  'documents:read',
+  'documents:write',
+  /** Sửa / huỷ phiếu nhập tay do người khác lập. Không có quyền này: chỉ sửa / huỷ phiếu của mình. */
+  'documents:edit-all',
+  /** Không bị chặn bởi khoá dữ liệu theo ngày (khoá đến ngày, chỉ sửa trong N ngày, chỉ lập phiếu hôm nay, cấm huỷ). */
+  'documents:bypass-date-lock',
+  'reports:read',
+  'settings:write',
+  'users:write',
+  /** Xem kết quả Kiểm chuẩn (Conformance Engine, ADR-0012). */
+  'conformance:read',
+  /** Chạy một lượt Kiểm chuẩn và lưu ảnh chụp (chỉ đọc sổ; không đổi sổ, không đổi cấu hình). */
+  'conformance:run',
+  /** Duyệt / thu hồi rulepack cho đơn vị (bản cài tự chủ, ADR-0016): kết quả dựa trên duyệt này mang nhãn "Đạt theo duyệt của đơn vị". */
+  'conformance:approve',
+  // [2026-11-02 10:10 PM Johnny Chu - Chu Hoàng Anh] PHASE-022 — W4: Bàn đánh giá (HT08) — checklist giả định lỗi theo vai, phương án khắc phục, xác nhận cảnh báo; chỉ đọc.
+  /** Xem Bàn đánh giá theo vai (kế toán trưởng, kiểm soát, thanh tra thuế — tự rà trước). */
+  'review:read',
+  // [2026-11-01 10:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-019 — W2: quyền devtools:read (D019-3) — chủ đơn vị + vai trò developer; không cấp cho khoá API, không cho AI.
+  /** Bàn điều tra cho nhà phát triển (PHASE-019): đọc trace / log / bằng chứng của đơn vị qua API trung gian. Không phạm vi khoá API nào ánh xạ tới. */
+  'devtools:read',
+] as const;
+// [2026-11-02 05:30 PM Johnny Chu - Chu Hoàng Anh] PHASE-011 — 3.3 (permissions.module): quyền do module khai trong manifest permissions[] — registry, vai trò mặc định theo roles, quyền risk high không cho AI / khoá API
+export type CorePermission = (typeof PERMISSIONS)[number];
+/** Quyền module khai trong manifest `permissions[]` (`<key>:<việc>`, BIZCITY-MODULE §3) — đăng ký lúc khởi động. */
+export type ModulePermission = `${string}:${string}`;
+export type Permission = CorePermission | ModulePermission;
+
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — quyền module mang được đủ siêu dữ liệu sổ quyền (catalog.ts đã đọc các trường này như tuỳ chọn).
+export interface ModulePermissionDef {
+  key: string; label: string; roles?: string[]; risk?: 'low' | 'high';
+  resource?: string; operation?: string; sensitive?: 'field' | 'pii'; scopeKinds?: ('branch' | 'warehouse' | 'org_unit')[]; aliases?: string[];
+}
+const modulePermissions = new Map<string, ModulePermissionDef & { module: string }>();
+const MODULE_PERM_RE = /^([a-z][a-z0-9-]*):[a-z][a-z0-9-]*$/;
+
+/** Đăng ký quyền của một module (app.ts từ manifest; test). Tiền tố phải là khoá module, không trùng quyền Core / module khác. */
+export function registerModulePermissions(module: string, defs: readonly ModulePermissionDef[]): void {
+  for (const d of defs) {
+    const m = MODULE_PERM_RE.exec(d.key);
+    if (m?.[1] !== module) throw new Error(`Quyền "${d.key}" của module ${module} phải dạng "${module}:<việc>"`);
+    if ((PERMISSIONS as readonly string[]).includes(d.key)) throw new Error(`Quyền "${d.key}" trùng quyền Core`);
+    const cur = modulePermissions.get(d.key);
+    if (cur && cur.module !== module) throw new Error(`Quyền "${d.key}" đã thuộc module ${cur.module}`);
+    modulePermissions.set(d.key, { ...d, module });
+  }
+}
+
+export const listModulePermissions = (): (ModulePermissionDef & { module: string })[] => [...modulePermissions.values()];
+
+// [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1 (80 D-AUTH-19): SỔ ĐĂNG KÝ LOẠI CHỨNG TỪ → QUYỀN (phân hệ đăng ký như hook) + quyền KÉO THEO
+/**
+ * Phân hệ đăng ký quyền lập / sửa cho loại chứng từ của mình qua cửa nạp (`registerDocumentPermission('sale', 'ban-hang:hoa-don-lap')`).
+ * Quyền đó phải khai trong manifest của phân hệ (permissions[]); phân hệ không bật → quyền không có trong sổ → cửa nạp kiểm
+ * `documents:write` như cũ. Quyền chi tiết được `documents:write` KÉO THEO (mọi người đang ghi được chứng từ vẫn ghi được như cũ);
+ * muốn chặn một loại phiếu thì Cấm quyền chi tiết (Cấm tính SAU khi kéo theo), muốn mở hẹp thì chỉ Cho quyền chi tiết.
+ */
+// [2026-11-09 05:40 PM kiennt] PHASE-028 — giai đoạn 3.2b: đủ bộ thao tác theo loại chứng từ — xem / lập / huỷ / xuất; mỗi thao tác do quyền Core đang gác nó kéo theo
+/** Thao tác trên một loại chứng từ. "In" không có quyền riêng: phiếu in ở trình duyệt từ dữ liệu xem (thuộc `read`). */
+export type DocumentOp = 'read' | 'create' | 'cancel' | 'export';
+/** Quyền Core đang gác từng thao tác hôm nay — kéo theo quyền chi tiết để không ai mất quyền khi phân hệ đăng ký. */
+export const DOCUMENT_OP_BASE: Readonly<Record<DocumentOp, CorePermission>> = { read: 'documents:read', create: 'documents:write', cancel: 'documents:write', export: 'reports:read' };
+const documentTypes = new Map<string, Partial<Record<DocumentOp, string>>>();
+const implied = new Map<string, Set<string>>();
+
+/**
+ * Phân hệ đăng ký quyền theo thao tác cho loại chứng từ của mình (gọi ở index.ts của phân hệ, quyền khai ở permissions[] của manifest):
+ * `registerDocumentType('sale', { read: 'ban-hang:hoa-don-xem', create: 'ban-hang:hoa-don-lap', cancel: …, export: … })`.
+ * Mỗi quyền được quyền Core của thao tác đó kéo theo (DOCUMENT_OP_BASE).
+ */
+export function registerDocumentType(docType: string, perms: Partial<Record<DocumentOp, string>>): void {
+  const cur = documentTypes.get(docType) ?? {};
+  for (const [op, permission] of Object.entries(perms) as [DocumentOp, string][]) {
+    if (cur[op] && cur[op] !== permission) throw new Error(`Loại chứng từ ${docType} đã đăng ký quyền ${op} = ${cur[op]}`);
+    if (!MODULE_PERM_RE.test(permission) || (PERMISSIONS as readonly string[]).includes(permission)) throw new Error(`Quyền chứng từ "${permission}" phải là quyền module <module>:<việc>`);
+    cur[op] = permission;
+    const base = DOCUMENT_OP_BASE[op];
+    implied.set(base, (implied.get(base) ?? new Set()).add(permission));
+  }
+  documentTypes.set(docType, cur);
+}
+
+/** Đăng ký riêng quyền lập / sửa (giữ cho chỗ gọi cũ). */
+export function registerDocumentPermission(docType: string, permission: string): void {
+  registerDocumentType(docType, { create: permission });
+}
+
+/** Quyền cần cho `op` trên loại chứng từ: quyền chi tiết nếu phân hệ đã đăng ký VÀ quyền có trong sổ (phân hệ bật), không thì quyền Core. */
+export function documentPermissionOf(docType: unknown, op: DocumentOp = 'create'): Permission {
+  const p = typeof docType === 'string' ? documentTypes.get(docType)?.[op] : undefined;
+  return p && isKnownPermission(p) ? p : DOCUMENT_OP_BASE[op];
+}
+
+/** Các loại chứng từ có quyền `op` riêng đang có hiệu lực (phân hệ bật): [loại, quyền]. */
+export function documentTypesWith(op: DocumentOp): [string, Permission][] {
+  return [...documentTypes].map(([t, ps]) => [t, ps[op]] as const).filter((x): x is [string, string] => !!x[1] && isKnownPermission(x[1])) as [string, Permission][];
+}
+
+/** Người này làm được `op` trên loại chứng từ không (theo quyền toàn đơn vị đã tính, gồm kéo theo và đã trừ Cấm). */
+export const canDocument = (auth: Pick<AuthContext, 'permissions'>, docType: unknown, op: DocumentOp): boolean => auth.permissions.has(documentPermissionOf(docType, op));
+
+/** Quyền được `permission` kéo theo (chỉ quyền đang có trong sổ). */
+export const impliedBy = (permission: string): string[] => [...(implied.get(permission) ?? [])].filter((p) => isKnownPermission(p));
+
+// [2026-11-09 05:00 PM kiennt] PHASE-028 — giai đoạn 3.1: Cấm quyền gốc thì Cấm luôn quyền nó kéo theo — luật Cấm documents:* đang có vẫn chặn được hoá đơn bán sau khi cửa nạp đòi ban-hang:hoa-don-lap
+/** Các quyền gốc kéo theo `permission` (vd documents:write → ban-hang:hoa-don-lap). */
+export const impliersOf = (permission: string): string[] => [...implied].filter(([, s]) => s.has(permission)).map(([b]) => b);
+
+/** Thêm quyền kéo theo vào một tập quyền (trước khi trừ Cấm). */
+export function withImplied<T extends Set<Permission>>(set: T): T {
+  for (const base of [...set]) for (const p of impliedBy(base)) set.add(p as Permission);
+  return set;
+}
+export const isKnownPermission = (p: string): p is Permission => (PERMISSIONS as readonly string[]).includes(p) || modulePermissions.has(p);
+/** Quyền module rủi ro cao: không cấp cho trợ lý AI, khoá API (BIZCITY-MODULE §3). */
+export const isHighRiskPermission = (p: string): boolean => modulePermissions.get(p)?.risk === 'high';
+
+// [2026-11-05 06:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-028 — W1 (ADR-0027 D-AUTH-03 bản chủ duyệt): tập vai trò quản trị cao thay so sánh cứng role === 'owner'; quyền hiệu lực của nhiều vai trò
+/**
+ * Vai trò quản trị cao (ADR-0027 D-AUTH-03): nhận mọi quyền module, kể cả quyền module không khai `roles`. Vai trò khác chỉ nhận quyền
+ * module khai mình trong `roles` — không khai là mặc định cấm. Thêm vai trò quản trị (vd `admin`) = thêm vào tập này.
+ */
+
+/** Quyền của vai trò: quyền Core theo bảng + quyền module có vai trò trong `roles` (vai trò quản trị cao: mọi quyền module). */
+export function rolePermissions(role: Role): Set<Permission> {
+  const def = roleDef(role);
+  const out = new Set<Permission>(def?.admin ? PERMISSIONS : ((def?.permissions ?? []) as Permission[]));
+  for (const p of modulePermissions.values()) if (ADMIN_ROLES.has(role) || p.roles?.includes(role)) out.add(p.key as Permission);
+  // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1 (80 D-AUTH-19): kéo theo quyền chứng từ chi tiết (vai trò có documents:write giữ nguyên khả năng nộp mọi loại phiếu)
+  return withImplied(out);
+}
+
+/** Quyền hiệu lực của nhiều vai trò (vai trò chính + vai trò bổ sung): hợp các tập quyền — trong phạm vi đơn vị (D-AUTH-04). */
+export function effectivePermissions(roles: readonly Role[]): Set<Permission> {
+  const out = new Set<Permission>();
+  for (const r of roles) for (const p of rolePermissions(r)) out.add(p);
+  return out;
+}
+
+// [2026-11-06 04:30 PM Johnny Chu - Chu Hoàng Anh] PHASE-028 — W2 đợt 2 (ADR-0027 Phụ lục A, chữ chốt bước 3): quyền hiệu lực có vai trò của đơn vị — (vai trò chính ∪ bổ sung ∪ nền + Cho) − Cấm; Cấm không áp cho vai trò quản trị cao
+/**
+ * Quyền hiệu lực của người dùng: hợp quyền các vai trò hệ thống (chính + bổ sung) và vai trò nền của vai trò đơn vị, thêm luật Cho đích
+ * danh (chỉ quyền có trong sổ quyền của code), rồi trừ mọi quyền khớp luật Cấm — Cấm thắng cả quyền của vai trò chính (D-AUTH-04).
+ * Người có một vai trò thuộc ADMIN_ROLES không bị Cấm (chống khoá chủ đơn vị khỏi quản trị).
+ */
+export function effectivePermissionsWithTenantRoles(roles: readonly Role[], extra: Pick<ExtraAuthz, 'baseRoles' | 'allow' | 'deny'>): Set<Permission> {
+  const out = effectivePermissions([...roles, ...extra.baseRoles]);
+  for (const p of extra.allow) if (isKnownPermission(p)) out.add(p);
+  // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1 (80 D-AUTH-19): kéo theo SAU khi cộng Cho (Cho documents:write cũng kéo theo), TRƯỚC khi trừ Cấm (Cấm ban-hang:* chặn được người có documents:write)
+  withImplied(out);
+  if (!extra.deny.length || roles.some((r) => ADMIN_ROLES.has(r))) return out;
+  for (const p of [...out]) if (extra.deny.some((d) => matchPattern(d, p) || impliersOf(p).some((b) => matchPattern(d, b)))) out.delete(p);
+  return out;
+}
+
+// [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — phạm vi khoá API của NỀN; app cộng thêm bằng registerApiScopes (cùng phạm vi ⇒ hợp quyền).
+registerApiScopes('platform', {
+  'documents:write': ['documents:write', 'documents:edit-all', 'documents:read'],
+  'reports:read': ['reports:read', 'conformance:read'],
+});
+
+// [2026-11-09 01:52 PM kiennt] PHASE-028 — S028-13: lộ ánh xạ phạm vi khoá → quyền để lúc tạo khoá kiểm người tạo có đủ các quyền đó
+/** Quyền mà một tập phạm vi khoá API mang theo (cùng bảng với lúc xác thực khoá). */
+export function scopePermissions(scopes: readonly string[]): Set<Permission> {
+  // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1: gồm cả quyền chứng từ kéo theo — người bị Cấm một loại phiếu không tạo được khoá documents:write để lách
+  return withImplied(new Set<Permission>(scopes.flatMap((s) => scopePermissionKeys(s) as Permission[])));
+}
+
+/**
+ * Phiếu nhập tay (phiếu thu, chi, kế toán, kết chuyển…) chỉ người lập được sửa / huỷ, trừ khi có quyền
+ * documents:edit-all (chủ đơn vị, kế toán trưởng, khoá API). Chứng từ nhận từ hệ thống khác không áp luật này.
+ */
+export function assertCanModify(auth: { kind: string; actor: string; permissions: ReadonlySet<string> }, row: { source_system: string; created_by: string | null }, action: 'sửa' | 'huỷ'): void {
+  if (row.source_system !== 'manual' || auth.kind !== 'user' || auth.permissions.has('documents:edit-all')) return;
+  if (row.created_by !== auth.actor) throw Errors.forbidden(`Bạn chỉ ${action} được phiếu do chính mình lập. Phiếu của người khác cần kế toán trưởng ${action}.`);
+}
+
+export interface AuthContext {
+  tenantId: string;
+  /** Định danh người gọi để ghi nhật ký: "user:<id>" hoặc "apikey:<id>". */
+  actor: string;
+  actorName: string;
+  kind: 'user' | 'apikey';
+  /** Vai trò chính (users.role, ghi trong vé). */
+  role: Role | null;
+  /** Vai trò chính + vai trò bổ sung còn hiệu lực (user_role_assignments, PHASE-028 W1). Khoá API / phiên quyền quản trị cấp: không có. */
+  roles?: readonly Role[];
+  permissions: ReadonlySet<Permission>;
+  /** Khoá của app ngoài tiến trình (kind 'apikey'): khoá app. Cửa nạp buộc docKey `<app>:…`, bằng chứng ghi via `app:<app>`. */
+  app?: string;
+  // [2026-11-17 04:10 PM khanhtd] NT-HT-003 — GĐ3: phạm vi chi nhánh của yêu cầu (lớp chi nhánh ghi khi bật bizcity.authz.branch_scope); GĐ4 runtime action đọc
+  /**
+   * Mã chi nhánh người gọi được làm việc ở yêu cầu này. `undefined` / `null` = mọi chi nhánh (chủ đơn vị, khoá API, không gán theo chi
+   * nhánh, công tắc tắt). Do lớp phân quyền theo chi nhánh đặt sau khi xác thực; code nghiệp vụ chỉ đọc để lọc / so, không tự đặt.
+   */
+  branchScope?: readonly string[] | null;
+  // [2026-11-23 09:10 AM Johnny Chu - Chu Hoàng Anh] OKT-SET-1 — ADR-0037: khoá cài đặt open-pos (okti_) — (khoá, X-OKT-Blog đã nối) → đúng một tenant; không có blog → chỉ route của bản cài
+  /**
+   * Khoá cài đặt open-pos (ADR-0037, kind 'apikey'): `blogId` = blog đã nối (yêu cầu chạy trong tenant của blog, quyền theo scopes);
+   * `blogId` null = yêu cầu của cả bản cài (chạy trong tenant chủ, không quyền nghiệp vụ, chỉ INSTALLATION_ROUTES).
+   */
+  installation?: { id: string; code: string; blogId: number | null };
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    auth?: AuthContext;
+  }
+  interface FastifyContextConfig {
+    /** Route công khai, không cần đăng nhập. */
+    public?: boolean;
+  }
+}
+
+async function resolveAuth(req: FastifyRequest): Promise<AuthContext | null> {
+  const apiKey = req.headers['x-api-key'];
+  if (typeof apiKey === 'string' && apiKey.length > 10) {
+    // [2026-11-23 09:10 AM Johnny Chu - Chu Hoàng Anh] OKT-SET-1 — ADR-0037: khoá cài đặt open-pos (okti_) — (khoá, X-OKT-Blog đã nối) → đúng một tenant; không có blog → chỉ route của bản cài
+    if (apiKey.startsWith(INSTALLATION_KEY_PREFIX)) return resolveInstallation(req, apiKey);
+    const row = await db
+      .selectFrom('api_keys as k')
+      .leftJoin('app_installations as i', (j) => j.onRef('i.tenant_id', '=', 'k.tenant_id').onRef('i.app_key', '=', 'k.app_key'))
+      .select(['k.id', 'k.tenant_id', 'k.name', 'k.scopes', 'k.app_key', 'i.status as app_status', 'i.permissions as app_permissions'])
+      .where('k.key_hash', '=', hashApiKey(apiKey))
+      .where('k.revoked_at', 'is', null)
+      .executeTakeFirst();
+    if (!row) return null;
+    // Khoá app: kết nối phải đang bật và app còn cài trong bản này; quyền chỉ trong danh sách Permission của Core.
+    if (row.app_key && (row.app_status !== 'active' || !getAppManifest(row.app_key))) return null;
+    // Ghi lần dùng cuối, không chặn request.
+    void db.updateTable('api_keys').set({ last_used_at: new Date() }).where('id', '=', row.id).execute();
+    // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1 (80 D-AUTH-19): khoá API / app có documents:write giữ nguyên khả năng nộp mọi loại phiếu (kéo theo quyền chi tiết)
+    const perms = withImplied(row.app_key
+      // [2026-11-24 06:20 PM Johnny Chu - Chu Hoàng Anh] P2b-3 — khoá app: quyền đã đồng ý còn trong sổ (Core + module), trừ quyền rủi ro cao (không cho khoá API, BIZCITY-MODULE §3)
+      ? new Set<Permission>((row.app_permissions ?? []).filter((p): p is Permission => isKnownPermission(p) && !isHighRiskPermission(p)))
+      : new Set<Permission>(row.scopes.flatMap((s) => scopePermissionKeys(s) as Permission[])));
+    return {
+      tenantId: row.tenant_id, actor: `apikey:${row.id}`, actorName: row.name, kind: 'apikey', role: null, permissions: perms,
+      ...(row.app_key ? { app: row.app_key } : {}),
+    };
+  }
+
+  const header = req.headers.authorization;
+  if (header?.startsWith('Bearer ')) {
+    const claims = await verifySession(header.slice(7));
+    if (!claims) return null;
+    // Vé đã bị thu hồi: đổi / đặt lại mật khẩu, đổi vai trò, khoá tài khoản, đăng xuất các thiết bị khác (core/security/session-state.ts).
+    // Vé cấp trước khi có cơ chế không ghi sv → 0 = mặc định users.session_version (0029): dùng được tới lần thu hồi đầu.
+    // [2026-11-09 02:30 PM kiennt] PHASE-028 — S028-16: kiểm phiên không đệm + authz_version làm khoá đệm quyền (thu hồi có hiệu lực từ yêu cầu kế tiếp)
+    const session = await checkSession(claims.sub, claims.sv ?? 0);
+    if (!session.valid) return null;
+    const role = claims.role as Role;
+    // Đăng nhập qua hệ thống quản trị: quyền theo phân quyền bên đó (trong phiên); còn lại theo vai trò chính + vai trò bổ sung.
+    if (claims.perms) {
+      // [2026-11-09 04:30 PM kiennt] PHASE-028 — giai đoạn 3.1 (80 D-AUTH-19): phiên SSO mang documents:write cũng kéo theo quyền chứng từ chi tiết
+      return { tenantId: claims.tid, actor: `user:${claims.sub}`, actorName: claims.name, kind: 'user', role, permissions: withImplied(new Set(claims.perms.filter(isKnownPermission))) };
+    }
+    // [2026-11-05 06:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-028 — W1: quyền hiệu lực = vai trò chính ∪ vai trò bổ sung còn hiệu lực (đệm 15 giây, xoá khi gán / thu hồi)
+    const extra = await extraAuthz(claims.sub, db, session.authzVersion);
+    const roles = [...new Set<Role>([role, ...extra.roles])];
+    return {
+      tenantId: claims.tid,
+      actor: `user:${claims.sub}`,
+      actorName: claims.name,
+      kind: 'user',
+      role,
+      roles,
+      permissions: effectivePermissionsWithTenantRoles(roles, extra),
+    };
+  }
+  return null;
+}
+
+// [2026-11-02 03:28 PM Johnny Chu - Chu Hoàng Anh] PHASE-011 — 3.14 (ADR-0011 mức 2): cổng route cho khoá app — đọc theo quyền, ghi chỉ danh sách đóng (cửa nạp, báo huỷ, đổi vé); mọi route ghi khác (phiếu tay, số dư đầu, tài khoản, thuế, route mới) bị từ chối
+/**
+ * Route GHI khoá app được gọi (ADR-0011 mức 2: app chỉ ghi sổ qua cửa nạp). Đóng: route ghi mới mặc định bị từ chối, thêm
+ * vào đây phải qua Nhóm Lõi (R-KER-2) và có luật chủ chứng từ ở Kernel. GET: theo quyền của từng route như khoá thường.
+ */
+export const APP_WRITE_ROUTES: ReadonlySet<string> = new Set([
+  'POST /api/v1/documents',          // cửa nạp cũ — postDocumentIn kiểm docKey `<app>:`
+  'POST /api/v1/documents/batch',    // nạp lô — cùng đường processDocument
+  'POST /api/v1/documents/submit',   // core.document.submit
+  'POST /api/v1/documents/cancel',   // báo huỷ — requestCancel kiểm docKey `<app>:`
+  'POST /api/v1/apps/ticket/exchange',
+]);
+
+/** Khoá app gọi route ghi ngoài APP_WRITE_ROUTES → FORBIDDEN (không lộ route có hay không: route lạ cũng FORBIDDEN). */
+export function assertAppRoute(method: string, routeUrl: string | undefined): void {
+  if (method === 'GET' || method === 'HEAD') return;
+  if (routeUrl && APP_WRITE_ROUTES.has(`${method} ${routeUrl}`)) return;
+  throw Errors.forbidden('Khoá app chỉ ghi qua cửa nạp chứng từ (ADR-0011 mức 2): route này không mở cho app');
+}
+
+// [2026-11-23 09:10 AM Johnny Chu - Chu Hoàng Anh] OKT-SET-1 — ADR-0037: khoá cài đặt open-pos (okti_) — (khoá, X-OKT-Blog đã nối) → đúng một tenant; không có blog → chỉ route của bản cài
+/** Tiền tố khoá cài đặt open-pos (ADR-0037). Khoá API thường bắt đầu `kt_`. */
+export const INSTALLATION_KEY_PREFIX = 'okti_';
+/** Route khoá cài đặt gọi được khi KHÔNG mang X-OKT-Blog (chạy trong tenant chủ). Đóng: route khác → FORBIDDEN. */
+export const INSTALLATION_ROUTES: ReadonlySet<string> = new Set([
+  'GET /api/v1/pos-installation/blogs',
+  'POST /api/v1/pos-installation/blogs',
+  'POST /api/v1/pos-installation/ping',
+]);
+const BLOG_RE = /^[1-9][0-9]{0,8}$/;
+
+/** Khoá cài đặt → AuthContext. Blog chờ / thu hồi / lạ → 403 có `details.reason` (bridge xếp hàng, không mất đơn — R-OKT-CONN-11). */
+async function resolveInstallation(req: FastifyRequest, apiKey: string): Promise<AuthContext | null> {
+  const inst = await db.selectFrom('pos_installations')
+    .select(['id', 'code', 'name', 'tenant_id', 'scopes'])
+    .where('key_hash', '=', hashApiKey(apiKey)).where('status', '=', 'active')
+    .executeTakeFirst();
+  if (!inst) return null;
+  const claimed = req.headers['x-okt-install'];
+  if (typeof claimed === 'string' && claimed !== '' && claimed !== inst.code) return null;
+  void db.updateTable('pos_installations').set({ last_seen_at: new Date() }).where('id', '=', inst.id).execute();
+  const rawBlog = req.headers['x-okt-blog'];
+  if (rawBlog === undefined || rawBlog === '') {
+    return { tenantId: inst.tenant_id, actor: `install:${inst.code}`, actorName: inst.name, kind: 'apikey', role: null, permissions: new Set<Permission>(),
+      installation: { id: String(inst.id), code: inst.code, blogId: null } };
+  }
+  if (typeof rawBlog !== 'string' || !BLOG_RE.test(rawBlog)) throw Errors.validation('X-OKT-Blog phải là số blog WordPress (số nguyên dương)');
+  const blogId = Number(rawBlog);
+  const blog = await db.selectFrom('pos_installation_blogs').select(['status', 'tenant_id'])
+    .where('installation_id', '=', inst.id).where('blog_id', '=', blogId).executeTakeFirst();
+  if (!blog) throw new AppError(ERROR_CODES.FORBIDDEN, `Blog ${blogId} chưa đăng ký với khoá cài đặt này — gọi POST /api/v1/pos-installation/blogs trước`, 403, { reason: 'BLOG_UNKNOWN', blogId });
+  if (blog.status !== 'active' || blog.tenant_id === null) {
+    throw new AppError(ERROR_CODES.FORBIDDEN, `Blog ${blogId} chưa được nối vào sổ nào — kế toán nhập mã nối ở Hệ thống → Kết nối open-pos`, 403, { reason: 'BLOG_NOT_LINKED', blogId, status: blog.status });
+  }
+  return {
+    tenantId: blog.tenant_id, actor: `install:${inst.code}:blog:${blogId}`, actorName: `${inst.name} · blog ${blogId}`, kind: 'apikey', role: null,
+    permissions: scopePermissions(inst.scopes), installation: { id: String(inst.id), code: inst.code, blogId },
+  };
+}
+
+/** Khoá cài đặt không mang blog chỉ gọi INSTALLATION_ROUTES (không lộ route có hay không). */
+export function assertInstallationRoute(method: string, routeUrl: string | undefined): void {
+  if (routeUrl && INSTALLATION_ROUTES.has(`${method} ${routeUrl}`)) return;
+  throw new AppError(ERROR_CODES.FORBIDDEN, 'Khoá cài đặt không mang X-OKT-Blog chỉ gọi được route của bản cài (ADR-0037 §4)', 403, { reason: 'BLOG_REQUIRED' });
+}
+
+/** preHandler cho route của bản cài: chỉ khoá cài đặt, không mang X-OKT-Blog. */
+export function requireInstallation() {
+  return async (req: FastifyRequest, _reply: FastifyReply) => {
+    const auth = req.auth;
+    if (!auth) throw Errors.unauthorized();
+    if (!auth.installation || auth.installation.blogId !== null) throw Errors.forbidden('Chỉ dùng bằng khoá cài đặt open-pos, không mang X-OKT-Blog (ADR-0037 §4)');
+  };
+}
+
+/** Plugin: mọi route (trừ route khai config.public) bắt buộc xác thực. */
+export const authPlugin = fp(async (app: FastifyInstance) => {
+  app.decorateRequest('auth', undefined);
+  app.addHook('onRequest', async (req) => {
+    if (req.routeOptions.config?.public) return;
+    // Trang tài liệu API (/api/docs) và trang tĩnh: công khai. /mcp (bizcity_mcp@1) xác thực như API.
+    if (!req.url.startsWith('/api/v1/') && req.url.split('?')[0] !== '/mcp') return;
+    const auth = await resolveAuth(req);
+    if (!auth) throw Errors.unauthorized();
+    if (auth.app) assertAppRoute(req.method, req.routeOptions.url);
+    if (auth.installation && auth.installation.blogId === null) assertInstallationRoute(req.method, req.routeOptions.url);
+    req.auth = auth;
+    // Cô lập đơn vị ở tầng CSDL (RLS, PHASE-007): từ đây mọi kết nối của yêu cầu mang bizcity.tenant_id = đơn vị này.
+    const rc = currentRequest();
+    if (rc) rc.tenantId = auth.tenantId;
+  });
+});
+
+// [2026-11-06 10:30 PM Johnny Chu - Chu Hoàng Anh] PHASE-028 — W3 đợt 2 (ADR-0027 Phụ lục A, W3 đợt 2 mục 2): shadow — so quyết định của bộ tính với đường cũ, không đổi quyết định
+let shadowModule: Promise<typeof import('./authz/shadow.js')> | null = null;
+
+/** Nạp muộn (import động) để auth.ts không nhập authz/* lúc khởi động — tránh vòng nhập. Không bao giờ ném lỗi, không đổi quyết định. */
+async function observeShadow(req: FastifyRequest, auth: AuthContext, needed: readonly Permission[]): Promise<void> {
+  if (auth.kind !== 'user' || !auth.roles) return; // khoá API / vé hệ thống quản trị: không có vai trò để so
+  try {
+    const m = await (shadowModule ??= import('./authz/shadow.js'));
+    if (!(await m.shadowEnabled(auth.tenantId))) return;
+    const userId = auth.actor.slice('user:'.length);
+    const isAdmin = m.hasAdminRole(auth.roles, ADMIN_ROLES);
+    for (const p of needed) await m.shadowCompare({ tenantId: auth.tenantId, userId, permission: p, legacyAllowed: auth.permissions.has(p), isAdmin }, db, req.log);
+  } catch {
+    /* shadow không được làm hỏng yêu cầu */
+  }
+}
+
+/** preHandler kiểm tra quyền. */
+export function requirePermission(...needed: Permission[]) {
+  return async (req: FastifyRequest, _reply: FastifyReply) => {
+    const auth = req.auth;
+    if (!auth) throw Errors.unauthorized();
+    await observeShadow(req, auth, needed);
+    for (const p of needed) {
+      if (!auth.permissions.has(p)) throw Errors.forbidden();
+    }
+  };
+}
+
+/**
+ * preHandler cho route "tự phục vụ" (đổi mật khẩu của mình, đăng xuất máy khác, báo online…): không cần quyền nghiệp vụ nào
+ * nhưng chỉ NGƯỜI DÙNG đăng nhập được gọi — khoá API bị từ chối. Khai tường minh để route nào cũng nói rõ mình cần gì (R-API-6).
+ */
+export function requireUser() {
+  return async (req: FastifyRequest, _reply: FastifyReply) => {
+    const auth = req.auth;
+    if (!auth) throw Errors.unauthorized();
+    if (auth.kind !== 'user') throw Errors.forbidden('Chỉ dùng cho người dùng đăng nhập, không dùng bằng khoá API');
+  };
+}
+
+/**
+ * preHandler cho route chỉ cần ĐÃ XÁC THỰC (người dùng hoặc khoá API), không gắn quyền nghiệp vụ — vd báo online, xem số đang online
+ * (khoá API gọi được nhưng không được đếm). Khai tường minh thay vì bỏ trống preHandler (R-API-6).
+ */
+export function requireAuthenticated() {
+  return async (req: FastifyRequest, _reply: FastifyReply) => {
+    if (!req.auth) throw Errors.unauthorized();
+  };
+}
+
+/** Lấy ngữ cảnh xác thực (đã chắc chắn có vì qua authPlugin). */
+export function authOf(req: FastifyRequest): AuthContext {
+  if (!req.auth) throw Errors.unauthorized();
+  return req.auth;
+}
