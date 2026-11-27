@@ -1,0 +1,142 @@
+// [2026-10-29 10:24 PM Johnny Chu - Chu Hoàng Anh] INIT — khởi tạo Bizcity Core Framework: sổ cái chỉ thêm, cửa nạp sự việc, CANON, hợp đồng, bộ kiểm chuẩn.
+// [2026-11-02 08:45 PM Johnny Chu - Chu Hoàng Anh] PHASE-011 — 3.15: loại chứng từ manual_journal (phiếu kế toán module lập)
+/**
+ * Hằng số nghiệp vụ dùng chung.
+ * Khai báo dạng `as const` để vừa dùng làm giá trị lúc chạy, vừa sinh kiểu TypeScript.
+ */
+
+/** Loại chứng từ gốc nhận từ hệ thống nghiệp vụ hoặc nhập tay. */
+export const DOC_TYPES = {
+  SALE: 'sale',
+  SALE_RETURN: 'sale_return',
+  RECEIPT: 'receipt',
+  PAYMENT: 'payment',
+  /** Báo có: tiền về tài khoản ngân hàng. */
+  BANK_RECEIPT: 'bank_receipt',
+  /** Báo nợ: tiền ra khỏi tài khoản ngân hàng. */
+  BANK_PAYMENT: 'bank_payment',
+  MANUAL: 'manual',
+  /** Số dư tài khoản đầu kỳ (nhập một lần khi bắt đầu dùng phần mềm). */
+  OPENING: 'opening',
+  CLOSING: 'closing',
+  /** Nhập mua hàng từ nhà cung cấp (kèm hoá đơn đầu vào). */
+  PURCHASE: 'purchase',
+  /** Trả hàng cho nhà cung cấp. */
+  PURCHASE_RETURN: 'purchase_return',
+  /** Chuyển kho giữa hai chi nhánh / cửa hàng (phiếu xuất kho kiêm vận chuyển nội bộ). */
+  TRANSFER: 'transfer',
+  /** Điều chỉnh kho: kiểm kê thừa / thiếu, hàng hỏng, xuất dùng nội bộ. */
+  STOCK_ADJUSTMENT: 'stock_adjustment',
+  /** Giá vốn hàng xuất trong tháng (phần mềm tự sinh khi tính giá vốn bình quân). */
+  COGS: 'cogs',
+  /** Chuyển tiền giữa hai chi nhánh, hoặc giữa quỹ và ngân hàng trong một chi nhánh. */
+  CASH_TRANSFER: 'cash_transfer',
+  /** Thu tiền khách hàng trả nợ (kể cả thu hộ công nợ của chi nhánh khác). */
+  CUSTOMER_PAYMENT: 'customer_payment',
+  /** Trả tiền nhà cung cấp (kể cả trả hộ công nợ của chi nhánh khác). */
+  SUPPLIER_PAYMENT: 'supplier_payment',
+  /** Khấu hao tài sản cố định, phân bổ công cụ dụng cụ / chi phí trả trước trong tháng (phần mềm tự sinh). */
+  DEPRECIATION: 'depreciation',
+  /** Phiếu kế toán module lập qua cửa nạp (ADR-0015 Q1): dòng theo lý do journal, không số tài khoản. Khác `manual` (kế toán tự lập). */
+  MANUAL_JOURNAL: 'manual_journal',
+} as const;
+export type DocType = (typeof DOC_TYPES)[keyof typeof DOC_TYPES];
+
+export const DOC_TYPE_LABELS: Record<DocType, string> = {
+  sale: 'Hoá đơn bán hàng',
+  sale_return: 'Hàng bán trả lại',
+  receipt: 'Phiếu thu',
+  payment: 'Phiếu chi',
+  bank_receipt: 'Thu tiền gửi',
+  bank_payment: 'Chi tiền gửi',
+  manual: 'Chứng từ nghiệp vụ khác',
+  opening: 'Số dư đầu kỳ',
+  closing: 'Kết chuyển',
+  purchase: 'Nhập mua hàng',
+  purchase_return: 'Trả hàng nhà cung cấp',
+  transfer: 'Chuyển kho',
+  stock_adjustment: 'Điều chỉnh kho',
+  cogs: 'Giá vốn hàng xuất',
+  cash_transfer: 'Chuyển tiền nội bộ',
+  customer_payment: 'Thanh toán khách hàng',
+  supplier_payment: 'Thanh toán nhà cung cấp',
+  depreciation: 'Khấu hao, phân bổ',
+  manual_journal: 'Chứng từ nghiệp vụ khác (module)',
+};
+
+/** Nhóm loại chứng từ ở màn đóng / mở kỳ (ACC2): mỗi nhóm một dải cột trên lưới khoá. */
+export const DOC_TYPE_GROUPS: { label: string; types: DocType[] }[] = [
+  { label: 'Bán hàng', types: ['sale', 'sale_return', 'customer_payment'] },
+  { label: 'Mua hàng, kho', types: ['purchase', 'purchase_return', 'supplier_payment', 'transfer', 'stock_adjustment', 'cogs'] },
+  { label: 'Tiền', types: ['receipt', 'payment', 'bank_receipt', 'bank_payment', 'cash_transfer'] },
+  { label: 'Kế toán', types: ['manual', 'manual_journal', 'depreciation', 'closing', 'opening'] },
+];
+
+/** Thứ tự loại chứng từ dùng cho bộ lọc ở các sổ. */
+export const DOC_TYPE_LIST = Object.keys(DOC_TYPE_LABELS) as DocType[];
+
+/** Trạng thái xử lý của chứng từ gốc. */
+export const SOURCE_DOC_STATUS = {
+  PENDING: 'pending',
+  POSTED: 'posted',
+  ERROR: 'error',
+  CANCELLED: 'cancelled',
+} as const;
+export type SourceDocStatus = (typeof SOURCE_DOC_STATUS)[keyof typeof SOURCE_DOC_STATUS];
+
+/** Trạng thái bút toán trên sổ cái. */
+export const ENTRY_STATUS = {
+  POSTED: 'posted',
+  REVERSED: 'reversed',
+} as const;
+export type EntryStatus = (typeof ENTRY_STATUS)[keyof typeof ENTRY_STATUS];
+
+/**
+ * Phần của chứng từ mà một dòng sổ cái thuộc về.
+ * Giúp đối chiếu riêng tiền hàng, thuế, giá vốn, thanh toán với chứng từ gốc.
+ */
+export const LINE_PARTS = {
+  GOODS: 'goods',
+  TAX: 'tax',
+  COGS: 'cogs',
+  DISCOUNT: 'discount',
+  PAYMENT: 'payment',
+  OTHER: 'other',
+} as const;
+export type LinePart = (typeof LINE_PARTS)[keyof typeof LINE_PARTS];
+
+/** Chiều thuế. */
+export const TAX_DIRECTION = { OUTPUT: 'output', INPUT: 'input' } as const;
+export type TaxDirection = (typeof TAX_DIRECTION)[keyof typeof TAX_DIRECTION];
+
+/** Bên số dư thông thường của tài khoản. */
+export const NORMAL_SIDE = { DEBIT: 'debit', CREDIT: 'credit', BOTH: 'both' } as const;
+export type NormalSide = (typeof NORMAL_SIDE)[keyof typeof NORMAL_SIDE];
+
+/** Vai trò người dùng. Quyền chi tiết theo vai trò nằm ở API (core/auth). */
+export const ROLES = {
+  OWNER: 'owner',
+  CHIEF_ACCOUNTANT: 'chief_accountant',
+  ACCOUNTANT: 'accountant',
+  VIEWER: 'viewer',
+  // [2026-11-01 10:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-019 — W2: vai trò developer (Q019-1 = b) = chỉ xem + Bàn điều tra (devtools:read).
+  /** Nhà phát triển: chỉ xem như viewer + Bàn điều tra (devtools:read). Không ghi chứng từ (PHASE-019 Q019-1). */
+  DEVELOPER: 'developer',
+  // [2026-11-02 10:10 PM Johnny Chu - Chu Hoàng Anh] PHASE-022 — W4: vai trò auditor (Q022-1) = chỉ xem + Bàn đánh giá (review:read).
+  /** Kiểm soát / ban kiểm soát: chỉ xem như viewer + Bàn đánh giá (review:read). Không ghi, không cấu hình. */
+  AUDITOR: 'auditor',
+  // [2026-11-17 02:25 PM khanhtd] NT-HT-003 — vai trò staff (Nhân viên): không quyền đọc toàn đơn vị; quyền nghiệp vụ chỉ đến từ lần gán tại chi nhánh / kho (chờ chủ dự án chốt, migration 0149)
+  /** Nhân viên (thu ngân, bán hàng, thủ kho cửa hàng): chỉ xem danh mục. Mọi quyền nghiệp vụ do vai trò gán TẠI chi nhánh / kho (bật `bizcity.authz.branch_scope`). */
+  STAFF: 'staff',
+} as const;
+export type Role = (typeof ROLES)[keyof typeof ROLES];
+
+export const ROLE_LABELS: Record<Role, string> = {
+  owner: 'Chủ sở hữu',
+  chief_accountant: 'Kế toán trưởng',
+  accountant: 'Kế toán',
+  viewer: 'Chỉ xem',
+  developer: 'Nhà phát triển',
+  auditor: 'Kiểm soát (ban kiểm soát)',
+  staff: 'Nhân viên (theo chi nhánh)', // [2026-11-17 02:25 PM khanhtd] NT-HT-003 — nhãn vai trò staff
+};

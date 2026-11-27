@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bizcity.vn/schema/spine/identity.schema.json",
+  "title": "bizcity_identity@1 — vé đăng nhập một lần từ WordPress và phiên của app (chủ duyệt 2026-11-24)",
+  "$comment": "[2026-11-24 08:10 PM Johnny Chu - Chu Hoàng Anh] SPINE-4 — hình vé giữ đúng bản đang chạy ở open-ketoan (wp-sso.ts: email, name, login, perms, tenant, iat, exp), thêm sub và aud theo chuẩn spine. Hạn: exp − iat ≤ 300 kiểm ở mã (schema không so hai trường).",
+  "$defs": {
+    "sub": { "type": "string", "pattern": "^(wp:[0-9]+|biz:[A-Za-z0-9_-]{1,64})$" },
+    "tenant": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}$" },
+    "perm": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*:[a-z][a-z0-9_-]*$" },
+    "TicketClaims": {
+      "type": "object",
+      "required": ["sub", "email", "iat", "exp"],
+      "additionalProperties": false,
+      "properties": {
+        "sub": { "$ref": "#/$defs/sub" },
+        "email": { "type": "string", "pattern": "^[^@\\s]+@[^@\\s]+$", "maxLength": 255 },
+        "name": { "type": "string", "maxLength": 255 },
+        "login": { "type": "string", "maxLength": 100 },
+        "tenant": { "$ref": "#/$defs/tenant" },
+        "perms": { "type": "array", "uniqueItems": true, "maxItems": 200, "items": { "$ref": "#/$defs/perm" } },
+        "aud": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
+        "iat": { "type": "integer", "minimum": 1700000000 },
+        "exp": { "type": "integer", "minimum": 1700000000 }
+      }
+    },
+    "SessionUser": {
+      "type": "object",
+      "required": ["sub", "tenant", "perms"],
+      "properties": {
+        "sub": { "$ref": "#/$defs/sub" },
+        "tenant": { "$ref": "#/$defs/tenant" },
+        "name": { "type": "string" },
+        "perms": { "type": "array", "items": { "$ref": "#/$defs/perm" } },
+        "is_active": { "type": "boolean" }
+      }
+    }
+  }
+}

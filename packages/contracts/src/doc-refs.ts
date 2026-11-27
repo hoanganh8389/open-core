@@ -1,0 +1,72 @@
+// [2026-11-01 12:16 AM Johnny Chu - Chu Hoàng Anh] PHASE-010 — documents.* (PHASES 2.7): docRef, vai trò liên kết, kiểu phiên bản / đính kèm dùng chung API, runtime action, giao diện
+// [2026-11-01 12:47 AM Johnny Chu - Chu Hoàng Anh] PHASE-010 — AttachmentRef.sha256 có thể null (tệp Mua hàng chuyển ở 0046)
+// [2026-11-01 03:13 PM Johnny Chu - Chu Hoàng Anh] PHASE-010 — DocumentSignature, SIGN_ROLE_RE (documents.signatures, 0047)
+/**
+ * Chứng từ dùng chung (bizcity_document@1 §3, §7). Mọi chứng từ gọi bằng docRef = <module>.<loại>:<id>
+ * (vd hop-dong.contract:42); sự việc kế toán của Kernel = ledger.event:<docKey>.
+ * Máy chủ: apps/api/src/core/documents.ts; module gọi ctx.documents.*.
+ */
+import { z } from 'zod';
+
+/** Khớp ràng buộc CHECK doc_ref ở migration 0045. */
+export const DOC_REF_RE = /^[a-z][a-z0-9-]*\.[a-z][a-z0-9_-]*:\S{1,200}$/;
+export const docRefSchema = z.string().regex(DOC_REF_RE, 'docRef dạng <module>.<loại>:<id>, vd hop-dong.contract:42');
+export type DocRef = string;
+
+/** Vai trò liên kết from → to (bizcity_document@1 §3). */
+// [2026-11-18 Nguyễn Văn Thủy] applies = áp chính sách / chương trình, uses = dùng lô hàng (0162) (đóng góp)
+export const DOC_LINK_ROLES = ['source', 'reverses', 'replaces', 'settles', 'attachesTo', 'ledger', 'applies', 'uses', 'adjusts'] as const; // 0179: adjusts = điều chỉnh cho (hoá đơn điều chỉnh → hoá đơn gốc)
+export type DocLinkRole = (typeof DOC_LINK_ROLES)[number];
+
+/** Mã module của docRef: phần trước dấu chấm đầu. */
+export const docRefModule = (ref: DocRef): string => ref.slice(0, ref.indexOf('.'));
+
+export interface DocumentVersion {
+  version: number;
+  contentHash: string;
+  createdBy: string;
+  createdAt: string;
+  snapshot?: unknown;
+}
+
+export interface DocumentLink {
+  from: DocRef;
+  to: DocRef;
+  role: DocLinkRole;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface AttachmentRef {
+  id: string;
+  docRef: DocRef;
+  kind: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  /** null: tệp chuyển từ đính kèm Mua hàng cũ (0046), chưa tải lần nào — máy chủ băm ở lần tải đầu. */
+  sha256: string | null;
+  note: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+/** Chữ ký theo vai trên chứng từ (documents.signatures, 0047); valid = ký đúng phiên bản hiện tại. */
+export interface DocumentSignature {
+  role: string;
+  version: number;
+  signer: string;
+  signerName: string;
+  signedAt: string;
+  valid: boolean;
+}
+
+/** Vai ký của chứng từ module: chữ thường, số, gạch dưới (vd preparer, legal). */
+export const SIGN_ROLE_RE = /^[a-z][a-z0-9_]{1,39}$/;
+
+/** Tệp gửi lên: nội dung base64 (HTTP) hoặc Buffer (máy chủ). */
+export interface FileInput {
+  fileName: string;
+  contentType?: string;
+  data: Uint8Array;
+}

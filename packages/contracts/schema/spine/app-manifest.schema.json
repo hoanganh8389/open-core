@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bizcity.vn/schema/spine/app-manifest.schema.json",
+  "title": "bizcity_app@1 — manifest bizcity.app.json ở gốc mỗi repo app (chủ duyệt 2026-11-24)",
+  "$comment": "[2026-11-24 05:08 PM Johnny Chu - Chu Hoàng Anh] SPINE-1 — manifest khai trục làm chủ / dùng / bản sao / cục bộ, cách đồng bộ, giấy phép (BIZCITY-SPINE-v1.md §5). Luật chéo (owns∩uses=∅, chủ đúng trục…) ở tools/spine-check.mjs.",
+  "type": "object",
+  "required": ["schema", "id", "name", "repo", "runtime", "license", "paid", "axes", "contracts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "enum": ["bizcity_app@1", "bizcity_app@1-draft"], "$comment": "[2026-11-24 06:05 PM Johnny Chu - Chu Hoàng Anh] SPINE-2 — đã duyệt: giá trị chính là bizcity_app@1; -draft còn nhận kèm cảnh báo." },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "repo": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "public": { "type": "boolean" },
+    "runtime": { "enum": ["node-ts", "wordpress-php", "php", "python", "other"] },
+    "license": { "type": "string", "minLength": 1 },
+    "paid": { "type": "boolean" },
+    "version": { "type": "string" },
+    "axes": {
+      "type": "object",
+      "required": ["owns", "uses"],
+      "additionalProperties": false,
+      "properties": {
+        "owns": { "$ref": "#/$defs/axisList" },
+        "uses": { "$ref": "#/$defs/axisList" },
+        "replica": { "$ref": "#/$defs/axisList" },
+        "local": { "$ref": "#/$defs/axisList" }
+      }
+    },
+    "sync": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pull_via": { "type": "string", "maxLength": 80 },
+        "push_via": { "type": "string", "maxLength": 80 },
+        "outbox": { "$ref": "#/$defs/axisList" },
+        "reconcile": { "type": "array", "items": { "type": "string", "pattern": "^RC-SPINE-[a-z_]+$" }, "uniqueItems": true }
+      }
+    },
+    "contracts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^bizcity_[a-z_]+@[0-9]+(-draft)?$" } },
+    "docs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "canon": { "type": "string" }, "public": { "type": "string" } }
+    },
+    "notes": { "type": "string", "maxLength": 500 }
+  },
+  "$defs": {
+    "axisList": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,30}$" } }
+  }
+}
