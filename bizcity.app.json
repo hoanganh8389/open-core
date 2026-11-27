@@ -1,0 +1,18 @@
+{
+  "schema": "bizcity_app@1",
+  "id": "open-core",
+  "name": "open-core (lõi chạy @bizcity/*)",
+  "repo": "hoanganh8389/open-core",
+  "public": true,
+  "runtime": "node-ts",
+  "license": "GPL-2.0-or-later",
+  "paid": false,
+  "version": "0.3.0",
+  "axes": {
+    "owns": [],
+    "uses": ["tenant", "user", "document"]
+  },
+  "contracts": ["bizcity_spine@1", "bizcity_site_provisioning@1", "bizcity_settings@1", "bizcity_storage@1"],
+  "docs": { "canon": "docs/canon/README.md" },
+  "notes": "Lõi chạy của mọi app TypeScript (canon R-CANON-17, bizcity-platform NC-003): không làm chủ trục nghiệp vụ nào; cung cấp khung tenant / user / chứng từ cho app. Chuẩn ở open-platform (bizcity-platform), cấp instance ở open-setup."
+}

@@ -1,0 +1,4 @@
+# [2026-11-27 11:20 PM Johnny Chu - Chu Hoàng Anh] C1 — mọi tệp chữ dùng LF (bizcity-platform thiếu tệp này nên diff giả CRLF, NC-003 §3.1)
+* text=auto eol=lf
+*.png binary
+*.tgz binary

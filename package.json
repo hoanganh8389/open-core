@@ -1,0 +1,20 @@
+{
+  "name": "open-core",
+  "private": true,
+  "version": "0.3.0",
+  "description": "open-core — lõi chạy của Bizcity Open (@bizcity/platform, @bizcity/contracts, @bizcity/server…): một nguồn, mọi gói chung một số phiên bản. GPL-2.0-or-later.",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "test": "node tools/kiem-khung.mjs && pnpm -r --if-present test",
+    "kiem": "node tools/kiem-khung.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.6",
+    "typescript": "5.6.3"
+  }
+}

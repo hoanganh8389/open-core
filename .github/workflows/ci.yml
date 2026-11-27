@@ -1,0 +1,21 @@
+# [2026-11-27 11:20 PM Johnny Chu - Chu Hoàng Anh] C1 — CI: kiểm khung (một số phiên bản, ranh giới nghiệp vụ) + test các gói + bộ kiểm chuẩn của open-platform.
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { repository: hoanganh8389/bizcity-platform, path: _platform }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: node _platform/tools/standard-check.mjs --repo .
