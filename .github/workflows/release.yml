@@ -1,0 +1,33 @@
+# [2026-11-27 11:31 PM Johnny Chu - Chu Hoàng Anh] C2 — phát hành: tag vX.Y.Z ⇒ test như CI ⇒ đóng gói mọi gói cùng số (tools/dong-goi.mjs kiểm khớp tag) ⇒ GitHub Release đính kèm tgz (Q-CORE-7).
+name: release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: x }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 5s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://postgres:x@localhost:5432/postgres
+      BIZCITY_PLATFORM_DIR: ${{ github.workspace }}/_platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { repository: hoanganh8389/bizcity-platform, path: _platform }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: node tools/dong-goi.mjs "${GITHUB_REF_NAME#v}" dist-release
+      - name: Tạo Release
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh release create "$GITHUB_REF_NAME" dist-release/*.tgz --title "open-core $GITHUB_REF_NAME" --notes "Gói @bizcity/contracts và @bizcity/platform $GITHUB_REF_NAME (open-core). Cài bằng URL tệp (README)."

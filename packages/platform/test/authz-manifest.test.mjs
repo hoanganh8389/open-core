@@ -12,7 +12,10 @@ process.env.DATABASE_URL ??= 'postgres://x@localhost/x';
 const auth = await import('../dist/core/auth.js');
 const roles = await import('../dist/core/roles.js');
 const { authzManifest } = await import('../dist/core/authz-manifest.js');
-const TOOL = fileURLToPath(new URL('../../../tools/users-check.mjs', import.meta.url));
+// [2026-11-27 11:31 PM Johnny Chu - Chu Hoàng Anh] C2 — users-check thuộc open-platform (bizcity-platform), không theo gói sang open-core: đọc từ BIZCITY_PLATFORM_DIR hoặc repo cạnh bên
+const TOOL = process.env.BIZCITY_PLATFORM_DIR
+  ? join(process.env.BIZCITY_PLATFORM_DIR, 'tools/users-check.mjs')
+  : fileURLToPath(new URL('../../../../bizcity-platform/tools/users-check.mjs', import.meta.url));
 
 test('authzManifest: đủ phần, sắp xếp ổn định, không có owner, qua users-check', () => {
   auth.registerModulePermissions('mrp', [
