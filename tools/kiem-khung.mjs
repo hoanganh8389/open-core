@@ -18,7 +18,7 @@ const BIZ_WORD = /['"`][^'"`]*\b(ketoan|kt_|cake_|crm)\b[^'"`]*['"`]/i;
 
 function walk(dir, out = []) {
   for (const n of readdirSync(dir)) {
-    if (n === 'node_modules' || n === 'dist') continue;
+    if (n === 'node_modules' || n === 'dist' || n === 'test') continue; // [2026-11-28 05:05 PM Johnny Chu - Chu Hoàng Anh] S001-2 — R-PLAT-1 xét mã lõi, không xét ví dụ trong test
     const p = path.join(dir, n);
     if (statSync(p).isDirectory()) walk(p, out); else if (/\.(ts|tsx|mjs|js)$/.test(n)) out.push(p);
   }
