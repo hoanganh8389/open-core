@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S004-W2-1 — kiểm ranh giới Core)
+- 2026-11-28 — **`tools/kiem-ranh-gioi.mjs`** (<!-- [2026-11-28 09:37 PM Johnny Chu - Chu Hoàng Anh] S004-W2-1 -->, R-CORE-8): đo theo (tệp, luật) mã lõi còn chứa nghiệp vụ kế toán — R-BANG, R-IMPORT, R-SO, R-VAI, R-THANG, R-ENV, R-TEP (bỏ chú thích) — so với sổ nợ `docs/scoreboard/ranh-gioi.json`; `--check` (trong `pnpm test`) **chặn khi số vi phạm tăng**, `--ghi` chỉ ghi khi không tăng, `--strict` cho S004-W2-6. Đo lần đầu **158 vi phạm / 22 tệp** (R-BANG 65 · R-VAI 65 · R-SO 19 · R-THANG 6 · R-TEP 2 · R-ENV 1). Phát hiện: `@bizcity/contracts` cũng chứa nội dung kế toán ⇒ PHASE-004 B-12 + Q-P4-6.
+
 ### Thêm (tài liệu — PHASE-004)
 - 2026-11-28 — **PHASE-004 Core độc lập** (<!-- [2026-11-28 09:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — R-CORE-8 (chủ 2026-11-28) -->): R-CORE-8 (Core sở hữu hạ tầng chứng từ, app sở hữu loại chứng từ và nghiệp vụ) ở AGENTS + ARCHITECTURE; năm hạng mục W1–W5 có điều kiện xong đo được; **10 — bản đồ tương thích open-ketoan** (đo: nền riêng 0.1 có 65 tệp, 38 giống / 27 khác / 9 chỉ lõi; 18 tệp khác chỉ là đường import; 0 commit kế toán sửa nền sau mốc tách; gói, API E-1…E-7 / R-1…R-11 / N-1…N-3, migration lõi 0001–0005 ↔ kế toán, cấu hình); **20 — diễn tập nâng cấp trên bản sao CSDL** (bất biến sổ cái L-1…L-8, chứng từ D-1…D-7, lịch sử / quyền H-1…H-5, danh sách trắng, 11 bước có quay lui); **30 — ranh giới Core** (kiểm kê B-1…B-11, cổng `definePort` thay `ctx.ledger`, bộ kiểm ranh giới, thứ tự W2 tới 0.7.0). Sửa: ghi chú `coveredBy` của lõi 0005 trỏ đúng `0187_truc_chung_tu.sql` (open-ketoan đã tới 0186).
 
