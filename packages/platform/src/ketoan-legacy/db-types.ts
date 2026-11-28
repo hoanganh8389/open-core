@@ -1,0 +1,1884 @@
+// @bizcity-layer P data
+// Copyright (c) 2026 Johnny Chu (Chu Hoàng Anh) / BizCity. GPL-2.0-or-later. See LICENSE.
+// [2026-11-28 11:54 PM Johnny Chu - Chu Hoàng Anh] S004-W2-2 — kiểu bảng của open-ketoan, dời ra khỏi Database của lõi (R-CORE-8, PHASE-004 · 30 B-1, Q-P4-2).
+//   CÁCH LY: chỉ có kiểu khi có import tệp này (hoặc @bizcity/platform/ketoan-legacy/*). Mã lõi ngoài src/ketoan-legacy KHÔNG được import (kiem-ranh-gioi R-CACH-LY).
+//   open-ketoan khi đổi nguồn sang lõi 0.7: import '@bizcity/platform/ketoan-legacy/db-types' một lần (vd ở packages/kernel) ⇒ kiểu như cũ.
+//   0.8: open-ketoan mang tệp này về Kernel kế toán; lõi xoá (S004-W2-7).
+import type { ColumnType, Generated, Insertable, Selectable } from 'kysely';
+import type { DateOnly, Json, JsonDefault, JsonNullable, Numeric, Timestamp, TimestampDefault } from '../db/types.js';
+
+
+/** Bể chờ đầu vào (0054, ADR-0014): chứng từ bị cửa nạp từ chối. */
+export interface IntakeInboxTable {
+  id: Generated<string>;
+  tenant_id: string;
+  received_at: TimestampDefault;
+  last_seen_at: TimestampDefault;
+  channel: 'api' | 'batch' | 'submit' | 'app' | 'connector' | 'mcp' | 'trial';
+  source_system: ColumnType<string | null, string | null | undefined, string | null>;
+  actor: string;
+  app_key: ColumnType<string | null, string | null | undefined, string | null>;
+  doc_key: ColumnType<string | null, string | null | undefined, string | null>;
+  doc_type: ColumnType<string | null, string | null | undefined, string | null>;
+  version: ColumnType<number | null, number | null | undefined, number | null>;
+  payload_raw: unknown;
+  payload_hash: string;
+  payload_bytes: number;
+  patches: Generated<unknown>;
+  findings: Generated<unknown>;
+  score: number;
+  door_error: ColumnType<unknown | null, unknown | null | undefined, unknown | null>;
+  attempt_no: Generated<number>;
+  status: Generated<'open' | 'trial' | 'resubmitted' | 'fixed_at_source' | 'accepted' | 'dismissed'>;
+  event_id: ColumnType<string | null, string | null | undefined, string | null>;
+  accepted_codes: Generated<string[]>;
+  resolved_by: ColumnType<string | null, string | null | undefined, string | null>;
+  resolved_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  resolution_note: ColumnType<string | null, string | null | undefined, string | null>;
+}
+
+
+// [2026-11-23 08:30 AM Johnny Chu - Chu Hoàng Anh] OKT-SET-1 — ADR-0037: khoá cài đặt open-pos (migration 0180)
+export interface PosInstallationsTable {
+  id: Generated<string>;
+  /** Tenant chủ (người tạo khoá). */
+  tenant_id: string;
+  code: string;
+  name: string;
+  site_url: Generated<string>;
+  key_prefix: string;
+  key_hash: string;
+  scopes: Generated<string[]>;
+  status: Generated<"active" | "revoked">;
+  created_by: string;
+  created_at: TimestampDefault;
+  revoked_by: ColumnType<string | null, string | null | undefined, string | null>;
+  revoked_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  last_seen_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+}
+
+
+export interface PosInstallationBlogsTable {
+  installation_id: string;
+  blog_id: number;
+  owner_tenant_id: string;
+  blog_name: Generated<string>;
+  blog_url: Generated<string>;
+  tenant_id: ColumnType<string | null, string | null | undefined, string | null>;
+  status: Generated<"pending" | "active" | "revoked">;
+  link_code_hash: ColumnType<string | null, string | null | undefined, string | null>;
+  link_code_expires_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  linked_by: ColumnType<string | null, string | null | undefined, string | null>;
+  linked_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  last_ping_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  last_ping_ms: ColumnType<number | null, number | null | undefined, number | null>;
+  bridge_version: Generated<string>;
+  queue_groups: ColumnType<number | null, number | null | undefined, number | null>;
+  pending_docs: ColumnType<number | null, number | null | undefined, number | null>;
+  created_at: TimestampDefault;
+}
+
+
+export interface PosConnectionsTable {
+  tenant_id: string;
+  blog_id: number;
+  blog_name: Generated<string>;
+  blog_url: Generated<string>;
+  bridge_version: Generated<string>;
+  last_ping_at: TimestampDefault;
+  last_ping_ms: ColumnType<number | null, number | null | undefined, number | null>;
+  queue_groups: ColumnType<number | null, number | null | undefined, number | null>;
+  pending_docs: ColumnType<number | null, number | null | undefined, number | null>;
+}
+
+
+export interface AccountingUnitsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+}
+
+
+export interface BranchesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  accounting_unit_id: string | null;
+  address: string | null;
+  external_ref: string | null;
+  is_active: Generated<boolean>;
+  created_at: TimestampDefault;
+  department_code: string | null;
+  note: Generated<string>;
+  company_name: Generated<string>;
+  tax_code: Generated<string>;
+  phone: Generated<string>;
+  fax: Generated<string>;
+  /** Shop: chi nhánh cha. */
+  parent_id: ColumnType<string | null, string | null | undefined, string | null>;
+  /** branch = chi nhánh cha (kho tổng), shop = cửa hàng con, '' = chưa xếp. */
+  level: Generated<string>;
+  /** Định danh bất biến cn_<ULID> (0121). */
+  uid: Generated<string>;
+}
+
+
+/** Kho của từng chi nhánh (DM12). */
+export interface WarehousesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  branch_id: string;
+  name: Generated<string>;
+  address: Generated<string>;
+  is_active: Generated<boolean>;
+  is_default: Generated<boolean>;
+  is_promo: Generated<boolean>;
+  account: Generated<string>;
+  note: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+  /** MST kê khai riêng của kho, hiện hành (0121); thường trống = theo chi nhánh / tỉnh. */
+  tax_id: Generated<string>;
+  /** Định danh bất biến kho_<ULID> (0121). */
+  uid: Generated<string>;
+  /** Loại kho (warehouse_types.code, 0128). */
+  type_code: Generated<string>;
+}
+
+
+/** Loại kho (0128). */
+export interface WarehouseTypesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  purpose: Generated<string>;
+  can_sell: Generated<boolean>;
+  owned: Generated<boolean>;
+  track_expiry: Generated<boolean>;
+  account_prefix: Generated<string>;
+  is_system: Generated<boolean>;
+  is_active: Generated<boolean>;
+  sort_order: Generated<number>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+  /** Thùng rác (0133): thời điểm, người chuyển vào; NULL = đang dùng. */
+  deleted_at: Date | null;
+  deleted_by: Generated<string>;
+}
+
+/** Nghiệp vụ → loại kho được dùng theo thứ tự ưu tiên (0128). */
+export interface WarehouseTypeOpsTable {
+  tenant_id: string;
+  op: string;
+  type_codes: ColumnType<string[], string[], string[]>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+// [2026-11-17 10:20 AM kiennt] NT-DM-001 — tên tiếng Anh tài khoản lưu lại khi bỏ cột accounts.name_en (0147, D023-9) (đóng góp)
+export interface AccountsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  /** Diễn giải (0101): ghi chú cách dùng, không ảnh hưởng ghi sổ. */
+  description: Generated<string>;
+  parent_code: string | null;
+  level: Generated<number>;
+  normal_side: Generated<string>;
+  is_posting: Generated<boolean>;
+  track_partner: Generated<boolean>;
+  track_cost_item: Generated<boolean>;
+  track_department: Generated<boolean>;
+  track_contract: Generated<boolean>;
+  track_employee: Generated<boolean>;
+  track_case: Generated<boolean>;
+  track_project: Generated<boolean>;
+  track_capital_source: Generated<boolean>;
+  track_cash_item: Generated<boolean>;
+  track_cashflow: Generated<boolean>;
+  is_foreign_currency: Generated<boolean>;
+  track_product: Generated<boolean>;
+  track_internal_debt: Generated<boolean>;
+  is_vat: Generated<boolean>;
+  is_debt: Generated<boolean>;
+  is_loan: Generated<boolean>;
+  always_increase: Generated<boolean>;
+  is_ledger: Generated<boolean>;
+  is_cost: Generated<boolean>;
+  is_active: Generated<boolean>;
+  created_at: TimestampDefault;
+}
+
+
+export interface FiscalPeriodsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  year: number;
+  month: number;
+  start_date: DateOnly;
+  end_date: DateOnly;
+}
+
+
+export interface CashPlansTable {
+  id: Generated<string>;
+  tenant_id: string;
+  period: string;
+  branch_id: string | null;
+  direction: string;
+  cost_item_code: string | null;
+  partner_id: string | null;
+  due_date: DateOnly | null;
+  description: Generated<string>;
+  amount: Numeric;
+  source: Generated<string>;
+  source_ref: string | null;
+  updated_by: string;
+  updated_at: TimestampDefault;
+}
+
+
+export interface CostNormsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  period: string;
+  branch_id: string | null;
+  department_code: string | null;
+  cost_item_code: string;
+  amount: Numeric;
+  note: Generated<string>;
+  updated_by: string;
+  updated_at: TimestampDefault;
+}
+
+
+export interface AuthorityInvoicesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  direction: string;
+  seller_tax_code: Generated<string>;
+  seller_name: Generated<string>;
+  buyer_tax_code: Generated<string>;
+  buyer_name: Generated<string>;
+  invoice_form: Generated<string>;
+  invoice_serial: string;
+  invoice_no: string;
+  invoice_date: DateOnly;
+  total_before_tax: Numeric;
+  total_tax: Numeric;
+  total_amount: Numeric;
+  status_text: Generated<string>;
+  status: Generated<string>;
+  check_result: Generated<string>;
+  source: string;
+  file_name: Generated<string>;
+  reference_doc_key: string | null;
+  imported_by: string;
+  imported_at: TimestampDefault;
+}
+
+
+export interface RiskyTaxpayersTable {
+  id: Generated<string>;
+  tenant_id: string;
+  tax_code: string;
+  name: Generated<string>;
+  risk: string;
+  effective_date: DateOnly | null;
+  source: Generated<string>;
+  note: Generated<string>;
+  updated_by: string;
+  updated_at: TimestampDefault;
+}
+
+
+export interface PeriodLockEventsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  period_id: string;
+  branch_id: string | null;
+  doc_type: string;
+  action: 'lock' | 'unlock';
+  reason: string | null;
+  actor: string;
+  actor_name: string;
+  created_at: TimestampDefault;
+}
+
+
+export interface PeriodLocksTable {
+  id: Generated<string>;
+  tenant_id: string;
+  period_id: string;
+  branch_id: string | null;
+  doc_type: Generated<string>;
+  locked_by: string;
+  locked_at: TimestampDefault;
+}
+
+
+export interface PartnersTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: Generated<string>;
+  kind: Generated<string>;
+  tax_code: string | null;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+  group_code: string | null;
+  is_active: Generated<boolean>;
+  payment_term_days: number | null;
+  credit_limit: ColumnType<string | null, number | string | null | undefined, number | string | null>;
+  note: Generated<string>;
+  contact_name: Generated<string>;
+  bank_account_no: Generated<string>;
+  bank_account_holder: Generated<string>;
+  bank_name: Generated<string>;
+  max_open_docs: number | null;
+  mobile: Generated<string>;
+  fax: Generated<string>;
+  website: Generated<string>;
+  position: Generated<string>;
+  company_name: Generated<string>;
+  company_address: Generated<string>;
+  short_name: Generated<string>;
+  manager_code: string | null;
+  branch_code: string | null;
+  created_by: Generated<string>;
+  birth_date: DateOnly | null;
+  gender: Generated<string>;
+  alias: Generated<string>;
+  is_prospect: Generated<boolean>;
+  customer_type: Generated<string>;
+  also_kinds: Generated<string[]>;
+  /** Định danh bất biến dt_<ULID> (0132). */
+  uid: Generated<string>;
+  /** Đơn vị cha (partners.uid), trống = gốc (0132). */
+  parent_uid: string | null;
+}
+
+
+export interface PartnerGroupsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  parent_code: string | null;
+  kind: Generated<string>;
+  note: Generated<string>;
+  is_active: Generated<boolean>;
+}
+
+
+export interface TaxCodesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  rate: Numeric;
+  direction: string;
+  account_code: string | null;
+  report_group: string;
+  is_active: Generated<boolean>;
+  // [2026-11-19 kiennt] NT-DM-012 — loại thuế cố định: hiệu lực, mã cũ (đóng góp)
+  valid_from: string | null;
+  valid_to: string | null;
+  legal_basis: string | null;
+  is_legacy: Generated<boolean>;
+  replaced_by: string | null;
+}
+
+
+export interface ProductPostingGroupsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  inventory_account: string;
+  cogs_account: string;
+  revenue_account: string;
+  discount_account: string | null;
+  sales_return_account: string;
+  is_default: Generated<boolean>;
+}
+
+
+export interface ProductsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  sku: string;
+  // [2026-11-05 02:05 PM Nguyễn Văn Thủy] PHASE-026 — S026-19: định danh trên dòng danh mục, do trigger cấp, 0070 (đóng góp)
+  item_id: Generated<string | null>;
+  name: Generated<string>;
+  unit: Generated<string>;
+  posting_group_code: string | null;
+  tax_out_code: string | null;
+  tax_in_code: string | null;
+  updated_at: TimestampDefault;
+  brand_code: string | null;
+  industry_code: string | null;
+  group_code: string | null;
+  type_code: string | null;
+  is_active: Generated<boolean>;
+  source_system: Generated<string>;
+  note: Generated<string>;
+  excise_rate: string | null;
+  barcode: Generated<string>;
+  image_url: Generated<string>;
+  description: Generated<string>;
+  weight_kg: string | null;
+  origin: Generated<string>;
+  is_main: Generated<boolean>;
+  is_under_24m: Generated<boolean>;
+  no_sale: Generated<boolean>;
+  export_adjust: Generated<boolean>;
+  is_kct: Generated<boolean>;
+  track_identifier: Generated<boolean>;
+  /** Mã hàng cha (họ mã 1 cấp). */
+  parent_sku: string | null;
+  parent_manual: Generated<boolean>;
+  // [2026-11-03 12:20 AM Johnny Chu - Chu Hoàng Anh] PHASE-024 — S024-28: mặt hàng nháp (0061)
+  /** Nháp: khai báo còn lỗi chặn Gate A — chưa dùng được trên chứng từ (IN-ITEM-009). */
+  is_draft: Generated<boolean>;
+  /** Mã lỗi chặn khiến còn nháp (ITEM-BLOCK-*). */
+  draft_codes: Generated<string[]>;
+  /** Lúc thêm mặt hàng (0063). */
+  created_by: Generated<string>;
+  /** Người sửa lần cuối (0120). */
+  updated_by: Generated<string>;
+  created_at: TimestampDefault;
+}
+
+
+export interface ProductUnitsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  sku: string;
+  unit: string;
+  ratio: Generated<string>;
+  is_default: Generated<boolean>;
+  is_purchase_default: Generated<boolean>;
+  weight_kg: string | null;
+  note: Generated<string>;
+  updated_at: TimestampDefault;
+  /** Định danh mặt hàng (0066, B2b); mã là ảnh chụp tại ngày. */
+  item_id: ColumnType<string | null, string | null | undefined, string | null>;
+}
+
+
+export interface UnitNamesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  name: string;
+  note: Generated<string>;
+  source: Generated<string>;
+  is_active: Generated<boolean>;
+  created_by: Generated<string>;
+  updated_by: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+// [2026-11-12 Nguyễn Văn Thủy] thẻ hướng dẫn (0113) (đóng góp)
+export interface HelpCardsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  title: Generated<string>;
+  body: Generated<string>;
+  format: Generated<string>;
+  source_key: Generated<string>;
+  created_by: Generated<string>;
+  updated_by: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+export interface HelpPlacesTable {
+  tenant_id: string;
+  place_key: string;
+  label: Generated<string>;
+  card_id: string | null;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+/** Hoá đơn đầu vào của NCC (0030). */
+export interface SupplierInvoicesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  partner_code: string;
+  invoice_form: Generated<string>;
+  invoice_series: Generated<string>;
+  invoice_no: string;
+  invoice_date: ColumnType<string | null, string | null | undefined, string | null>;
+  seller_tax_code: Generated<string>;
+  seller_name: Generated<string>;
+  buyer_tax_code: Generated<string>;
+  total_before_tax: ColumnType<string, string | number | undefined, string | number>;
+  total_discount: ColumnType<string, string | number | undefined, string | number>;
+  total_tax: ColumnType<string, string | number | undefined, string | number>;
+  total: ColumnType<string, string | number | undefined, string | number>;
+  source: Generated<string>;
+  status: Generated<string>;
+  data: ColumnType<unknown, string | undefined, string>;
+  note: Generated<string>;
+  created_by: Generated<string>;
+  updated_by: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+  cancelled_by: ColumnType<string | null, string | null | undefined, string | null>;
+  cancelled_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  cancel_reason: ColumnType<string | null, string | null | undefined, string | null>;
+}
+
+/** Dòng hàng hoá đơn NCC (0030). */
+export interface SupplierInvoiceLinesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  invoice_id: string;
+  line_no: number;
+  ncc_sku: Generated<string>;
+  ncc_name: Generated<string>;
+  ncc_unit: Generated<string>;
+  qty: ColumnType<string, string | number | undefined, string | number>;
+  price: ColumnType<string, string | number | undefined, string | number>;
+  discount_amount: ColumnType<string, string | number | undefined, string | number>;
+  amount: ColumnType<string, string | number | undefined, string | number>;
+  tax_rate: ColumnType<string | null, string | number | null | undefined, string | number | null>;
+  tax_amount: ColumnType<string, string | number | undefined, string | number>;
+  is_gift: Generated<boolean>;
+  sku: ColumnType<string | null, string | null | undefined, string | null>;
+  unit: ColumnType<string | null, string | null | undefined, string | null>;
+  match_source: Generated<string>;
+  data: ColumnType<unknown, string | undefined, string>;
+}
+
+/** Nhận diện mã hàng NCC — dữ liệu học (0030). */
+export interface SupplierItemAliasesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  partner_code: string;
+  ncc_sku: Generated<string>;
+  ncc_name: Generated<string>;
+  ncc_name_key: Generated<string>;
+  ncc_unit: Generated<string>;
+  sku: string;
+  unit: string;
+  hits: Generated<number>;
+  source: Generated<string>;
+  last_seen_at: TimestampDefault;
+  created_by: Generated<string>;
+  updated_by: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+export interface SupplierProductsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  partner_code: string | null;
+  sku: string;
+  unit: string;
+  is_default_unit: Generated<boolean>;
+  ncc_sku: Generated<string>;
+  price: ColumnType<string | null, string | null | undefined, string | null>;
+  price_includes_vat: Generated<boolean>;
+  warn_pct: Generated<string>;
+  valid_from: ColumnType<string | null, string | null | undefined, string | null>;
+  valid_to: ColumnType<string | null, string | null | undefined, string | null>;
+  note: Generated<string>;
+  is_active: Generated<boolean>;
+  is_demo: Generated<boolean>;
+  created_by: Generated<string>;
+  updated_by: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+  /** Tên hàng bên NCC. */
+  ncc_name: Generated<string>;
+  /** 0163: thuộc hợp đồng mua (mã Danh mục hợp đồng), rỗng = không theo hợp đồng. */
+  contract_code: Generated<string>;
+}
+
+
+/** Tồn max / min theo chi nhánh – kho – mã (0020). */
+export interface StockLevelsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  branch_code: string;
+  warehouse_code: Generated<string>;
+  sku: string;
+  max_qty: ColumnType<string, string | number, string | number>;
+  min_qty: ColumnType<string, string | number | undefined, string | number>;
+  source: Generated<string>;
+  note: Generated<string>;
+  updated_by: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+export interface PrintTemplateSettingsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  template_code: string;
+  scope: string;
+  scope_ref: Generated<string>;
+  is_enabled: Generated<boolean>;
+  is_default: Generated<boolean>;
+  overrides: ColumnType<Record<string, unknown>, string | undefined, string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+// [2026-11-11 Nguyễn Văn Thủy] 0103 hồ sơ in (đóng góp)
+export interface PrintProfilesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  branch_code: Generated<string>;
+  profile: ColumnType<Record<string, unknown>, string | undefined, string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface StockSkuSettingsTable {
+  tenant_id: string;
+  sku: string;
+  window_days: number | null;
+  cover_days: ColumnType<string | null, string | number | null | undefined, string | number | null>;
+  transfer_mode: Generated<string>;
+  note: Generated<string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface StockMaxRequestsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  kind: Generated<string>;
+  branch_code: string;
+  parent_code: Generated<string>;
+  status: Generated<string>;
+  title: Generated<string>;
+  note: Generated<string>;
+  source: Generated<string>;
+  data: ColumnType<unknown, string, string>;
+  created_by: Generated<string>;
+  approved_by: Generated<string>;
+  approved_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+export interface OrderFormulasTable {
+  tenant_id: string;
+  branch_code: string;
+  config: ColumnType<unknown, string, string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface TransferRequestsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  from_branch: string;
+  from_warehouse: Generated<string>;
+  to_branch: string;
+  to_warehouse: Generated<string>;
+  status: Generated<string>;
+  note: Generated<string>;
+  data: ColumnType<unknown, string, string>;
+  created_by: Generated<string>;
+  done_by: Generated<string>;
+  done_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+export interface PriceListsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: Generated<string>;
+  is_company: Generated<boolean>;
+  is_active: Generated<boolean>;
+  note: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface PriceListBranchesTable {
+  tenant_id: string;
+  branch_code: string;
+  price_list_code: string;
+  updated_at: TimestampDefault;
+}
+
+
+export interface ProductPricesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  price_list_code: string;
+  sku: string;
+  unit: string;
+  price: string | null;
+  is_default_unit: Generated<boolean>;
+  note: Generated<string>;
+  updated_at: TimestampDefault;
+  /** Định danh mặt hàng (0066, B2b); mã là ảnh chụp tại ngày. */
+  item_id: ColumnType<string | null, string | null | undefined, string | null>;
+}
+
+
+export interface ItemClassesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  kind: string;
+  code: string;
+  name: string;
+  parent_code: string | null;
+  is_active: Generated<boolean>;
+  sku_code: Generated<string>;
+  updated_at: TimestampDefault;
+  created_by: Generated<string>;
+  created_at: Generated<Date | null>;
+  updated_by: Generated<string>;
+  /** Tên nhóm đầy đủ (0118). */
+  full_name: Generated<string>;
+  /** Ghi chú (0119). */
+  note: Generated<string>;
+}
+
+/** Lịch sử thêm / sửa nhóm hàng (0116). */
+/** Phiên bản MST theo ngày hiệu lực của kho / chi nhánh / nút cơ cấu (0121). valid_to loại trừ. */
+export interface TaxIdVersionsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  scope: 'warehouse' | 'branch' | 'org_unit';
+  ref_id: string;
+  tax_id: Generated<string>;
+  valid_from: ColumnType<Date, Date | string, Date | string>;
+  valid_to: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  changed_by: Generated<string>;
+  changed_at: TimestampDefault;
+}
+
+/** Phiên bản cơ cấu (0121): branch_org / branch_parent / org_parent. */
+export interface OrgLinkVersionsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  scope: 'branch_org' | 'branch_parent' | 'org_parent';
+  ref_id: string;
+  parent_id: string | null;
+  valid_from: ColumnType<Date, Date | string, Date | string>;
+  valid_to: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  changed_by: Generated<string>;
+  changed_at: TimestampDefault;
+}
+
+/** Mục đích xuất (0140): phiếu xuất kho không bán / điều chỉnh kho → TK đối ứng. */
+export interface StockPurposesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  /** increase | decrease | both */
+  direction: Generated<string>;
+  account_code: string;
+  is_active: Generated<boolean>;
+  sort_order: Generated<number>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface PostingReasonsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  kind: string;
+  counter_account: string | null;
+  revenue_account: string | null;
+  expense_account: string | null;
+  cashflow_code: string | null;
+  flags: JsonDefault;
+  is_active: Generated<boolean>;
+  // [2026-11-02 08:45 PM Johnny Chu - Chu Hoàng Anh] PHASE-011 — 3.15: cặp tài khoản của lý do journal (0058)
+  /** Lý do journal: tài khoản Nợ / Có của mỗi dòng manual_journal (0058); loại khác NULL. */
+  debit_account: string | null;
+  credit_account: string | null;
+}
+
+
+export interface PaymentMethodsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  account_code: string;
+  bank_account_code: string | null;
+  is_receivable: Generated<boolean>;
+  is_active: Generated<boolean>;
+  note: Generated<string>;
+  sort_order: number | null;
+  discount_rate: string | null;
+  partner_code: string | null;
+}
+
+
+export interface BankAccountsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  bank_name: string;
+  bank_branch: Generated<string>;
+  account_no: string;
+  holder: Generated<string>;
+  account_code: string;
+  branch_code: string | null;
+  currency: Generated<string>;
+  note: Generated<string>;
+  is_active: Generated<boolean>;
+  bank_address: Generated<string>;
+  bank_phone: Generated<string>;
+  contact: Generated<string>;
+}
+
+
+export interface PostingDefaultsTable {
+  tenant_id: string;
+  key: string;
+  account_code: string;
+}
+
+
+/** Chính sách kế toán có phiên bản (migration 0040, ADR-0009). Chỉ thêm. */
+export interface PostingPolicyVersionsTable {
+  tenant_id: string;
+  version: number;
+  effective_from: ColumnType<string, string, string>;
+  kind: 'initial' | 'amend' | 'publish';
+  snapshot: Json<unknown>;
+  hash: string;
+  note: Generated<string>;
+  created_by: string;
+  created_at: TimestampDefault;
+}
+
+
+/** Hồ sơ kế toán của đơn vị có phiên bản (migration 0054, ADR-0013). Chỉ thêm. */
+export interface AccountingProfilesTable {
+  tenant_id: string;
+  version: number;
+  effective_from: ColumnType<string, string, string>;
+  fiscal_year_start_month: number;
+  regime: 'vn-tt200-2014' | 'vn-tt99-2025' | 'vn-tt133-2016' | 'vn-tt152-2025';
+  entity_type: 'enterprise' | 'sme' | 'micro' | 'household';
+  note: string;
+  created_by: string;
+  created_at: TimestampDefault;
+}
+
+
+/** Lượt duyệt / thu hồi rulepack tại bản cài (migration 0056, ADR-0016). Chỉ thêm. */
+export interface RulepackApprovalsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  rulepack_id: string;
+  rulepack_version: string;
+  rulepack_hash: string;
+  action: 'approve' | 'revoke';
+  accounting_reviewer: string | null;
+  tax_reviewer: string | null;
+  note: string;
+  actor: string;
+  created_at: TimestampDefault;
+}
+
+
+/** Gói định khoản đã cài (migration 0042, bizcity_posting_template@1 §5). */
+export interface ConfigPacksTable {
+  tenant_id: string;
+  pack_id: string;
+  version: string;
+  title: string;
+  regime: string;
+  status: Generated<'installed' | 'uninstalled'>;
+  manifest: Json<unknown>;
+  items: JsonDefault<unknown>;
+  policy_version: number | null;
+  installed_by: string;
+  installed_at: TimestampDefault;
+  uninstalled_by: string | null;
+  uninstalled_at: Date | null;
+}
+
+
+export interface PostingLogTable {
+  id: Generated<string>;
+  tenant_id: string;
+  event_id: string;
+  doc_type: string;
+  doc_no: string;
+  version: number;
+  action: 'receive' | 'post' | 'repost' | 'error' | 'cancel' | 'cancel_request' | 'unpost';
+  entry_ids: ColumnType<string[], string[] | undefined, string[]>;
+  reversed: Generated<number>;
+  total: Numeric | null;
+  message: string | null;
+  actor: string;
+  /** Phiên bản chính sách kế toán đã dùng (0040, ADR-0009). */
+  policy_version: ColumnType<number | null, number | null | undefined, number | null>;
+  created_at: TimestampDefault;
+}
+
+
+export interface AccountingEventsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  source_system: Generated<string>;
+  doc_key: string;
+  version: Generated<number>;
+  doc_type: string;
+  branch_id: string;
+  doc_no: string;
+  doc_date: DateOnly;
+  partner_id: string | null;
+  invoice_no: string | null;
+  total: Numeric;
+  payload: Json<unknown>;
+  status: Generated<string>;
+  error_code: string | null;
+  error_message: string | null;
+  received_at: TimestampDefault;
+  posted_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  created_by: ColumnType<string | null, string | null | undefined, string | null>;
+  posted_version: ColumnType<number | null, number | null | undefined, number | null>;
+  cancel_requested_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  cancel_reason: string | null;
+}
+
+
+export interface AccountingEventVersionsTable {
+  id: Generated<string>;
+  event_id: string;
+  version: number;
+  payload: Json<unknown>;
+  received_at: Timestamp;
+}
+
+
+export interface LedgerEntriesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  branch_id: string;
+  period_id: string;
+  entry_no: string;
+  doc_type: string;
+  event_id: string; // NOT NULL từ 0077 (R-LEDGER-12, S030-41b)
+  event_version: number | null;
+  doc_no: string;
+  invoice_no: string | null;
+  doc_date: DateOnly;
+  posting_date: DateOnly;
+  reason_code: string | null;
+  partner_id: string | null;
+  description: Generated<string>;
+  total: Numeric;
+  status: Generated<string>;
+  reverses_entry_id: string | null;
+  content_hash: string | null;
+  /** Mã băm phần số liệu (migration 0062). */
+  body_hash: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Tên đối tượng tại NGÀY CHỨNG TỪ lúc ghi + bản thuộc tính đã dùng (0087): trigger điền, không đổi về sau. */
+  partner_name: ColumnType<string | null, string | null | undefined, never>;
+  partner_attr_id: ColumnType<string | null, string | null | undefined, never>;
+  /** Phiên bản chính sách kế toán bút toán được dựng theo (0040, ADR-0009). */
+  policy_version: ColumnType<number | null, number | null | undefined, number | null>;
+  is_reversal: Generated<boolean>;
+  created_by: string;
+  created_at: TimestampDefault;
+}
+
+
+export interface LedgerLinesTable {
+  id: Generated<string>;
+  entry_id: string;
+  tenant_id: string;
+  branch_id: string;
+  posting_date: DateOnly;
+  line_no: number;
+  pair_no: number;
+  account_code: string;
+  debit: Numeric;
+  credit: Numeric;
+  partner_id: string | null;
+  tax_code: string | null;
+  part: string;
+  product_sku: string | null;
+  product_name: string | null;
+  /** Tên đối tượng tại NGÀY CHỨNG TỪ lúc ghi + bản thuộc tính đã dùng (0087): trigger điền, không đổi về sau. */
+  partner_name: ColumnType<string | null, string | null | undefined, never>;
+  partner_attr_id: ColumnType<string | null, string | null | undefined, never>;
+  description: Generated<string>;
+  source_line_key: string | null;
+  dims: JsonDefault;
+  /** Dòng giá vốn chờ tính giá: 'debit' | 'credit' (bên ghi số tiền). Xem migration 0059. */
+  cost_fill: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Định danh mặt hàng (0066, B2b); mã là ảnh chụp tại ngày. */
+  item_id: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Định danh chi nhánh / shop cn_… (0121, trigger điền). */
+  branch_uid: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Định danh kho kho_… (0121); không truyền = kho mặc định của chi nhánh (trigger). */
+  warehouse_uid: ColumnType<string | null, string | null | undefined, string | null>;
+  /** [2026-11-13 Nguyễn Văn Thủy] Định danh phòng ban pb_… theo dims.department (0130, trigger) (đóng góp) */
+  department_uid: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Mã kho chụp lúc ghi (0121). */
+  warehouse_code: ColumnType<string | null, string | null | undefined, string | null>;
+  /** MST tại ngày hạch toán (0121): kho → chi nhánh → … → nút cơ cấu → công ty (trigger). */
+  tax_id: ColumnType<string | null, string | null | undefined, string | null>;
+}
+
+
+export interface LedgerLinksTable {
+  id: Generated<string>;
+  tenant_id: string;
+  entry_id: string;
+  target_entry_id: string;
+  link_type: string;
+  reason: Generated<string>;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+}
+
+
+export interface LedgerBalancesDailyTable {
+  tenant_id: string;
+  branch_id: string;
+  account_code: string;
+  posting_date: DateOnly;
+  partner_id: string;
+  debit: Numeric;
+  credit: Numeric;
+}
+
+
+export interface TaxInvoicesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  branch_id: string;
+  direction: string;
+  event_id: string;
+  doc_type: string;
+  doc_no: string;
+  doc_date: DateOnly;
+  invoice_no: string;
+  invoice_serial: Generated<string>;
+  invoice_form: Generated<string>;
+  invoice_date: DateOnly;
+  status: Generated<string>;
+  partner_id: string | null;
+  buyer_name: Generated<string>;
+  buyer_tax_code: Generated<string>;
+  buyer_address: Generated<string>;
+  total_before_tax: Numeric;
+  total_tax: Numeric;
+  sign: Generated<number>;
+  created_at: TimestampDefault;
+  declare_date: ColumnType<string | null, string | null | undefined, string | null>;
+  deductible: Generated<boolean>;
+  payment_ref: Generated<string>;
+  /** Cột sinh tự động = kỳ kê khai nếu có, không thì ngày hoá đơn. */
+  period_date: ColumnType<string, never, never>;
+}
+
+
+export interface TaxInfoPatchesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  event_id: string;
+  invoice: JsonDefault;
+  declare_month: ColumnType<string | null, string | null | undefined, string | null>;
+  deductible: Generated<boolean>;
+  payment_ref: Generated<string>;
+  note: Generated<string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface CashTransferConfirmationsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  event_id: string;
+  amount: Numeric;
+  to_branch_code: string;
+  to_bank_code: Generated<string>;
+  note: Generated<string>;
+  confirmed_by: Generated<string>;
+  confirmed_at: TimestampDefault;
+}
+
+
+export interface TaxInvoiceLinesTable {
+  id: Generated<string>;
+  tax_invoice_id: string;
+  line_no: number;
+  sku: Generated<string>;
+  name: Generated<string>;
+  unit: Generated<string>;
+  qty: Numeric;
+  amount_before_tax: Numeric;
+  tax_code: string;
+  tax_rate: Numeric;
+  report_group: string;
+  tax_amount: Numeric;
+}
+
+
+/** View (migration 0053): dòng hàng chứng từ bán / trả lại đã ghi sổ, đọc từ payload. Chỉ đọc. */
+export interface SalesLinesTable {
+  id: Generated<string>;
+  item_id: string | null;
+  tenant_id: string;
+  event_id: string;
+  branch_id: string;
+  partner_id: string | null;
+  doc_date: DateOnly;
+  sign: number;
+  line_no: number;
+  sku: Generated<string>;
+  name: Generated<string>;
+  unit: Generated<string>;
+  qty: Numeric;
+  unit_price: Numeric;
+  amount_before_tax: Numeric;
+  discount: Numeric;
+  tax_code: Generated<string>;
+  tax_amount: Numeric;
+  is_gift: Generated<boolean>;
+  cost: ColumnType<string | null, number | string | null | undefined, number | string | null>;
+}
+
+
+export interface InventoryMovementsTable {
+  id: Generated<string>;
+  /** Thuế GTGT / chiết khấu của dòng mua, trả NCC (0153). */
+  tax_amount: ColumnType<string, number | undefined, number>;
+  discount_amount: ColumnType<string, number | undefined, number>;
+  /** MST tại ngày chứng từ (0121, trigger). */
+  tax_id: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Định danh chi nhánh / shop cn_…, kho kho_… (0121, trigger). */
+  branch_uid: ColumnType<string | null, string | null | undefined, string | null>;
+  warehouse_uid: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Không tính vào đơn giá bình quân (quà KM người tiêu dùng). */
+  exclude_cost: Generated<boolean>;
+  tenant_id: string;
+  event_id: string;
+  branch_id: string;
+  doc_type: string;
+  doc_date: DateOnly;
+  line_no: number;
+  kind: string;
+  sku: string;
+  name: Generated<string>;
+  unit: Generated<string>;
+  warehouse_code: Generated<string>;
+  qty: Numeric;
+  amount: ColumnType<string | null, number | string | null | undefined, number | string | null>;
+  counter_branch_id: string | null;
+  reason_code: string | null;
+  is_gift: Generated<boolean>;
+  priced_at_sale: Generated<boolean>;
+  /** Định danh mặt hàng (0066, B2b); mã là ảnh chụp tại ngày. */
+  item_id: ColumnType<string | null, string | null | undefined, string | null>;
+}
+
+
+export interface AssetCategoriesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  kind: string;
+  asset_account: string | null;
+  depreciation_account: string;
+  expense_account: string;
+  useful_life_months: number | null;
+  parent_code: string | null;
+  is_active: Generated<boolean>;
+}
+
+
+export interface AssetsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  kind: string;
+  category_id: string | null;
+  branch_id: string;
+  unit: Generated<string>;
+  quantity: ColumnType<string, number | string | undefined, number | string>;
+  acquired_date: ColumnType<string | null, string | null | undefined, string | null>;
+  start_date: DateOnly;
+  original_cost: Numeric;
+  useful_life_months: number;
+  monthly_amount: ColumnType<string | null, number | string | null | undefined, number | string | null>;
+  opening_accumulated: ColumnType<string, number | string | undefined, number | string>;
+  opening_as_of: ColumnType<string | null, string | null | undefined, string | null>;
+  asset_account: string | null;
+  depreciation_account: string;
+  expense_account: string;
+  cost_item_code: string | null;
+  department_code: string | null;
+  contract_code: ColumnType<string | null, string | null | undefined, string | null>;
+  specs: ColumnType<unknown, string | undefined, string>;
+  photo: ColumnType<string | null, string | null | undefined, string | null>;
+  tool_group_code: ColumnType<string | null, string | null | undefined, string | null>;
+  usage_purpose_code: ColumnType<string | null, string | null | undefined, string | null>;
+  depreciable_amount: ColumnType<string | null, number | string | null | undefined, number | string | null>;
+  tax_monthly_amount: ColumnType<string | null, number | string | null | undefined, number | string | null>;
+  opening_remaining_months: ColumnType<number | null, number | null | undefined, number | null>;
+  status: Generated<string>;
+  disposed_date: ColumnType<string | null, string | null | undefined, string | null>;
+  note: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+export interface AssetDepreciationsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  asset_id: string;
+  year: number;
+  month: number;
+  amount: Numeric;
+  covers_from: ColumnType<number | null, number | null | undefined, number | null>;
+  event_id: string | null;
+  computed_at: TimestampDefault;
+}
+
+
+export interface AssetAllocationsTable {
+  id: Generated<string>;
+  asset_id: string;
+  line_no: number;
+  percent: Numeric;
+  branch_id: string | null;
+  expense_account: string;
+  cost_item_code: string | null;
+  department_code: string | null;
+  contract_code: string | null;
+}
+
+
+export interface AssetEventsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  asset_id: string;
+  kind: string;
+  event_date: DateOnly;
+  doc_no: Generated<string>;
+  payload: ColumnType<Record<string, unknown>, string | undefined, string>;
+  note: Generated<string>;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+}
+
+
+export interface AssetDepreciationOverridesTable {
+  id: Generated<string>;
+  asset_id: string;
+  year: number;
+  month: number;
+  amount: Numeric;
+  reason: string;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface VatReturnsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  period_kind: string;
+  year: number;
+  period: number;
+  scope: Generated<string>;
+  status: Generated<string>;
+  values: ColumnType<Record<string, number>, string, string>;
+  manual: ColumnType<Record<string, number>, string | undefined, string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+  revision: Generated<number>;
+  supplement: ColumnType<Record<string, unknown> | null, string | null | undefined, string | null>;
+  info: ColumnType<Record<string, unknown>, string | undefined, string>;
+}
+
+
+export interface CitReturnsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  year: number;
+  status: Generated<string>;
+  values: ColumnType<Record<string, number>, string, string>;
+  manual: ColumnType<Record<string, number>, string | undefined, string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface TaxpayerProfilesTable {
+  tenant_id: string;
+  data: JsonDefault;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface LongTermBalancesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  as_of: DateOnly;
+  account_code: string;
+  partner_id: string | null;
+  amount: Numeric;
+  note: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface InventoryCostsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  cost_group: Generated<string>;
+  year: number;
+  month: number;
+  sku: string;
+  opening_qty: Numeric;
+  opening_value: Numeric;
+  in_qty: Numeric;
+  in_value: Numeric;
+  unit_cost: Numeric;
+  out_qty: Numeric;
+  closing_qty: Numeric;
+  closing_value: Numeric;
+  /** Tồn cuối phần quà KM người tiêu dùng (giá 0), nằm trong closing_qty. */
+  gift_qty: ColumnType<string, number | string | undefined, number | string>;
+  computed_at: Generated<Date>;
+  /** computed = tính bình quân; import = nhập từ Excel giá vốn tháng (migration 0061). */
+  cost_source: Generated<string>;
+  /** Định danh mặt hàng (0066, B2b); mã là ảnh chụp tại ngày. */
+  item_id: ColumnType<string | null, string | null | undefined, string | null>;
+  /** Loại kho tính giá vốn riêng (0155); rỗng = tính chung. */
+  wh_type: Generated<string>;
+}
+
+
+/** View (migration 0053): thanh toán của chứng từ bán / trả lại đã ghi sổ, đọc từ payload. Chỉ đọc. */
+export interface SalesPaymentsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  event_id: string;
+  branch_id: string;
+  doc_date: DateOnly;
+  sign: number;
+  method_code: string;
+  amount: Numeric;
+}
+
+
+export interface DimensionsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  kind: string;
+  code: string;
+  name: string;
+  parent_code: string | null;
+  note: Generated<string>;
+  extra: JsonDefault;
+  is_active: Generated<boolean>;
+  /** [2026-11-13 Nguyễn Văn Thủy] Định danh bất biến pb_… / dm_… (0130, trigger) (đóng góp) */
+  uid: Generated<string>;
+}
+
+
+export interface ContractSchedulesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  contract_code: string;
+  seq: number;
+  due_date: DateOnly;
+  amount: Numeric;
+  tax_amount: ColumnType<string, number | string | undefined, number | string>;
+  description: Generated<string>;
+  status: Generated<string>;
+  paid_date: ColumnType<string | null, string | null | undefined, string | null>;
+  paid_ref: Generated<string>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface DebtItemsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  event_id: string;
+  partner_id: string;
+  account_code: string;
+  side: string;
+  amount: Numeric;
+  settled_amount: ColumnType<string, number | string | undefined, number | string>;
+  branch_id: string;
+  doc_no: string;
+  doc_date: DateOnly;
+  due_date: DateOnly;
+  updated_at: TimestampDefault;
+}
+
+
+export interface DebtAllocationsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  debit_item_id: string;
+  credit_item_id: string;
+  amount: Numeric;
+  alloc_date: ColumnType<string, string | undefined, string>;
+  is_auto: Generated<boolean>;
+  note: Generated<string>;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+}
+
+
+/** Chứng từ mua hàng (phân hệ Mua hàng, 0010). */
+export interface PurchaseDocumentsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  kind: string;
+  status: Generated<string>;
+  doc_no: string;
+  doc_date: DateOnly;
+  branch_code: string;
+  partner_code: string;
+  brand_code: string | null;
+  invoice_no: string | null;
+  invoice_serial: Generated<string>;
+  invoice_date: ColumnType<string | null, string | null | undefined, string | null>;
+  due_date: ColumnType<string | null, string | null | undefined, string | null>;
+  total_before_tax: ColumnType<string, number | string | undefined, number | string>;
+  total_tax: ColumnType<string, number | string | undefined, number | string>;
+  total: ColumnType<string, number | string | undefined, number | string>;
+  ref_ids: ColumnType<string[], string[] | undefined, string[]>;
+  revision: Generated<number>;
+  links: JsonDefault<unknown>;
+  data: JsonDefault<unknown>;
+  is_demo: Generated<boolean>;
+  created_by: Generated<string>;
+  created_by_name: Generated<string>;
+  approved_by: string | null;
+  approved_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+/** Chính sách mua hàng (0010). */
+export interface PurchasePoliciesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  kind: string;
+  name: string;
+  scope: JsonDefault<unknown>;
+  valid_from: ColumnType<string | null, string | null | undefined, string | null>;
+  valid_to: ColumnType<string | null, string | null | undefined, string | null>;
+  priority: Generated<number>;
+  rule: JsonDefault<unknown>;
+  is_active: Generated<boolean>;
+  is_demo: Generated<boolean>;
+  updated_by: Generated<string>;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+export interface PaymentRequestsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  request_no: string;
+  request_date: DateOnly;
+  branch_code: string;
+  partner_id: string;
+  amount: Numeric;
+  due_date: ColumnType<string | null, string | null | undefined, string | null>;
+  method: Generated<string>;
+  debit_account: string | null;
+  description: Generated<string>;
+  source_ref: Generated<string>;
+  items: JsonDefault<unknown>;
+  contract_schedule_id: string | null;
+  status: Generated<string>;
+  levels_required: Generated<number>;
+  created_by: Generated<string>;
+  created_by_name: Generated<string>;
+  submitted_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  approved1_by: string | null;
+  approved1_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  approved2_by: string | null;
+  approved2_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+  rejected_by: string | null;
+  rejected_reason: Generated<string>;
+  paid_event_id: string | null;
+  created_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+export interface ReferenceDocumentsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  kind: string;
+  doc_key: string;
+  doc_no: string;
+  doc_date: DateOnly;
+  partner_id: string | null;
+  branch_code: Generated<string>;
+  total: ColumnType<string, number | string | undefined, number | string>;
+  due_date: ColumnType<string | null, string | null | undefined, string | null>;
+  description: Generated<string>;
+  source_system: Generated<string>;
+  payload: JsonDefault<unknown>;
+  status: Generated<string>;
+  used_event_id: string | null;
+  received_at: TimestampDefault;
+  updated_at: TimestampDefault;
+}
+
+
+export interface VoucherTemplatesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  code: string;
+  name: string;
+  doc_type: string;
+  voucher: Json;
+  is_active: Generated<boolean>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface VoucherRecurrencesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  template_code: string;
+  name: Generated<string>;
+  frequency: string;
+  day_of_month: number;
+  start_month: string;
+  end_month: string | null;
+  branch_code: string | null;
+  is_active: Generated<boolean>;
+  updated_by: Generated<string>;
+  updated_at: TimestampDefault;
+}
+
+
+export interface VoucherRecurrenceRunsTable {
+  id: Generated<string>;
+  tenant_id: string;
+  recurrence_id: string;
+  period: string;
+  document_id: string;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+}
+
+
+export interface ClosingRulesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  seq: number;
+  from_account: string;
+  to_account: string;
+  mode: string;
+  description: Generated<string>;
+  is_active: Generated<boolean>;
+  include_opening: Generated<boolean>;
+}
+
+
+/** 0146 + 0157/0160: thùng rác danh mục — dòng đã xoá (khôi phục được), dấu xoá cho luồng danh mục (tombstone.<loại>), ảnh chụp trước khi nạp dữ liệu gốc (backup.default-data), bản lưu cột bỏ đi. */
+export interface CatalogTrashTable {
+  id: Generated<string>;
+  tenant_id: string;
+  catalog: string;
+  row_key: string;
+  label: string;
+  payload: Json<unknown>;
+  deleted_by: string;
+  deleted_at: TimestampDefault;
+}
+
+
+/** Toàn bộ cơ sở dữ liệu. */
+/** Duyệt luật nhắc khung Vì sao theo đơn vị (0063, D023-4 / D023-8). [2026-11-03 11:40 AM Johnny Chu - Chu Hoàng Anh] PHASE-024 — HT09 */
+export interface CatalogRuleReviewsTable {
+  tenant_id: string;
+  code: string;
+  title: string | null;
+  why: string | null;
+  fix: string | null;
+  lowered: Generated<boolean>;
+  note: Generated<string>;
+  rule_hash: string;
+  reviewed_by: string;
+  reviewed_by_name: Generated<string>;
+  reviewed_at: TimestampDefault;
+}
+
+
+/** Item Master (0065, B2a): định danh bất biến. [2026-11-03 10:30 PM Johnny Chu - Chu Hoàng Anh] PHASE-024 — B2a */
+export interface ItemsTable {
+  item_id: Generated<string>;
+  tenant_id: string;
+  name: Generated<string>;
+  unit_base: Generated<string>;
+  status: Generated<'draft' | 'active' | 'retired'>;
+  draft_codes: Generated<string[]>;
+  parent_item_id: string | null;
+  attributes: JsonDefault;
+  source_system: Generated<string>;
+  created_at: TimestampDefault;
+  created_by: Generated<string>;
+  updated_at: TimestampDefault;
+  retired_at: ColumnType<Date | null, Date | string | null | undefined, Date | string | null>;
+}
+
+
+/** Mã hàng có phiên bản (0065): chỉ thêm, UPDATE duy nhất là đóng valid_to. */
+export interface ItemCodesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  item_id: string;
+  kind: string;
+  code: string;
+  valid_from: ColumnType<string, string | undefined, never>;
+  valid_to: ColumnType<string | null, string | null | undefined, string | null>;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+  note: Generated<string>;
+}
+
+
+/** Thuộc tính có hiệu lực (tên, MST, địa chỉ) của đối tượng / chi nhánh / kho (0087, S029-19): nguồn sự thật tại một ngày, có phiên bản. */
+export interface EntityAttributesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  entity_type: 'partner' | 'branch' | 'warehouse';
+  entity_id: string;
+  version: ColumnType<number, number | undefined, never>;
+  name: string;
+  tax_code: string | null;
+  address: string | null;
+  valid_from: ColumnType<string, string | undefined, never>;
+  valid_to: ColumnType<string | null, string | null | undefined, string | null>;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+  note: Generated<string>;
+}
+
+
+/** Mã có phiên bản của đối tượng / chi nhánh / kho (0085, D026-3). */
+export interface EntityCodesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  entity_type: 'partner' | 'branch' | 'warehouse';
+  entity_id: string;
+  kind: Generated<string>;
+  code: string;
+  valid_from: ColumnType<string, string | undefined, never>;
+  valid_to: ColumnType<string | null, string | null | undefined, string | null>;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+  note: Generated<string>;
+}
+
+
+/** Phân loại hạch toán theo ngày hiệu lực (0065). */
+export interface ItemClassificationTable {
+  id: Generated<string>;
+  tenant_id: string;
+  item_id: string;
+  valid_from: ColumnType<string, string | undefined, string>;
+  valid_to: ColumnType<string | null, string | null | undefined, string | null>;
+  kind: string | null;
+  posting_group_code: string | null;
+  tax_out_code: string | null;
+  tax_in_code: string | null;
+  excise_rate: ColumnType<string | null, number | string | null | undefined, number | string | null>;
+  track: Generated<string[]>;
+  policy_version: number | null;
+  created_by: Generated<string>;
+  created_at: TimestampDefault;
+  note: Generated<string>;
+}
+
+/** Bảng + khung nhìn đọc của open-ketoan (migration của kế toán, không phải của lõi). */
+export interface KetoanLegacyTables {
+  items: ItemsTable;
+  // [2026-11-05 01:50 PM Nguyễn Văn Thủy] PHASE-026 — S026-21: khung nhìn sổ kho theo mã hiện hành, 0069 (đóng góp)
+  inventory_movements_cur: InventoryMovementsTable & { snapshot_sku: string; root_item_id: string | null };
+  item_codes: ItemCodesTable;
+  entity_codes: EntityCodesTable;
+  entity_attributes: EntityAttributesTable;
+  item_classification: ItemClassificationTable;
+  catalog_rule_reviews: CatalogRuleReviewsTable;
+  pos_installations: PosInstallationsTable;
+  pos_installation_blogs: PosInstallationBlogsTable;
+  pos_connections: PosConnectionsTable;
+  intake_inbox: IntakeInboxTable;
+  accounting_units: AccountingUnitsTable;
+  branches: BranchesTable;
+  warehouses: WarehousesTable;
+  warehouse_types: WarehouseTypesTable;
+  warehouse_type_ops: WarehouseTypeOpsTable;
+  accounts: AccountsTable;
+  fiscal_periods: FiscalPeriodsTable;
+  period_locks: PeriodLocksTable;
+  period_lock_events: PeriodLockEventsTable;
+  authority_invoices: AuthorityInvoicesTable;
+  cash_plans: CashPlansTable;
+  cost_norms: CostNormsTable;
+  risky_taxpayers: RiskyTaxpayersTable;
+  partners: PartnersTable;
+  tax_codes: TaxCodesTable;
+  product_posting_groups: ProductPostingGroupsTable;
+  products: ProductsTable;
+  posting_reasons: PostingReasonsTable;
+  payment_methods: PaymentMethodsTable;
+  bank_accounts: BankAccountsTable;
+  posting_defaults: PostingDefaultsTable;
+  accounting_events: AccountingEventsTable;
+  posting_log: PostingLogTable;
+  accounting_event_versions: AccountingEventVersionsTable;
+  ledger_entries: LedgerEntriesTable;
+  posting_policy_versions: PostingPolicyVersionsTable;
+  accounting_profiles: AccountingProfilesTable;
+  rulepack_approvals: RulepackApprovalsTable;
+  config_packs: ConfigPacksTable;
+  ledger_lines: LedgerLinesTable;
+  ledger_balances_daily: LedgerBalancesDailyTable;
+  ledger_links: LedgerLinksTable;
+  /** Khung nhìn chỉ đọc của Kernel (0043, ledger.query): ngoài Kernel đọc sổ qua đây, không qua bảng ledger_* (SC-KERNEL-7). */
+  'bizcity_read.ledger_entries': Omit<LedgerEntriesTable, 'content_hash' | 'body_hash'>;
+  'bizcity_read.ledger_lines': LedgerLinesTable;
+  'bizcity_read.ledger_balances_daily': LedgerBalancesDailyTable;
+  /** Danh mục chuẩn chỉ đọc (0044, data.read-views): module JOIN theo mã; không có thuộc tính hạch toán của Kernel. */
+  'bizcity_read.partners': Pick<PartnersTable, 'tenant_id' | 'code' | 'name' | 'short_name' | 'kind' | 'also_kinds' | 'customer_type' | 'is_prospect' | 'group_code' | 'tax_code' | 'company_name' | 'company_address' | 'address' | 'contact_name' | 'position' | 'phone' | 'mobile' | 'email' | 'website' | 'payment_term_days' | 'credit_limit' | 'manager_code' | 'branch_code' | 'is_active' | 'note' | 'created_at' | 'updated_at'>;
+  'bizcity_read.products': Pick<ProductsTable, 'tenant_id' | 'sku' | 'parent_sku' | 'name' | 'unit' | 'barcode' | 'group_code' | 'type_code' | 'brand_code' | 'industry_code' | 'tax_out_code' | 'tax_in_code' | 'is_active' | 'no_sale' | 'track_identifier' | 'description' | 'image_url' | 'weight_kg' | 'origin' | 'updated_at' | 'item_id'> & { variant_code: string; send_to_tax: boolean }; // [2026-11-10 02:30 PM Võ Hoàng] POS-W1 — module pos: item_id (0070), variant_code / send_to_tax (0102) (đóng góp)
+  'bizcity_read.branches': Pick<BranchesTable, 'tenant_id' | 'code' | 'name' | 'level' | 'department_code' | 'address' | 'company_name' | 'tax_code' | 'phone' | 'is_active' | 'note' | 'created_at'> & { parent_code: string | null };
+  'bizcity_read.warehouses': Pick<WarehousesTable, 'tenant_id' | 'code' | 'name' | 'address' | 'is_active' | 'is_default' | 'is_promo' | 'note' | 'created_at' | 'updated_at'> & { branch_code: string };
+  'bizcity_read.unit_names': Pick<UnitNamesTable, 'tenant_id' | 'name' | 'is_active' | 'note'>;
+  'bizcity_read.tax_codes': Pick<TaxCodesTable, 'tenant_id' | 'code' | 'name' | 'rate' | 'direction' | 'report_group' | 'is_active'>;
+  'bizcity_read.payment_methods': Pick<PaymentMethodsTable, 'tenant_id' | 'code' | 'name' | 'is_receivable' | 'bank_account_code' | 'partner_code' | 'discount_rate' | 'sort_order' | 'is_active' | 'note'>;
+  'bizcity_read.dimensions': Pick<DimensionsTable, 'tenant_id' | 'kind' | 'code' | 'name' | 'parent_code' | 'is_active' | 'note'>;
+  // [2026-11-12 04:00 PM Võ Hoàng] POS-CATALOG — giá theo chi nhánh, tồn theo chi nhánh (0109) (đóng góp)
+  'bizcity_read.branch_prices': { tenant_id: string; branch_code: string; sku: string; item_id: string | null; unit: string; ratio: string; is_default_unit: boolean; price: string | null; price_source: 'branch' | 'company' | null; updated_at: Date | null };
+  'bizcity_read.stock_on_hand': { tenant_id: string; branch_code: string; warehouse_code: string; item_id: string | null; sku: string; qty: string };
+  tax_invoices: TaxInvoicesTable;
+  partner_groups: PartnerGroupsTable;
+  item_classes: ItemClassesTable;
+  stock_purposes: StockPurposesTable;
+  tax_id_versions: TaxIdVersionsTable;
+  org_link_versions: OrgLinkVersionsTable;
+  product_units: ProductUnitsTable;
+  price_lists: PriceListsTable;
+  price_list_branches: PriceListBranchesTable;
+  product_prices: ProductPricesTable;
+  tax_info_patches: TaxInfoPatchesTable;
+  cash_transfer_confirmations: CashTransferConfirmationsTable;
+  tax_invoice_lines: TaxInvoiceLinesTable;
+  sales_lines: SalesLinesTable;
+  sales_payments: SalesPaymentsTable;
+  inventory_movements: InventoryMovementsTable;
+  inventory_costs: InventoryCostsTable;
+  asset_categories: AssetCategoriesTable;
+  assets: AssetsTable;
+  asset_depreciations: AssetDepreciationsTable;
+  asset_allocations: AssetAllocationsTable;
+  asset_events: AssetEventsTable;
+  asset_depreciation_overrides: AssetDepreciationOverridesTable;
+  vat_returns: VatReturnsTable;
+  cit_returns: CitReturnsTable;
+  taxpayer_profiles: TaxpayerProfilesTable;
+  long_term_balances: LongTermBalancesTable;
+  catalog_trash: CatalogTrashTable;
+  closing_rules: ClosingRulesTable;
+  dimensions: DimensionsTable;
+  contract_schedules: ContractSchedulesTable;
+  voucher_templates: VoucherTemplatesTable;
+  debt_items: DebtItemsTable;
+  reference_documents: ReferenceDocumentsTable;
+  payment_requests: PaymentRequestsTable;
+  purchase_documents: PurchaseDocumentsTable;
+  purchase_policies: PurchasePoliciesTable;
+  supplier_products: SupplierProductsTable;
+  supplier_invoices: SupplierInvoicesTable;
+  supplier_invoice_lines: SupplierInvoiceLinesTable;
+  supplier_item_aliases: SupplierItemAliasesTable;
+  stock_levels: StockLevelsTable;
+  stock_sku_settings: StockSkuSettingsTable;
+  print_template_settings: PrintTemplateSettingsTable;
+  print_profiles: PrintProfilesTable;
+  stock_max_requests: StockMaxRequestsTable;
+  order_formulas: OrderFormulasTable;
+  transfer_requests: TransferRequestsTable;
+  unit_names: UnitNamesTable;
+  help_cards: HelpCardsTable;
+  help_places: HelpPlacesTable;
+  debt_allocations: DebtAllocationsTable;
+  voucher_recurrences: VoucherRecurrencesTable;
+  voucher_recurrence_runs: VoucherRecurrenceRunsTable;
+}
+
+declare module '../db/types.js' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface AppDatabase extends KetoanLegacyTables {}
+}
+
+
+export type Account = Selectable<AccountsTable>;
+export type Branch = Selectable<BranchesTable>;
+export type Partner = Selectable<PartnersTable>;
+export type TaxCode = Selectable<TaxCodesTable>;
+export type PostingReason = Selectable<PostingReasonsTable>;
+export type PaymentMethod = Selectable<PaymentMethodsTable>;
+export type ProductPostingGroup = Selectable<ProductPostingGroupsTable>;
+export type AccountingEventRow = Selectable<AccountingEventsTable>;
+export type LedgerEntryRow = Selectable<LedgerEntriesTable>;
+export type LedgerLineInsert = Insertable<LedgerLinesTable>;

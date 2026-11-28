@@ -12,7 +12,7 @@
  *   ensureLocal     ghi nhận "tôi là chủ trục này" nếu trục chưa có chủ; đã có thì trả nguyên dòng (không giành chủ).
  *   assertWritable  cổng ghi trục: local + đúng instance ⇒ qua; transferring ⇒ CONFLICT AXIS_TRANSFERRING; replica / chủ khác ⇒ CONFLICT AXIS_READ_ONLY.
  *                   Trục chưa ghi nhận ⇒ qua (app đứng riêng chưa từng khai).
- *   Giao thức chuyển local → ketoan (transferring, replica, tăng epoch) là W4 (S004-SY-*): ở đây chưa có hàm chuyển.
+ *   Giao thức chuyển local → ketoan (transferring, replica, tăng epoch) là S004-DB-4 (lane T): ở đây chưa có hàm chuyển.
  * Hàm nhận giao dịch của người gọi (như documents.*): trong action là ctx.data.tx, ngoài action là trx của service.
  */
 import { AXIS_KEY_RE, ENTITY_LINK_KINDS, type DataAuthority, type EntityLink, type EntityLinkKind } from '@bizcity/contracts';

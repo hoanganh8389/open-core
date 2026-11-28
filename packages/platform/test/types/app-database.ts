@@ -20,3 +20,12 @@ export async function demo(): Promise<string[]> {
   await db.selectFrom('catalog_items').select('khong_co_cot').execute();
   return rows.map((r) => r.sku);
 }
+
+// [2026-11-28 11:54 PM Johnny Chu - Chu Hoàng Anh] S004-W2-2 — Database của lõi chỉ còn bảng lõi (CoreDatabase): không import khu cách ly ketoan-legacy ⇒ bảng kế toán KHÔNG có kiểu.
+export async function coreOnly(): Promise<void> {
+  // @ts-expect-error bảng sổ của open-ketoan không thuộc lõi
+  await db.selectFrom('ledger_entries').selectAll().execute();
+  // @ts-expect-error danh mục đối tượng của open-ketoan không thuộc lõi
+  await db.selectFrom('partners').selectAll().execute();
+  await db.selectFrom('business_documents').select(['doc_no', 'currency']).execute();
+}
