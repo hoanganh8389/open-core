@@ -45,6 +45,10 @@ export const CORE_COVERED_BY_KETOAN: Readonly<Record<string, string>> = {
   '0002_platform_vai_theo_app.sql': 'ràng buộc vai của open-ketoan (giữ vai kế toán, ketoanAuthzPreset)',
   '0003_platform_external_sub.sql': '0183_nguoi_dung_external_sub.sql',
   '0004_platform_secrets.sql': '0184_tenant_secrets.sql',
+  // [2026-11-28 07:52 PM Johnny Chu - Chu Hoàng Anh] S003-14 — quyết định PHASE-001 R-4: KHÔNG chạy trên CSDL open-ketoan lúc này. business_documents của
+  // open-ketoan sinh ở 0156 (sau 0005 theo thứ tự tên) và do trigger đồng bộ; open-ketoan thêm bản tương đương (≥ 0185, sau 0156) khi lên trục chứng từ
+  // qua R-FLOW, rồi đổi giá trị dưới đây thành tên tệp đó. Tới lúc ấy mã document-spine của lõi không dùng được trên CSDL open-ketoan.
+  '0005_platform_truc_chung_tu.sql': 'chờ open-ketoan (≥ 0185, sau 0156) — S003-14, R-FLOW',
 };
 
 const record = (c: MigrationClient, name: string) => c.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING', [name]);

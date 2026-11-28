@@ -79,7 +79,7 @@ test('coveredBy: CSDL mới, lõi và app cùng tạo một bảng ⇒ chỉ ch�
   } finally { await c.end(); }
 });
 
-test('open-ketoan: bốn migration lõi hiện có đều có bản tương đương trong dãy của open-ketoan', async () => {
+test('open-ketoan: mọi migration lõi đều có quyết định cho CSDL open-ketoan (bản tương đương, hoặc chờ R-FLOW)', async () => {
   const { CORE_COVERED_BY_KETOAN, ketoanLegacyHooks } = await import('../dist/db/migrate-ketoan-legacy.js');
   const { PLATFORM_MIGRATIONS_DIR } = await import('../dist/db/paths.js');
   const core = planMigrations({ sources: [{ name: 'platform', dir: PLATFORM_MIGRATIONS_DIR }] }).map((m) => m.file);

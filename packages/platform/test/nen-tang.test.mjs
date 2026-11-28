@@ -10,7 +10,7 @@ process.env.DATABASE_URL ??= url ?? 'postgres://x@localhost/x';
 const { runMigrations } = await import('../dist/db/migrate.js');
 const { PLATFORM_MIGRATIONS_DIR } = await import('../dist/db/paths.js');
 
-const NEN = ['action_requests', 'api_keys', 'app_installations', 'audit_logs', 'business_documents', 'document_attachments', 'document_links', 'document_sequences',
+const NEN = ['action_requests', 'api_keys', 'app_installations', 'audit_logs', 'business_documents', 'document_activities', 'document_attachments', 'document_links', 'document_sequences',
   'document_signatures', 'document_versions', 'event_deliveries', 'event_outbox', 'library_change_requests', 'library_settings', 'mcp_confirm_tokens', 'module_registry',
   'notification_reads', 'notifications', 'policy_registry', 'setting_values', 'tenant_modules', 'tenant_role_rules', 'tenant_roles', 'tenant_secret_keys', 'tenant_secrets', 'tenants', 'user_role_assignments', 'users'];
 
@@ -18,7 +18,7 @@ test('migration nền: đủ bảng nền, không bảng kế toán, nhật ký 
   const c = new pg.Client({ connectionString: url }); await c.connect();
   try {
     await c.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
-    assert.deepEqual(await runMigrations(() => {}, { connectionString: url, sources: [{ name: 'platform', dir: PLATFORM_MIGRATIONS_DIR }] }), ['0001_platform_nen_tang.sql', '0002_platform_vai_theo_app.sql', '0003_platform_external_sub.sql', '0004_platform_secrets.sql']);
+    assert.deepEqual(await runMigrations(() => {}, { connectionString: url, sources: [{ name: 'platform', dir: PLATFORM_MIGRATIONS_DIR }] }), ['0001_platform_nen_tang.sql', '0002_platform_vai_theo_app.sql', '0003_platform_external_sub.sql', '0004_platform_secrets.sql', '0005_platform_truc_chung_tu.sql']);
     const tables = (await c.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'schema_migrations' ORDER BY 1")).rows.map((r) => r.tablename);
     assert.deepEqual(tables, NEN);
     const { rows: [t] } = await c.query("INSERT INTO tenants (code, name) VALUES ('hoa-mai', 'Shop Hoa Mai') RETURNING id");

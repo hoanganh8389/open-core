@@ -125,7 +125,7 @@ function cakeRuntime(dir) {
     process.env.TEST_DATABASE_URL = url; // test của app đọc TEST_DATABASE_URL; thiếu ⇒ test CSDL bị bỏ qua âm thầm
     const r = sh(`pnpm exec vitest run`, dir, true).replace(/\x1b\[[0-9;]*m/g, '');
     const m = /Tests\s+(?:(\d+) failed \| )?(\d+) passed(?: \| (\d+) skipped)?/.exec(r);
-    return { failed: Number(m?.[1] ?? (m ? 0 : NaN)), passed: Number(m?.[2] ?? 0), skipped: Number(m?.[3] ?? 0), tail: r.split('\n').filter((l) => /FAIL|Tests /.test(l)).slice(0, 12) };
+    return { failed: Number(m?.[1] ?? (m ? 0 : NaN)), passed: Number(m?.[2] ?? 0), skipped: Number(m?.[3] ?? 0), tail: m ? r.split('\n').filter((l) => /FAIL|Tests /.test(l)).slice(0, 12) : r.trim().split('\n').slice(-8) }; // [2026-11-28 07:52 PM Johnny Chu - Chu Hoàng Anh] S003-14 — vitest dừng trước dòng tổng ⇒ in đuôi để thấy lý do
   } finally {
     for (const f of files) writeFileSync(path.join(dir, f), saved[f]);
     sh('pnpm install --frozen-lockfile', dir, true);
