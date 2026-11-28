@@ -17,5 +17,10 @@
 | S003-9 | hoạt động (chatter) | ☐ |
 | S003-10 | nhập chung có chạy thử | ☐ |
 | S003-11 | việc nền + định kỳ | ☐ |
-| S003-12 | `bizcity_ux@1` — token, khung, màn mẫu (f1–f6 chủ đã duyệt 2026-11-28; f7–f13 Cài đặt hệ thống + tìm chứng từ chờ duyệt) | ◐ |
+| S003-12 | `bizcity_ux@1` — token, khung, màn mẫu (f1–f13 chủ đã duyệt 2026-11-28; f14–f20 nhóm hàng, mặt hàng, bộ lọc, lưu trữ, nhật ký, lỗi, media chờ duyệt — NC-007) | ◐ |
 | S003-13 | scoreboard + màn Tình trạng nền tảng | ◐ |
+| S003-14 | trục chứng từ: `defineDocumentType`, `document_meta`, `document_versions`, `document_activities` (NC-007 §3) | ☐ |
+| S003-15 | thanh công cụ + "Tất cả bộ lọc" + cây đơn vị trong `<ListScreen>`; `archive / restore / purge` (NC-007 §4) | ☐ |
+| S003-16 | `bizcity_issues@1` + màn Nhật ký & trace, Lỗi & sửa lỗi (NC-007 §5) | ☐ |
+| S003-17 | `media` + trình điều khiển S3-compatible (R2 / S3 / MinIO) + màn Media (NC-007 §6) | ☐ |
+| S003-18 | `ledger_ref {book, org_unit_code}` + cây đơn vị + catalog feed / đề xuất từ kế toán (NC-007 §1–2) | ☐ |

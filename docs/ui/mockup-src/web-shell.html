@@ -90,6 +90,22 @@
   .res { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); align-items: center; } .res .t { font-size: 12px; color: var(--muted-foreground); }
   .palette { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); width: 860px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 24px 64px rgba(15,31,61,.25); overflow: hidden; }
   .palette .q { height: 58px; display: flex; align-items: center; gap: 10px; padding: 0 18px; border-bottom: 1px solid var(--border); font-size: 18px; } .palette h6 { margin: 10px 16px 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--subtle-foreground); }
+  /* [2026-11-28 07:34 PM Johnny Chu - Chu Hoàng Anh] NC-007 — thanh công cụ chuẩn, cột cây danh mục, ngăn bộ lọc, cây đơn vị, thẻ media, thanh tab */
+  .tb { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .tb .sep { width: 1px; height: 28px; background: var(--border); margin: 0 4px; } .tb .sp { flex: 1; }
+  .btn.dis { opacity: .45; } .btn.sm { height: 34px; padding: 0 12px; font-size: 14px; } .btn.dg { color: var(--destructive); }
+  .selbar { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: var(--primary-soft); border-bottom: 1px solid #c5dcfa; font-size: 14px; color: var(--primary); font-weight: 600; }
+  .col3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cc { display: flex; flex-direction: column; min-height: 360px; } .cc .ch { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 700; } .cc .ch small { color: var(--muted-foreground); font-weight: 500; } .cc .ch i { font-style: normal; width: 24px; height: 24px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: var(--primary); font-size: 13px; }
+  .cc .ci { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 10px 16px; font-size: 15px; } .cc .ci.on { background: var(--primary-soft); font-weight: 600; } .cc .ci code { background: var(--muted); border-radius: 6px; text-align: center; padding: 2px 0; font-weight: 700; } .cc .ci small { color: var(--muted-foreground); }
+  .cc .cf { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--border); }
+  .drawer { position: absolute; top: 56px; right: 0; bottom: 0; width: 560px; background: var(--card); border-left: 1px solid var(--border); box-shadow: -12px 0 32px rgba(15,31,61,.12); display: flex; flex-direction: column; }
+  .drawer .hd { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; } .drawer .hd h2 { margin: 0; font-size: 20px; } .drawer .bd { padding: 16px 22px; display: grid; gap: 12px; align-content: start; flex: 1; } .drawer .ft { padding: 14px 22px; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+  .fr { display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center; font-size: 15px; }
+  .ut { display: flex; gap: 4px; border-bottom: 1px solid var(--border); } .ut a { padding: 8px 14px; font-size: 14px; color: var(--muted-foreground); border-bottom: 2px solid transparent; } .ut a.on { color: var(--primary); border-color: var(--primary); font-weight: 700; }
+  .ot div { display: flex; align-items: center; gap: 8px; padding: 5px 0 5px calc(var(--d) * 22px); font-size: 14px; } .ot code { font-size: 12px; color: var(--muted-foreground); } .ot .bx { width: 16px; height: 16px; border: 1.5px solid var(--border-strong); border-radius: 4px; display: inline-grid; place-items: center; font-size: 12px; } .ot .bx.y { background: var(--primary); border-color: var(--primary); color: #fff; } .ot .bx.p { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .mg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 14px; } .mg .th { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 13px; } .mg .th.on { outline: 2px solid var(--primary); } .mg .th .im { height: 110px; display: grid; place-items: center; font-size: 34px; } .mg .th .cp { padding: 8px 10px; } .mg .th .cp small { display: block; color: var(--muted-foreground); }
+  .wf { display: grid; grid-template-columns: 280px 1fr; gap: 6px 12px; font-size: 13px; padding: 12px 16px; } .wf .bar { height: 14px; border-radius: 4px; background: var(--primary); opacity: .75; } .wf .bar.db { background: var(--success); } .wf .bar.ev { background: var(--warning); }
+  .life { display: grid; gap: 10px; font-size: 14px; } .life .ln { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .life .ar { color: var(--subtle-foreground); }
 </style>
 </head>
 <body>
@@ -108,7 +124,7 @@
 <template id="shell-nav">
   <nav class="nav">
     <h6>Bán hàng</h6>
-    <a>💬 Hộp thư <em>12</em></a><a>👥 Khách hàng</a><a class="on">🧾 Đơn bán hàng</a><a>📦 Mặt hàng</a>
+    <a>💬 Hộp thư <em>12</em></a><a>👥 Khách hàng</a><a class="on">🧾 Đơn bán hàng</a><a data-k="mat-hang">📦 Mặt hàng</a><a data-k="nhom-hang">🗂 Nhóm hàng</a>
     <h6>Kho</h6><a>📥 Nhập kho</a><a>📤 Xuất kho</a>
     <h6>Việc</h6><a>✅ Việc của tôi <em>4</em></a>
     <h6>Hệ thống</h6><a data-k="cai-dat">⚙️ Cài đặt hệ thống</a>
@@ -260,7 +276,7 @@
     <h6>Tổ chức</h6><a data-s="chung">Cài đặt chung</a><a data-s="workspace">Tên miền &amp; Workspace</a>
     <h6>Con người</h6><a data-s="users">Người dùng</a><a data-s="roles">Vai &amp; quyền</a>
     <h6>Cấu hình</h6><a data-s="danh-muc">Danh mục &amp; mặt hàng</a><a>Mẫu in &amp; đánh số</a><a>Quy trình duyệt</a>
-    <h6>Hệ thống</h6><a data-s="he-thong">Hệ thống &amp; nhật ký</a><a>Kết nối BizCity (4 bước)</a><a>Tình trạng nền tảng</a>
+    <h6>Hệ thống</h6><a data-s="he-thong">Hệ thống &amp; nhật ký</a><a data-s="media">Media &amp; lưu trữ tệp</a><a data-s="nhat-ky">Nhật ký &amp; trace</a><a data-s="loi">Lỗi &amp; sửa lỗi</a><a>Kết nối BizCity (4 bước)</a><a>Tình trạng nền tảng</a>
   </nav>
 </template>
 
@@ -357,11 +373,11 @@
         <div style="display:grid;gap:14px;align-content:start">
           <div class="head"><h1>Danh mục &amp; mặt hàng</h1><span class="sp"></span><button class="btn">Kiểm khớp với Kế toán</button></div>
           <div class="card mx"><table><thead><tr><th>Danh mục</th><th>Chủ (nơi được sửa)</th><th>Cửa hàng ghi đè</th><th>Đồng bộ</th><th>Lần đối chiếu</th></tr></thead><tbody>
-            <tr><td><b>Mặt hàng · ĐVT · nhóm</b></td><td><span class="tag a">Chuỗi — cửa hàng chủ: Quận 1</span></td><td>Giá bán, Đang bán / Ngừng</td><td>changefeed mỗi 5 phút</td><td><span class="tag ok">khớp 28/11 18:30</span></td></tr>
+            <tr><td><b>Mặt hàng · ĐVT · nhóm (Ngành → Nhãn → Nhóm)</b></td><td><span class="tag a">Kế toán (sổ HM-01) — nguồn duy nhất</span></td><td>Giá bán, Đang bán / Ngừng</td><td>changefeed mỗi 5 phút</td><td><span class="tag ok">khớp 28/11 18:30</span></td></tr>
             <tr><td><b>Bảng giá</b></td><td><span class="tag">Từng cửa hàng</span></td><td>—</td><td>—</td><td>—</td></tr>
             <tr><td><b>Đối tượng / khách</b></td><td><span class="tag a">Kế toán (sổ HM-01)</span></td><td>—</td><td>mã theo SĐT đã xác minh</td><td><span class="tag ok">khớp</span></td></tr>
             <tr><td><b>Thuế suất</b></td><td><span class="tag a">Kế toán</span></td><td>—</td><td>KCT · 0 · 5 · 8 · 10 · KKKN</td><td><span class="tag ok">khớp</span></td></tr>
-            <tr><td><b>Chi nhánh / kho</b></td><td><span class="tag a">Kế toán (trong pháp nhân)</span></td><td>Kho mặc định</td><td>Quận 1 → CN01 · Quận 3 → CN02 · Thủ Đức → CN03</td><td><span class="tag c">1 lệch — xem</span></td></tr>
+            <tr><td><b>Cây đơn vị / chi nhánh / kho</b></td><td><span class="tag a">Kế toán (cây tổ chức nhiều tầng)</span></td><td>Kho mặc định</td><td>mỗi cửa hàng gắn một nút: Quận 1 → HCM/Q1 · Quận 3 → HCM/Q3 · Thủ Đức → HCM/TD</td><td><span class="tag c">1 lệch — xem</span></td></tr>
           </tbody></table></div>
           <div class="cols2">
             <div class="card sect"><h3>Quy tắc mặt hàng</h3><div class="kvl"><span>Mã SKU</span><b>Chữ hoa + số, ≤ 64 ký tự</b><span>Tên</span><b>≤ 50 ký tự</b><span>Đơn vị nhỏ nhất</span><b>Bắt buộc — số lượng lưu theo đơn vị này</b><span>ĐVT / mặt hàng</span><b>≤ 10, tên trong 40 ĐVT chuẩn</b><span>Biến thể</span><b>Cha + thuộc tính (màu, cỡ) — mỗi biến thể một mã</b><span>Theo dõi</span><b>Lô · Hạn dùng · Số seri (bật theo mặt hàng)</b><span>Giá</span><b>Gồm thuế, 2 chữ số lẻ</b></div></div>
@@ -418,12 +434,12 @@
             <div class="card sect"><h3>Workspace</h3><div class="kvl"><span>Doanh nghiệp</span><b>Chuỗi Hoa Mai</b><span>Slug</span><b class="mono">hoa-mai</b><span>Gói</span><b>Doanh nghiệp · hết hạn 31/12/2026</b><span>Khoá BizCity</span><b>một khoá cho cả chuỗi</b><span>App đang bật</span><b>Open Cake · Kế toán · POS</b></div></div>
             <div class="card sect"><h3>Tên miền</h3><div class="kvl"><span>Open Cake</span><b class="mono">hoa-mai.opencake.net</b><span>Kế toán</span><b class="mono">hoa-mai.openketoan.com</b><span>Tên miền riêng</span><b class="mono">crm.hoamai.vn <span class="tag ok">đã xác minh DNS</span></b><span>Khoá dùng được ở</span><b>3 / 3 tên miền (Hub cấp)</b></div></div>
           </div>
-          <div class="card mx"><table><thead><tr><th>Cửa hàng (tenant — đơn vị nhỏ nhất)</th><th>Blog BizCity</th><th>Mã</th><th>Sổ kế toán · chi nhánh</th><th>Kho mặc định</th><th>Trạng thái</th></tr></thead><tbody>
-            <tr><td><b>Cửa hàng Quận 1</b> <span class="tag a">chủ danh mục</span></td><td class="mono">wp-blog:212</td><td class="mono">hoa-mai-q1</td><td>HM-01 · CN01</td><td>KHO-Q1</td><td><span class="st approved">Hoạt động</span></td></tr>
-            <tr><td><b>Cửa hàng Quận 3</b></td><td class="mono">wp-blog:215</td><td class="mono">hoa-mai-q3</td><td>HM-01 · CN02</td><td>KHO-Q3</td><td><span class="st approved">Hoạt động</span></td></tr>
-            <tr><td><b>Cửa hàng Thủ Đức</b></td><td class="mono">wp-blog:230</td><td class="mono">hoa-mai-td</td><td>HM-01 · CN03</td><td>KHO-TD</td><td><span class="st pending">Đang dựng</span></td></tr>
+          <div class="card mx"><table><thead><tr><th>Cửa hàng (tenant — đơn vị nhỏ nhất)</th><th>Blog BizCity</th><th>Mã</th><th>Sổ kế toán · nút đơn vị (cây kế toán)</th><th>Kho mặc định</th><th>Trạng thái</th></tr></thead><tbody>
+            <tr><td><b>Cửa hàng Quận 1</b></td><td class="mono">wp-blog:212</td><td class="mono">hoa-mai-q1</td><td>HM-01 · Miền Nam / HCM / Q1</td><td>KHO-Q1</td><td><span class="st approved">Hoạt động</span></td></tr>
+            <tr><td><b>Cửa hàng Quận 3</b></td><td class="mono">wp-blog:215</td><td class="mono">hoa-mai-q3</td><td>HM-01 · Miền Nam / HCM / Q3</td><td>KHO-Q3</td><td><span class="st approved">Hoạt động</span></td></tr>
+            <tr><td><b>Cửa hàng Thủ Đức</b></td><td class="mono">wp-blog:230</td><td class="mono">hoa-mai-td</td><td>HM-01 · Miền Nam / HCM / TD</td><td>KHO-TD</td><td><span class="st pending">Đang dựng</span></td></tr>
           </tbody></table>
-          <div class="foot">Mỗi cửa hàng = một blog = một tenant (cô lập dữ liệu, đánh số, sổ riêng); cả chuỗi chung một pháp nhân ⇒ một sổ kế toán HM-01, cửa hàng là chi nhánh trong sổ. Thêm cửa hàng: tạo blog ở BizCity ⇒ open-setup dựng tenant.</div></div>
+          <div class="foot">Mỗi cửa hàng = một blog = một tenant (cô lập dữ liệu, đánh số, sổ riêng); cả chuỗi chung một pháp nhân ⇒ một sổ kế toán HM-01; cửa hàng gắn vào một nút của <b>cây đơn vị do Kế toán quản</b> (Miền → Chi nhánh / kho tổng → Cửa hàng — tầng giữa không phải cửa hàng). Thêm cửa hàng: tạo blog ở BizCity ⇒ open-setup dựng tenant.</div></div>
         </div>
       </div>
     </main>
@@ -446,6 +462,237 @@
     <div class="res"><span class="st draft" style="width:34px;justify-content:center">●</span><div><b>HĐ 0000142</b> · Hoá đơn bán (Kế toán) · nối từ DB-2026-0142<div class="t">app Kế toán · sổ HM-01 · CN01 — mở ở app Kế toán</div></div><span class="tag">app khác</span></div>
     <h6>Lọc nâng cao</h6>
     <div class="filters" style="padding:6px 16px 14px"><div class="chip on">Loại: mọi loại ✕</div><div class="chip">Trạng thái ▾</div><div class="chip">Ngày ▾</div><div class="chip">Cửa hàng: Quận 1 ✕</div><div class="chip">Đối tượng ▾</div><div class="chip">Số tiền ▾</div></div>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+
+<!-- [2026-11-28 07:34 PM Johnny Chu - Chu Hoàng Anh] NC-007 — f14…f20: nhóm hàng (nguồn kế toán), mặt hàng + thanh công cụ chuẩn, ngăn bộ lọc + cây đơn vị, lưu trữ / thùng rác, nhật ký & trace, lỗi & sửa lỗi, media (R2 / S3) -->
+
+<!-- F14 — Nhóm hàng (nguồn: open-ketoan) -->
+<section class="frame" id="f14">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="nhom-hang"></div>
+    <main class="main">
+      <div class="crumb">Bán hàng › <b>Nhóm hàng</b></div>
+      <div class="head"><h1>Nhóm hàng</h1><span class="tag">Ngành → Nhãn → Nhóm</span><span class="sp"></span>
+        <div class="tb"><button class="btn">⟳ Nạp</button><button class="btn">⬇ Xuất</button><button class="btn">🗑 Thùng rác</button><button class="btn pri">＋ Đề xuất nhóm mới</button></div></div>
+      <div class="banner" style="background:var(--primary-soft);color:var(--foreground);border-color:#c5dcfa">ⓘ <b>Nguồn: Kế toán</b> (sổ HM-01, màn DM11) — đồng bộ 18:30, khớp ✔. Ở app này nhóm hàng <b>chỉ đọc</b>; thêm / sửa ở Kế toán, hoặc bấm <b>Đề xuất nhóm mới</b> (gửi kế toán duyệt, duyệt xong tự về).</div>
+      <div class="card" style="padding:10px 12px"><div class="in" style="border:0">🔍 Tìm ngành, nhãn, nhóm, mã SKU…</div></div>
+      <div class="col3">
+        <div class="card cc"><div class="ch"><i>1</i>Ngành hàng <small>12</small><span class="sp"></span><small>mã 2 ký tự</small></div>
+          <div class="ci on"><code>11</code><span>Sữa bột</span><small>214</small></div>
+          <div class="ci"><code>12</code><span>Sữa nước</span><small>96</small></div>
+          <div class="ci"><code>14</code><span>Các chế phẩm từ sữa</span><small>31</small></div>
+          <div class="ci"><code>19</code><span>Bỉm / Tã</span><small>58</small></div>
+          <div class="ci"><code>Q</code><span>Quà khuyến mại</span><small>17</small></div>
+          <div class="cf"><small style="color:var(--muted-foreground)">Ngừng dùng thì ẩn, không xoá — mặt hàng cũ vẫn giữ mã</small></div></div>
+        <div class="card cc"><div class="ch"><i style="background:var(--success)">2</i>Nhãn hàng <small>6</small><span class="sp"></span><small>mã 3 ký tự</small></div>
+          <div class="ci on"><code>006</code><span>ABBOTT</span><small>42</small></div>
+          <div class="ci"><code>007</code><span>Nestlé</span><small>38</small></div>
+          <div class="ci"><code>012</code><span>Vinamilk</span><small>51</small></div>
+          <div class="ci"><code>143</code><span>QBB</span><small>0</small></div>
+          <div class="cf"></div></div>
+        <div class="card cc"><div class="ch"><i style="background:var(--warning)">3</i>Nhóm hàng <small>3</small><span class="sp"></span><small>mã 1 ký tự</small></div>
+          <div class="ci on"><code>3</code><span>Sữa công thức trẻ em</span><small>18</small></div>
+          <div class="ci"><code>4</code><span>Sữa người lớn</span><small>15</small></div>
+          <div class="ci"><code>5</code><span>Sữa mẹ bầu</span><small>9</small></div>
+          <div class="cf"></div></div>
+      </div>
+      <div class="card"><div class="filters"><b>Sữa bột / ABBOTT / Sữa công thức trẻ em</b><span class="tag">mã hàng = ngành 11 + nhãn 006 + nhóm 3 + số thứ tự 3 chữ số ⇒ <b class="mono">110063101</b></span><div class="views"><span style="color:var(--muted-foreground);font-size:14px">18 mặt hàng · mở ở màn Mặt hàng</span></div></div>
+        <table><thead><tr><th>Mã hàng</th><th>Tên hàng</th><th>ĐVT nhỏ nhất</th><th>Quy đổi</th><th>Trạng thái</th></tr></thead><tbody>
+          <tr><td class="mono">110063101</td><td>Abbott Grow Gold 3+ 900g</td><td>Hộp</td><td>Thùng = 6 Hộp</td><td><span class="st approved">Đang bán</span></td></tr>
+          <tr><td class="mono">110063102</td><td>Abbott Grow Gold 6+ 900g</td><td>Hộp</td><td>Thùng = 6 Hộp</td><td><span class="st approved">Đang bán</span></td></tr>
+        </tbody></table></div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F15 — Mặt hàng: thanh công cụ chuẩn -->
+<section class="frame" id="f15">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="mat-hang"></div>
+    <main class="main">
+      <div class="crumb">Bán hàng › <b>Mặt hàng</b></div>
+      <div class="head"><h1>Mặt hàng</h1><span class="tag a">nguồn: Kế toán</span><span class="sp"></span><span style="color:var(--muted-foreground);font-size:14px">Đồng bộ 18:30 · 1.284 mặt hàng</span></div>
+      <div class="card">
+        <div class="tb" style="padding:12px">
+          <button class="btn pri">＋ Thêm</button><button class="btn">⧉ Nhân bản</button><span class="sep"></span>
+          <button class="btn">⟳ Nạp</button><button class="btn">⬇ Xuất ▾</button><button class="btn">🖨 In ▾</button><button class="btn">⬆ Nhập Excel</button><span class="sep"></span>
+          <button class="btn">🗄 Lưu trữ</button><button class="btn">🗑 Thùng rác (3)</button><button class="btn">⋯</button>
+          <span class="sp"></span><button class="btn ghost">▥ Cột</button></div>
+        <div class="filters" style="border-top:1px solid var(--border)"><div class="chip on">Trạng thái: Đang bán ✕</div><div class="chip on">Nhóm: Sữa bột ✕</div><div class="chip">Chi nhánh ▾</div><div class="chip">Tồn ▾</div><div class="chip add">⚲ Tất cả bộ lọc</div><div class="views"><div class="chip">★ Bộ lọc đã lưu ▾</div></div></div>
+        <div class="selbar">2 dòng đã chọn <button class="btn sm">⧉ Nhân bản</button><button class="btn sm">🗄 Lưu trữ</button><button class="btn sm">🏷 Gắn nhóm</button><button class="btn sm">🖨 In tem giá</button><span class="sp" style="flex:1"></span><a>Bỏ chọn</a></div>
+        <table><thead><tr><th>☐</th><th>Mã hàng</th><th>Tên hàng</th><th>Ngành / Nhãn / Nhóm</th><th>ĐVT</th><th class="num">Giá bán</th><th class="num">Tồn (đơn vị nhỏ nhất)</th><th>Trạng thái</th></tr></thead><tbody>
+          <tr class="sel"><td>☑</td><td class="mono">110063101</td><td>Abbott Grow Gold 3+ 900g</td><td>Sữa bột / ABBOTT / Sữa CT trẻ em</td><td>Hộp</td><td class="num">545.000</td><td class="num">126</td><td><span class="st approved">Đang bán</span></td></tr>
+          <tr class="sel"><td>☑</td><td class="mono">110063102</td><td>Abbott Grow Gold 6+ 900g</td><td>Sữa bột / ABBOTT / Sữa CT trẻ em</td><td>Hộp</td><td class="num">520.000</td><td class="num">88</td><td><span class="st approved">Đang bán</span></td></tr>
+          <tr><td>☐</td><td class="mono">110074015</td><td>Nan Optipro 4 800g</td><td>Sữa bột / Nestlé / Sữa người lớn</td><td>Hộp</td><td class="num">410.000</td><td class="num">0</td><td><span class="st pending">Hết hàng</span></td></tr>
+          <tr><td>☐</td><td class="mono">110120001</td><td>Vinamilk Dielac Alpha 1 400g</td><td>Sữa bột / Vinamilk / Sữa CT trẻ em</td><td>Hộp</td><td class="num">189.000</td><td class="num">240</td><td><span class="st draft">Chờ kế toán cấp mã</span></td></tr>
+        </tbody></table>
+        <div class="foot">4 / 214 dòng <span class="sum">Tồn: 454</span></div>
+      </div>
+      <div class="banner" style="background:var(--muted);color:var(--foreground);border-color:var(--border)">ⓘ Thứ tự nút cố định ở mọi danh sách: <b>Thêm · Nhân bản</b> | <b>Nạp · Xuất · In · Nhập</b> | <b>Lưu trữ · Thùng rác · ⋯</b> — phải: <b>Cột</b>. Nút không có quyền thì ẩn; có quyền mà chưa chọn dòng thì mờ. Không có nút "Xoá hết".</div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F16 — Ngăn "Tất cả bộ lọc" + cây đơn vị (nguồn kế toán) -->
+<section class="frame" id="f16">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="mat-hang"></div>
+    <main class="main"><div class="crumb">Bán hàng › <b>Mặt hàng</b></div><div class="head"><h1>Mặt hàng</h1></div><div class="card" style="height:760px"></div></main>
+  </div>
+  <div class="scrim" style="inset:56px 560px 0 0"></div>
+  <aside class="drawer">
+    <div class="hd"><h2>Tất cả bộ lọc</h2><span class="sp" style="flex:1"></span><a>📌 Ghim bên trái</a><span>✕</span></div>
+    <div class="bd">
+      <div class="tb"><div class="in" style="flex:1">★ Tồn cuối tháng — miền Bắc ▾</div><button class="btn sm">💾 Lưu bộ lọc</button></div>
+      <div class="fr"><span>Kỳ</span><div class="in">Đầu tháng đến nay ▾</div></div>
+      <div class="fr"><span>Từ ngày</span><div class="in">01/11/2026</div></div>
+      <div class="fr"><span>Đến ngày</span><div class="in">28/11/2026</div></div>
+      <div class="card" style="padding:12px 14px;border-color:var(--primary)">
+        <div class="tb"><b>Đơn vị</b><span style="color:var(--primary)">2 / 9 nút</span><span class="sp"></span><small style="color:var(--muted-foreground)">nguồn: Kế toán (cây tổ chức)</small></div>
+        <div class="ut" style="margin:8px 0"><a class="on">Cây</a><a>Danh sách</a><a>Kho</a></div>
+        <div class="tb"><div class="in" style="flex:1;height:34px">Tìm mã, tên nút / chi nhánh / kho</div><span>☑ Đang dùng</span></div>
+        <div class="tb" style="margin:8px 0"><button class="btn sm">Chọn tất</button><button class="btn sm">Bỏ chọn</button><a>Mở hết</a><a>Thu gọn</a></div>
+        <div class="ot">
+          <div style="--d:0">▾ <span class="bx p">–</span>🏢 <code>HM</code><b>Công ty Hoa Mai (pháp nhân · sổ HM-01)</b></div>
+          <div style="--d:1">▾ <span class="bx p">–</span>📍 <code>MB</code><b>Miền Bắc</b></div>
+          <div style="--d:2">▾ <span class="bx y">✓</span>📍 <code>PT</code>Chi nhánh Phú Thọ <small style="color:var(--muted-foreground)">· kho tổng KHO-PT</small></div>
+          <div style="--d:3"><span class="bx y">✓</span>🏬 <code>PT0800</code>Cửa hàng Nguyễn Tất Thành <span class="tag a">tenant hoa-mai-pt1</span></div>
+          <div style="--d:3"><span class="bx y">✓</span>🏬 <code>PT0801</code>Cửa hàng Việt Trì <span class="tag a">tenant hoa-mai-pt2</span></div>
+          <div style="--d:2">▸ <span class="bx"></span>📍 <code>TQ</code>Chi nhánh Tuyên Quang</div>
+          <div style="--d:1">▸ <span class="bx"></span>📍 <code>MN</code>Miền Nam</div>
+        </div>
+        <div class="foot" style="padding:8px 0 0">Đang chọn Chi nhánh Phú Thọ + 2 cửa hàng · mọi kho · 1 cửa hàng chưa gắn nút</div>
+      </div>
+    </div>
+    <div class="ft"><button class="btn pri" style="justify-content:center">🔍 Tìm kiếm</button><button class="btn" style="justify-content:center">🖨 In</button></div>
+  </aside>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F17 — Lưu trữ & thùng rác (không xoá) -->
+<section class="frame" id="f17">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="mat-hang"></div>
+    <main class="main">
+      <div class="crumb">Bán hàng › Mặt hàng › <b>Lưu trữ &amp; thùng rác</b></div>
+      <div class="head"><h1>Lưu trữ &amp; thùng rác</h1></div>
+      <div class="cols2" style="grid-template-columns:1fr 420px">
+        <div class="card">
+          <div class="ut" style="padding:0 12px"><a>Đang dùng 1.284</a><a class="on">Lưu trữ 12</a><a>Thùng rác 3</a></div>
+          <table><thead><tr><th>Mã</th><th>Tên</th><th>Lưu trữ lúc · bởi</th><th>Lý do</th><th>Đã dùng ở chứng từ</th><th></th></tr></thead><tbody>
+            <tr><td class="mono">110063099</td><td>Abbott Grow 3 (mẫu cũ)</td><td>12/11 · Mai</td><td>Ngừng nhập từ NCC</td><td>214 chứng từ</td><td><button class="btn sm">↺ Khôi phục</button></td></tr>
+            <tr><td class="mono">190010007</td><td>Bỉm Bobby M42 (bao cũ)</td><td>02/11 · Lan</td><td>Đổi bao bì</td><td>58 chứng từ</td><td><button class="btn sm">↺ Khôi phục</button></td></tr>
+            <tr><td class="mono">Q0000012</td><td>Bình nước quà tặng</td><td>28/10 · Lan</td><td>Hết CTKM</td><td>0 chứng từ</td><td><button class="btn sm">↺ Khôi phục</button></td></tr>
+          </tbody></table>
+          <div class="foot" style="display:block">Lưu trữ = ẩn khỏi chọn mới, vẫn tra cứu &amp; báo cáo được. <b>Xoá vĩnh viễn</b> chỉ ở Thùng rác, chỉ với mục <b>chưa từng dùng ở chứng từ</b>, cần quyền riêng + ghi bằng chứng.</div>
+        </div>
+        <div class="card sect"><h3>Vòng đời — không xoá</h3><div class="life">
+          <b>Chứng từ</b>
+          <div class="ln"><span class="st draft">Nháp</span><span class="ar">→ Huỷ nháp →</span><span class="st cancelled">Đã huỷ</span><small>(giữ, lọc ẩn)</small></div>
+          <div class="ln"><span class="st pending">Chờ duyệt</span><span class="ar">→ Trả lại →</span><span class="st draft">Nháp</span></div>
+          <div class="ln"><span class="st approved">Đã ghi sổ</span><span class="ar">→</span><span class="tag">Đảo (chứng từ đảo)</span><span class="ar">hoặc</span><span class="tag">Phiên bản mới @2</span></div>
+          <b style="margin-top:8px">Danh mục (mặt hàng, khách, nhóm…)</b>
+          <div class="ln"><span class="st approved">Đang dùng</span><span class="ar">→</span><span class="st draft">Lưu trữ</span><span class="ar">→ Khôi phục ↺</span></div>
+          <div class="ln"><span class="st draft">Lưu trữ</span><span class="ar">→</span><span class="st cancelled">Thùng rác</span><span class="ar">→ Xoá vĩnh viễn (chưa dùng)</span></div>
+          <small style="color:var(--muted-foreground)">Mỗi bước ghi hoạt động trên doc_ref / mã mục: ai, lúc, lý do.</small>
+        </div></div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F18 — Nhật ký & trace -->
+<section class="frame" id="f18">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Nhật ký &amp; trace</b></div>
+      <div class="set"><div data-slot="snav" data-s="nhat-ky"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Nhật ký &amp; trace</h1><span class="sp"></span><button class="btn">⟳ Nạp</button><button class="btn">⬇ Xuất</button></div>
+          <div class="banner" style="background:var(--muted);color:var(--foreground);border-color:var(--border)">Đơn vị: <b>Cửa hàng Quận 1</b> — chỉ thấy dữ liệu của đơn vị này · nguồn: Loki ✔ · Tempo ✔ · CSDL ✔</div>
+          <div class="tb"><div class="in" style="width:120px">1 giờ ▾</div><div class="in" style="width:140px">mọi mức ▾</div><div class="in mono" style="flex:1;font-size:14px">mã lỗi, sự việc, route, trace… vd PERIOD_LOCKED, ban-hang.don.duyet, /api/v1/documents</div><button class="btn pri">Lọc</button></div>
+          <div class="card"><table><thead><tr><th>Lúc</th><th>Mức</th><th>Sự việc / route</th><th>Mã</th><th class="num">ms</th><th>Ai</th><th>Trace</th><th>Mã tra cứu</th></tr></thead><tbody>
+            <tr><td>19:19:37</td><td>info</td><td class="mono">POST /api/v1/actions/ban-hang.don.duyet · 200</td><td></td><td class="num">41</td><td>Mai</td><td class="mono"><a>df9de1e0…</a> ⧉</td><td class="mono">req-3239a248 ⧉</td></tr>
+            <tr class="sel"><td>19:19:30</td><td><span class="st pending">warn</span></td><td class="mono">POST /api/v1/actions/kho.xuat.ghi-so · 409</td><td class="mono">PERIOD_LOCKED</td><td class="num">12</td><td>Hùng</td><td class="mono"><a>6860d54c…</a> ⧉</td><td class="mono">req-8273c6c5 ⧉</td></tr>
+            <tr><td>19:18:31</td><td><span class="st cancelled">error</span></td><td class="mono">GET /api/v1/catalog/feed/prices · 500</td><td class="mono">INTERNAL</td><td class="num">208</td><td>đồng bộ</td><td class="mono"><a>206dbfe2…</a> ⧉</td><td class="mono">req-b9a44124 ⧉</td></tr>
+            <tr><td>19:18:00</td><td>info</td><td class="mono">GET /api/v1/org-units/tree · 200</td><td></td><td class="num">19</td><td>Lan</td><td class="mono"><a>e8210996…</a> ⧉</td><td class="mono">req-4f6937a3 ⧉</td></tr>
+          </tbody></table>
+          <div class="sect" style="border-top:1px solid var(--border)"><h3>Trace 6860d54c… — kho.xuat.ghi-so (409 PERIOD_LOCKED)</h3>
+            <div class="wf"><span>http POST /actions/kho.xuat.ghi-so</span><div class="bar" style="width:100%"></div><span>&nbsp;&nbsp;authz · scope tenant hoa-mai-q1</span><div class="bar" style="width:8%;margin-left:2%"></div><span>&nbsp;&nbsp;db SELECT period_locks</span><div class="bar db" style="width:22%;margin-left:12%"></div><span>&nbsp;&nbsp;lỗi PERIOD_LOCKED · details.reason=closed_month</span><div class="bar ev" style="width:6%;margin-left:36%"></div></div>
+            <div class="foot" style="padding:6px 0 0">Câu báo người dùng thấy: "Kỳ 10/2026 đã khoá — Cách sửa: chọn ngày trong kỳ đang mở hoặc nhờ kế toán mở kỳ." · <a>Mở mục lỗi</a> · <a>Chép mã tra cứu</a></div></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F19 — Lỗi & sửa lỗi -->
+<section class="frame" id="f19">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Lỗi &amp; sửa lỗi</b></div>
+      <div class="set"><div data-slot="snav" data-s="loi"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Lỗi &amp; sửa lỗi</h1><span class="sp"></span><span class="tag ok">Tự sửa: bật (chỉ bản dev)</span><button class="btn">Quét ngay</button></div>
+          <div class="grid3" style="grid-template-columns:repeat(5,1fr)"><div class="card stat"><b style="color:var(--destructive)">2</b><span>lỗi phần mềm cần sửa</span></div><div class="card stat"><b>1</b><span>đang sửa</span></div><div class="card stat"><b style="color:var(--warning)">7</b><span>từ chối hôm nay (dữ liệu nhập)</span></div><div class="card stat"><b style="color:var(--success)">3</b><span>đã sửa hôm nay</span></div><div class="card stat"><b style="color:var(--destructive)">1</b><span>tái phát</span></div></div>
+          <div class="card">
+            <div class="ut" style="padding:0 12px"><a class="on">Tất cả</a><a>Bán hàng</a><a>Kho</a><a>Danh mục</a><a>Đồng bộ</a><a>Hệ thống</a></div>
+            <table><thead><tr><th>Mục lỗi</th><th>Loại</th><th>Mã lỗi</th><th>Câu báo (chuẩn hoá)</th><th class="num">Lần</th><th>Lần cuối</th><th>Trạng thái</th><th>Commit / lý do</th></tr></thead><tbody>
+              <tr><td class="mono">fp:9c1e…</td><td><span class="tag c">phần mềm</span></td><td class="mono">INTERNAL</td><td>catalog.feed.prices: giá NULL ở bảng giá #</td><td class="num">14</td><td>19:18</td><td><span class="st pending">Đang sửa</span></td><td>—</td></tr>
+              <tr><td class="mono">fp:41ab…</td><td><span class="tag c">phần mềm</span></td><td class="mono">INTERNAL</td><td>ban-hang.don.in: thiếu mẫu in cho tenant #</td><td class="num">3</td><td>18:02</td><td><span class="st cancelled">Tái phát</span></td><td class="mono">e656bb41 → lại sau sửa</td></tr>
+              <tr><td class="mono">fp:07d2…</td><td><span class="tag">từ chối</span></td><td class="mono">PERIOD_LOCKED</td><td>kho.xuat.ghi-so: kỳ # đã khoá</td><td class="num">5</td><td>19:19</td><td><span class="st draft">Bỏ qua</span></td><td>đúng luật — câu báo đã đủ cách sửa</td></tr>
+              <tr><td class="mono">fp:c3f0…</td><td><span class="tag c">phần mềm</span></td><td class="mono">INTERNAL</td><td>org-units.tree: vòng lặp cha–con #</td><td class="num">2</td><td>15:40</td><td><span class="st approved">Đã sửa</span></td><td class="mono">43578786 · test tái hiện ✔</td></tr>
+            </tbody></table>
+            <div class="foot">Một mục = các lần lỗi giống nhau (phân hệ + mã lỗi + sự việc + câu báo, số coi như nhau). Trạng thái: Mới → Được yêu cầu → Đang sửa → Đã sửa (bắt buộc commit + test tái hiện) · Bỏ qua (bắt buộc lý do) · Tái phát (tự bật khi lỗi lại sau lúc sửa).</div>
+          </div>
+          <div class="card"><div class="sect" style="padding-bottom:4px"><h3>Nhật ký sửa</h3></div><table><thead><tr><th>Lúc</th><th>Người / máy sửa</th><th>Đã sửa gì</th><th>Mục lỗi</th><th>Commit</th><th>Dựng lại</th></tr></thead><tbody>
+            <tr><td>15:57 28/11</td><td>Thủy · máy MSI</td><td>org-units.tree chặn vòng cha–con khi gắn nút; thêm test</td><td class="mono">fp:c3f0…</td><td class="mono">43578786</td><td><span class="st approved">Xong 16:02</span></td></tr>
+            <tr><td>14:10 28/11</td><td>Lịch tự sửa (dev)</td><td>mẫu in mặc định khi tenant chưa khai</td><td class="mono">fp:41ab…</td><td class="mono">e656bb41</td><td><span class="st approved">Xong 14:15</span></td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F20 — Media & lưu trữ tệp (R2 / S3) -->
+<section class="frame" id="f20">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Media &amp; lưu trữ tệp</b></div>
+      <div class="set"><div data-slot="snav" data-s="media"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Media</h1><span class="sp"></span><div class="tb"><button class="btn">⬇ Xuất danh sách</button><button class="btn">🗄 Lưu trữ</button><button class="btn pri">⬆ Tải lên</button></div></div>
+          <div class="grid3"><div class="card stat"><b>R2</b><span>nơi lưu · S3-compatible · bucket oc-hoa-mai</span></div><div class="card stat"><b>3,2 GB</b><span>đã dùng / 50 GB của gói</span></div><div class="card stat"><b>12.480</b><span>tệp · 214 trùng nội dung đã gộp</span></div><div class="card stat"><b>15 phút</b><span>hạn link tải ký (không công khai)</span></div></div>
+          <div class="cols2" style="grid-template-columns:1fr 400px">
+            <div class="card">
+              <div class="filters"><div class="chip on">Loại: Ảnh ✕</div><div class="chip">Gắn với ▾</div><div class="chip">Chưa gắn</div><div class="chip">Người tải ▾</div><div class="chip">Ngày ▾</div><div class="views"><div class="chip">▦ Lưới</div><div class="chip">☰ Bảng</div></div></div>
+              <div class="mg">
+                <div class="th on"><div class="im" style="background:#fdeceb">🥫</div><div class="cp">grow-gold-3.jpg<small>mặt hàng 110063101</small></div></div>
+                <div class="th"><div class="im" style="background:#e8f1fd">🧾</div><div class="cp">hd-0000142.pdf<small>chứng từ HĐ 0000142</small></div></div>
+                <div class="th"><div class="im" style="background:#eaf6ee">📷</div><div class="cp">zalo-2811-1840.jpg<small>chat · Chị Thu</small></div></div>
+                <div class="th"><div class="im" style="background:#fff4cc">🎙</div><div class="cp">voice-0912.m4a<small>chat · Anh Hùng</small></div></div>
+                <div class="th"><div class="im" style="background:var(--muted)">📄</div><div class="cp">bang-gia-t11.xlsx<small>chưa gắn</small></div></div>
+              </div>
+            </div>
+            <div class="card sect"><h3>grow-gold-3.jpg</h3><div class="kvl" style="grid-template-columns:120px 1fr"><span>Kiểu</span><b>image/jpeg · 1200×1200 · 184 KB</b><span>Khoá lưu</span><b class="mono" style="font-size:13px">t/hoa-mai-q1/2026/11/8f3a…c2.jpg</b><span>SHA-256</span><b class="mono" style="font-size:13px">8f3a91…77c2</b><span>Gắn với</span><b>mat-hang.item:110063101 (ảnh chính)<br>ban-hang.don:DB-2026-0142 (đính kèm)</b><span>Tải lên</span><b>Lan · 20/11 09:12</b><span>Quyền xem</span><b>theo quyền của mục được gắn</b></div>
+              <div class="tb" style="margin-top:12px"><button class="btn sm">🔗 Link ký 15 phút</button><button class="btn sm">🗄 Lưu trữ</button></div></div>
+          </div>
+          <div class="card sect"><h3>Nơi lưu (bậc bản cài / site)</h3><div class="kvl"><span>Trình điều khiển</span><b>S3-compatible: Cloudflare R2 · AWS S3 · MinIO (cùng một API) · local (chỉ dev)</b><span>Endpoint · bucket</span><b class="mono" style="font-size:14px">https://&lt;acc&gt;.r2.cloudflarestorage.com · oc-hoa-mai</b><span>Khoá truy cập</span><b>trong kho bí mật · không hiện giá trị · đổi khoá không mất tệp</b><span>Giữ tệp</span><b>theo cài đặt <code>bizcity.core.storage.retention</code>; tệp lưu trữ quá hạn → thùng rác</b></div></div>
+        </div>
+      </div>
+    </main>
   </div>
   <span class="demo">Dữ liệu minh hoạ</span>
 </section>
