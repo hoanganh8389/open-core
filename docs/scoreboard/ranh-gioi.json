@@ -9,7 +9,7 @@
     "R-ENV": "cấu hình sổ cứng (BOOK_MODE)",
     "R-TEP": "tệp chuyển tiếp *-ketoan-* (xoá sau B4)"
   },
-  "total": 158,
+  "total": 154,
   "files": {
     "packages/contracts/src/documents.ts": {
       "R-SO": 1
@@ -45,9 +45,6 @@
       "R-VAI": 23,
       "R-TEP": 1
     },
-    "packages/platform/src/core/authz-manifest.ts": {
-      "R-THANG": 1
-    },
     "packages/platform/src/core/authz/scope.ts": {
       "R-BANG": 1
     },
@@ -55,8 +52,8 @@
       "R-BANG": 1
     },
     "packages/platform/src/core/settings.ts": {
-      "R-BANG": 2,
-      "R-THANG": 4
+      "R-BANG": 1,
+      "R-THANG": 2
     },
     "packages/platform/src/db/migrate-ketoan-legacy.ts": {
       "R-TEP": 1
