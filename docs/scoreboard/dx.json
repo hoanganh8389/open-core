@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-11-29",
-  "coreRef": "open-core @ 4dde504 (0.6.0 + 0007)",
+  "measuredAt": "2026-11-29 (F1)",
+  "coreRef": "open-core feat/s005-f1-entity (0.6.0 + 0007 + entity)",
   "apps": [
     "open-core",
     "open-cake",
@@ -136,8 +136,8 @@
   "levels": {
     "TP-01": {
       "open-core": {
-        "level": 1,
-        "evidence": "zod viết tay trong input mỗi defineAction — test/golden/nhom-khach.mjs (NhomKhachInput)"
+        "level": 2,
+        "evidence": "packages/platform/src/entity/entity.ts — field.* sinh zod tạo / sửa (golden NhomKhach 4 dòng trường) (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 2,
@@ -164,8 +164,8 @@
     },
     "TP-03": {
       "open-core": {
-        "level": 1,
-        "evidence": "core/list.ts defineListAction — cột / phép lọc khai lại tay (golden nhomKhachList)"
+        "level": 3,
+        "evidence": "packages/platform/src/entity/entity.ts — defineEntity tự sinh defineListAction: cột, tìm, sắp, phép lọc theo kiểu, ẩn lưu trữ (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 1,
@@ -178,8 +178,8 @@
     },
     "TP-04": {
       "open-core": {
-        "level": 0,
-        "evidence": "golden getNhomKhach + findById viết tay"
+        "level": 3,
+        "evidence": "packages/platform/src/entity/entity.ts — <key>.get sinh tự động (REST + MCP) (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 1,
@@ -192,8 +192,8 @@
     },
     "TP-05": {
       "open-core": {
-        "level": 2,
-        "evidence": "defineListAction exportPermission ⇒ csv / json / ndjson (core/list.ts); chưa có xlsx"
+        "level": 3,
+        "evidence": "packages/platform/src/entity/entity.ts — <key>.export sinh tự động: csv / json / ndjson; còn thiếu xlsx (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 0,
@@ -206,8 +206,8 @@
     },
     "TP-06": {
       "open-core": {
-        "level": 0,
-        "evidence": "lõi chưa có — golden importNhomKhach viết tay ~40 dòng"
+        "level": 3,
+        "evidence": "packages/platform/src/entity/entity.ts — <key>.import sinh cho lớp config / record: ghép cột theo nhãn + aliases, chạy thử mặc định, lỗi theo dòng + trường, cùng kiểm của \"thêm\" (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 0,
@@ -416,8 +416,8 @@
     },
     "TP-21": {
       "open-core": {
-        "level": 1,
-        "evidence": "ctx.events.emit gọi tay mỗi action (golden phát 4 chỗ)"
+        "level": 3,
+        "evidence": "packages/platform/src/entity/entity.ts — <key>.changed / <key>.imported phát tự động cho mọi ghi sinh ra (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 0,
@@ -430,8 +430,8 @@
     },
     "TP-22": {
       "open-core": {
-        "level": 0,
-        "evidence": "golden assertCodeFree viết tay"
+        "level": 2,
+        "evidence": "packages/platform/src/entity/entity.ts — field.*({ unique: true }) ⇒ CONFLICT có trường; nhập báo trùng trong tệp và trùng CSDL (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 1,
@@ -444,8 +444,8 @@
     },
     "TP-23": {
       "open-core": {
-        "level": 1,
-        "evidence": "documentSpine.archive / restore cho chứng từ; thực thể khác viết tay (golden archiveNhomKhach)"
+        "level": 2,
+        "evidence": "packages/platform/src/entity/entity.ts — lifecycle: 'archive' ⇒ <key>.archive (lưu trữ / khôi phục), danh sách ẩn lưu trữ; sửa bản đã lưu trữ bị chặn (lớp config / record; master viết action riêng — SC-ENT-1)"
       },
       "open-cake": {
         "level": 1,
@@ -561,9 +561,9 @@
       "packages/platform/test/golden/nhom-khach.mjs",
       "packages/platform/test/golden/phieu-yeu-cau.mjs"
     ],
-    "baselineLoc": 177,
+    "baselineLoc": 78,
     "test": "TEST_DATABASE_URL=… node --test packages/platform/test/golden.test.mjs (3 / 3 ĐẠT trên Postgres 16)",
-    "note": "Chỉ phần máy chủ (đo thật). Giao diện chưa đo được vì lõi chưa có web-shell: màn danh sách + form tương đương hôm nay tốn ≈ 108 dòng (open-cake catalog/item-table + item-sheet) đến 118 dòng (open-ketoan WarehousesPage) cho MỖI thực thể, chưa kể màn chi tiết ⇒ tính năng vàng hôm nay ≈ 177 + ~350 ≈ 530 dòng (phần giao diện là ước theo số đối chiếu)."
+    "note": "Phần máy chủ: 177 dòng (0.6, F0) ⇒ 78 dòng (Entity Registry, F1) — Nhóm khách 112 ⇒ 13 dòng, cùng test, cùng mã action. Phiếu yêu cầu (lớp document) chưa đổi: 48 dòng. Giao diện chưa đo được (lõi chưa có web-shell), ước ≈ 350 theo màn tương đương ở app."
   },
   "debt": {
     "open-cake": {

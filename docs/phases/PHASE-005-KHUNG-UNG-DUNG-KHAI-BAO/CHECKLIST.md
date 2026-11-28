@@ -11,14 +11,14 @@
 | S005-F0-1 | `tools/scoreboard-dx.mjs` + `docs/scoreboard/dx.json` / `DX.md` (tệp riêng, không đụng `scoreboard.json` của lane R) + đo D0–D3 cho 3 app có bằng chứng + nợ viết tay đo thật; `--check` trong `pnpm test` <!-- [2026-11-29 01:14 AM Johnny Chu - Chu Hoàng Anh] S005-F0 — số đo thật --> | T | — | ☑ lõi 31 % · cake 20 % · ketoan 27 %; nợ: cake 17 route / 8 bảng, ketoan 211 / 108; bánh cóc thử đỏ ở 178 > 177 |
 | S005-F0-2 | module mẫu `golden` (nhóm khách + phiếu yêu cầu) viết **bằng API hiện có** ⇒ số dòng / tệp mốc thật | T | — | ☑ 177 dòng / 3 tệp máy chủ; `golden.test.mjs` 3 / 3 trên Postgres |
 | **F1** | **Entity Registry** | | | |
-| S005-F1-1 | `@bizcity/platform/entity`: `defineEntity`, `field.*`, sáu lớp, registry trong bộ nhớ, `GET /api/v1/meta/entities` | T | — | ☐ |
+| S005-F1-1 | `@bizcity/platform/entity`: `defineEntity`, `field.*`, sáu lớp, registry trong bộ nhớ, `GET /api/v1/meta/entities` <!-- [2026-11-29 01:17 AM Johnny Chu - Chu Hoàng Anh] S005-F1 — Entity Registry bản đầu --> | T | — | ☑ `src/entity/entity.ts`; `entity.test.mjs` 5 / 5; golden Nhóm khách 112 ⇒ 13 dòng |
 | S005-F1-2 | `extendEntity` / `registerField` / `registerRelation` / `registerValidator` + SC-ENT-3 | T | — | ☐ |
 | S005-F1-3 | `entity_meta` + `records` ở lõi (lõi hoá 0103 của open-cake), `storage: 'meta' / 'extension'` | T | S003-2 | ☐ |
-| S005-F1-4 | sinh zod / JSON Schema / `ListDef` / import mapping từ registry; `defineListAction` nhận `ListDef` sinh ra | T | S003-4 | ☐ |
+| S005-F1-4 | sinh zod / JSON Schema / `ListDef` / import mapping từ registry; `defineListAction` nhận `ListDef` sinh ra | T | S003-4 | ◐ zod, ListDef, ghép cột nhập: có; JSON Schema: chưa |
 | **F2** | **API đọc + cổng ghi** | | | |
-| S005-F2-1 | API đọc sinh tự động `<key>.list / .get / .export` (REST + MCP chỉ đọc), che `sensitive` | T | S003-4 | ☐ |
-| S005-F2-2 | ghi sinh cho `config` / `record` (action + sự kiện); Conformance Gate SC-ENT-1…6 lúc nạp + trong `pnpm test` | T | — | ☐ |
-| S005-F2-3 | nhập chạy thử chung (tải → ghép → chạy thử → ghi qua action) + XLSX + xuất nền | T | S003-10, S003-11 | ☐ |
+| S005-F2-1 | API đọc sinh tự động `<key>.list / .get / .export` (REST + MCP chỉ đọc), che `sensitive` | T | S003-4 | ◐ list / get / export có; che `sensitive` chưa |
+| S005-F2-2 | ghi sinh cho `config` / `record` (action + sự kiện); Conformance Gate SC-ENT-1…6 lúc nạp + trong `pnpm test` | T | — | ◐ create / update / archive + sự kiện; SC-ENT-1 chặn lúc nạp; SC-ENT-2…6 chưa |
+| S005-F2-3 | nhập chạy thử chung (tải → ghép → chạy thử → ghi qua action) + XLSX + xuất nền | T | S003-10, S003-11 | ◐ `<key>.import` (ghép theo nhãn + aliases, chạy thử, lỗi theo dòng); XLSX, ghi theo lô / chạy nền: chưa |
 | **F3** | **View Framework** | | | |
 | S005-F3-1 | `defineScreen` + `GET /api/v1/meta/screens` + bí danh `registerScreens` / menu | T | S003-3 (Q-P5-7) | ☐ |
 | S005-F3-2 | `@bizcity/web-shell`: ScreenRenderer, ListScreen, FormSheet, DetailScreen, bốn trạng thái — khớp f1–f3 | T | S003-6, S003-12, S003-15 | ☐ |

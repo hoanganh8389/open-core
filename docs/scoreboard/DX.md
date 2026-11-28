@@ -2,20 +2,20 @@
 
 <!-- sinh bởi tools/scoreboard-dx.mjs từ dx.json — đừng sửa tay tệp này -->
 
-> **Đo lúc:** 2026-11-29 · **open-core:** open-core @ 4dde504 (0.6.0 + 0007) · **Nguồn:** [`dx.json`](dx.json) · **Phương pháp:** [PHASE-005 · 60](../phases/PHASE-005-KHUNG-UNG-DUNG-KHAI-BAO/60-SCOREBOARD-DX.md)
+> **Đo lúc:** 2026-11-29 (F1) · **open-core:** open-core feat/s005-f1-entity (0.6.0 + 0007 + entity) · **Nguồn:** [`dx.json`](dx.json) · **Phương pháp:** [PHASE-005 · 60](../phases/PHASE-005-KHUNG-UNG-DUNG-KHAI-BAO/60-SCOREBOARD-DX.md)
 > **Thang:** D0 viết tay toàn bộ · D1 có helper, vẫn ráp nhiều · D2 khai một dòng / khối · D3 tự sinh
 
 | App | Điểm DX | Repo đo |
 |---|---|---|
-| open-core | **31 %** | origin/main @ 4dde504 |
+| open-core | **48 %** | origin/main @ 4dde504 |
 | open-cake | **20 %** | D:/projects/open-cake @ 1024200 |
 | open-ketoan | **27 %** | bản làm việc open-ketoan-main @ af5305ec (đang dở merge README — chỉ đọc) |
 
 ## Tính năng vàng (module mẫu `golden`)
 
-- **177 dòng viết tay** (đếm thật, bỏ dòng trống / chú thích) trong 3 tệp: `packages/platform/test/golden/0001_golden.sql`, `packages/platform/test/golden/nhom-khach.mjs`, `packages/platform/test/golden/phieu-yeu-cau.mjs`. Mốc bánh cóc: 177.
+- **78 dòng viết tay** (đếm thật, bỏ dòng trống / chú thích) trong 3 tệp: `packages/platform/test/golden/0001_golden.sql`, `packages/platform/test/golden/nhom-khach.mjs`, `packages/platform/test/golden/phieu-yeu-cau.mjs`. Mốc bánh cóc: 78.
 - Chạy thật: `TEST_DATABASE_URL=… node --test packages/platform/test/golden.test.mjs (3 / 3 ĐẠT trên Postgres 16)`.
-- Chỉ phần máy chủ (đo thật). Giao diện chưa đo được vì lõi chưa có web-shell: màn danh sách + form tương đương hôm nay tốn ≈ 108 dòng (open-cake catalog/item-table + item-sheet) đến 118 dòng (open-ketoan WarehousesPage) cho MỖI thực thể, chưa kể màn chi tiết ⇒ tính năng vàng hôm nay ≈ 177 + ~350 ≈ 530 dòng (phần giao diện là ước theo số đối chiếu).
+- Phần máy chủ: 177 dòng (0.6, F0) ⇒ 78 dòng (Entity Registry, F1) — Nhóm khách 112 ⇒ 13 dòng, cùng test, cùng mã action. Phiếu yêu cầu (lớp document) chưa đổi: 48 dòng. Giao diện chưa đo được (lõi chưa có web-shell), ước ≈ 350 theo màn tương đương ở app.
 
 ## Nợ viết tay ở app (đo thật, bánh cóc: không được tăng)
 
@@ -28,12 +28,12 @@
 
 | # | Thao tác | open-core | open-cake | open-ketoan |
 |---|---|---|---|---|
-| TP-01 | schema kiểm dữ liệu tạo / sửa | D1 | D2 | D1 |
+| TP-01 | schema kiểm dữ liệu tạo / sửa | D2 | D2 | D1 |
 | TP-02 | kiểu TS chung API ↔ giao diện | D1 | D2 | D1 |
-| TP-03 | API danh sách (lọc, tìm, sắp, con trỏ) | D1 | D1 | D0 |
-| TP-04 | API chi tiết theo ID | D0 | D1 | D0 |
-| TP-05 | xuất CSV / XLSX / JSON / NDJSON | D2 | D0 | D1 |
-| TP-06 | nhập: ghép cột, chạy thử, lỗi từng dòng | D0 | D0 | D1 |
+| TP-03 | API danh sách (lọc, tìm, sắp, con trỏ) | D3 | D1 | D0 |
+| TP-04 | API chi tiết theo ID | D3 | D1 | D0 |
+| TP-05 | xuất CSV / XLSX / JSON / NDJSON | D3 | D0 | D1 |
+| TP-06 | nhập: ghép cột, chạy thử, lỗi từng dòng | D3 | D0 | D1 |
 | TP-07 | màn danh sách (chip lọc, cột, URL, bulk) | D0 | D1 | D1 |
 | TP-08 | form tạo / sửa (lỗi dưới ô) | D0 | D1 | D1 |
 | TP-09 | màn chi tiết | D0 | D0 | D0 |
@@ -48,9 +48,9 @@
 | TP-18 | menu + số đếm + route URL | D0 | D0 | D1 |
 | TP-19 | REST + MCP cho action | D2 | D1 | D2 |
 | TP-20 | idempotency + audit cho ghi | D3 | D3 | D2 |
-| TP-21 | sự kiện / outbox | D1 | D0 | D1 |
-| TP-22 | chống trùng + cảnh báo | D0 | D1 | D1 |
-| TP-23 | lưu trữ / khôi phục | D1 | D1 | D0 |
+| TP-21 | sự kiện / outbox | D3 | D0 | D1 |
+| TP-22 | chống trùng + cảnh báo | D2 | D1 | D1 |
+| TP-23 | lưu trữ / khôi phục | D2 | D1 | D0 |
 | TP-24 | bốn trạng thái + lỗi có cách sửa | D0 | D2 | D1 |
 | TP-25 | màn Cài đặt + nguồn giá trị + lịch sử | D1 | D0 | D1 |
 | TP-26 | trường phụ thuộc tổ chức | D1 | D0 | D0 |
@@ -62,7 +62,7 @@
 ## Bằng chứng
 
 ### TP-01 schema kiểm dữ liệu tạo / sửa
-- **open-core** (D1): zod viết tay trong input mỗi defineAction — test/golden/nhom-khach.mjs (NhomKhachInput)
+- **open-core** (D2): packages/platform/src/entity/entity.ts — field.* sinh zod tạo / sửa (golden NhomKhach 4 dòng trường) (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D2): packages/contracts/src/cake/*.ts — một khối zod mỗi spec, dùng chung server / mock / client; flex/records.ts:9-27 sinh tự động (3 loại)
 - **open-ketoan** (D1): apps/api/src/modules/warehouses/warehouse.routes.ts:23-35 bodySchema / patchSchema viết tay
 
@@ -72,22 +72,22 @@
 - **open-ketoan** (D1): @ketoan/contracts; DTO danh mục chép tay hai nơi (WarehouseDto ↔ WarehousesPage.tsx:17)
 
 ### TP-03 API danh sách (lọc, tìm, sắp, con trỏ)
-- **open-core** (D1): core/list.ts defineListAction — cột / phép lọc khai lại tay (golden nhomKhachList)
+- **open-core** (D3): packages/platform/src/entity/entity.ts — defineEntity tự sinh defineListAction: cột, tìm, sắp, phép lọc theo kiểu, ẩn lưu trữ (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D1): apps/api/src/care/inbox.ts:62-122 Kysely tay, con trỏ tự viết; runtime.ts:26-28 paged()
 - **open-ketoan** (D0): warehouse.routes.ts:155 r.get + Kysely tay; con trỏ riêng catalog.service.ts:409
 
 ### TP-04 API chi tiết theo ID
-- **open-core** (D0): golden getNhomKhach + findById viết tay
+- **open-core** (D3): packages/platform/src/entity/entity.ts — <key>.get sinh tự động (REST + MCP) (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D1): care/inbox.ts:124 cake.contact.get — handler tay, route / kiểm từ spec
 - **open-ketoan** (D0): mỗi service tự select().where()
 
 ### TP-05 xuất CSV / XLSX / JSON / NDJSON
-- **open-core** (D2): defineListAction exportPermission ⇒ csv / json / ndjson (core/list.ts); chưa có xlsx
+- **open-core** (D3): packages/platform/src/entity/entity.ts — <key>.export sinh tự động: csv / json / ndjson; còn thiếu xlsx (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D0): không có (grep text/csv | xlsx = 0)
 - **open-ketoan** (D1): DataGrid xuất .xlsx phía trình duyệt; CSV máy chủ viết tay addins/excel-export/index.ts (17 route)
 
 ### TP-06 nhập: ghép cột, chạy thử, lỗi từng dòng
-- **open-core** (D0): lõi chưa có — golden importNhomKhach viết tay ~40 dòng
+- **open-core** (D3): packages/platform/src/entity/entity.ts — <key>.import sinh cho lớp config / record: ghép cột theo nhãn + aliases, chạy thử mặc định, lỗi theo dòng + trường, cùng kiểm của "thêm" (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D0): không có (grep dryRun | columnMap = 0)
 - **open-ketoan** (D1): components/ExcelImport.tsx + catalog-import.ts:31 importProducts(dryRun); mỗi thực thể tự viết /import (8 endpoint)
 
@@ -162,17 +162,17 @@
 - **open-ketoan** (D2): actions.ts tự động; mã cũ còn writeAudit tay (warehouse.routes.ts:86)
 
 ### TP-21 sự kiện / outbox
-- **open-core** (D1): ctx.events.emit gọi tay mỗi action (golden phát 4 chỗ)
+- **open-core** (D3): packages/platform/src/entity/entity.ts — <key>.changed / <key>.imported phát tự động cho mọi ghi sinh ra (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D0): chỉ pg_notify gợi ý (stream.ts:20-22); emits khai nhưng không phát; không có outbox
 - **open-ketoan** (D1): ctx.events.emit + outbox; chỉ ~3 tệp phát
 
 ### TP-22 chống trùng + cảnh báo
-- **open-core** (D0): golden assertCodeFree viết tay
+- **open-core** (D2): packages/platform/src/entity/entity.ts — field.*({ unique: true }) ⇒ CONFLICT có trường; nhập báo trùng trong tệp và trùng CSDL (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D1): care-kernel/src/identity.ts (chỉ khách); trùng SKU / email viết tay
 - **open-ketoan** (D1): partner.hints.ts, item.hints.ts, catalog-warn.ts (chỉ đối tượng / hàng)
 
 ### TP-23 lưu trữ / khôi phục
-- **open-core** (D1): documentSpine.archive / restore cho chứng từ; thực thể khác viết tay (golden archiveNhomKhach)
+- **open-core** (D2): packages/platform/src/entity/entity.ts — lifecycle: 'archive' ⇒ <key>.archive (lưu trữ / khôi phục), danh sách ẩn lưu trữ; sửa bản đã lưu trữ bị chặn (lớp config / record; master viết action riêng — SC-ENT-1)
 - **open-cake** (D1): records.ts:61-67 core.record.archive (chỉ flex); còn lại tay
 - **open-ketoan** (D0): xoá cứng deleteFrom (warehouse.routes.ts:128)
 
