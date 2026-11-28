@@ -19,7 +19,7 @@ export interface UserMetaKeyDef {
 export interface SettingKeyDef {
   key: string;
   label: string;
-  scopes: ('tenant' | 'accounting_unit' | 'branch' | 'user')[];
+  scopes: string[]; // [2026-11-28 09:52 PM Johnny Chu - Chu Hoàng Anh] S004-W2-4 — bậc do app đăng ký (registerSettingScopes), không còn liệt kê cứng accounting_unit
   permission: string;
 }
 

@@ -140,11 +140,38 @@ export async function readSetting<T = unknown>(trx: Db, tenantId: string, module
 
 /** Khoá mới chỉ lưu ở kho giá trị (không có nhánh JSON cũ). */
 export const VALUES_STORAGE = 'setting_values';
-export type SettingScopeType = 'tenant' | 'accounting_unit' | 'branch' | 'user';
-/** Thứ tự giải: hẹp thắng trước. */
-const SCOPE_ORDER: readonly SettingScopeType[] = ['user', 'branch', 'accounting_unit', 'tenant'];
+// [2026-11-28 09:52 PM Johnny Chu - Chu Hoàng Anh] S004-W2-4 (PHASE-004 Q-P4-4, R-CORE-8) — thang cài đặt MỞ: lõi có bốn bậc nền (user → branch → tenant, "tenant" luôn cuối) và để app khai thêm bậc của mình
+// (kế toán: accounting_unit, giữa tenant và branch) bằng registerSettingScopes. Trước đây bậc kế toán viết cứng trong thang của lõi.
+export type SettingScopeType = 'tenant' | 'branch' | 'user' | (string & {});
+export interface SettingScopeDef {
+  /** Tên bậc, chữ thường / gạch dưới (khớp ràng buộc 0006). */
+  key: string;
+  /** Bậc mới nằm GIỮA hai bậc này (hẹp hơn `wider`, rộng hơn `narrower`) — mặc định giữa tenant và branch. */
+  between?: { wider: string; narrower: string };
+  /** Bản ghi có thật của đơn vị (định danh, không phải mã — ECP-04). Không khai = tra bảng cùng tên mặc định không có ⇒ phải khai. */
+  exists: (trx: Db, tenantId: string, id: string) => Promise<boolean>;
+}
+const BASE_ORDER = ['user', 'branch', 'tenant'];
+const extraScopes = new Map<string, SettingScopeDef>();
+const SCOPE_KEY_RE = /^[a-z][a-z0-9_]{1,30}$/;
+export function registerSettingScopes(defs: SettingScopeDef[]): void {
+  for (const d of defs) {
+    if (!SCOPE_KEY_RE.test(d.key) || d.key === 'tenant') throw new Error(`Bậc cài đặt "${d.key}" sai khuôn / trùng bậc nền`);
+    const w = d.between?.wider ?? 'tenant', n = d.between?.narrower ?? 'branch';
+    if (![...BASE_ORDER, ...extraScopes.keys()].includes(w) || ![...BASE_ORDER, ...extraScopes.keys()].includes(n)) throw new Error(`Bậc "${d.key}": bậc "${w}" / "${n}" chưa có`);
+    extraScopes.set(d.key, d);
+  }
+}
+/** Chỉ cho kiểm thử. */
+export function resetSettingScopes(): void { extraScopes.clear(); }
+/** Thứ tự giải: hẹp thắng trước. Bậc thêm chèn ngay sau bậc hẹp hơn của nó (mặc định branch). */
+function scopeOrder(): string[] {
+  const order = [...BASE_ORDER];
+  for (const d of extraScopes.values()) { const at = order.indexOf(d.between?.narrower ?? 'branch'); order.splice(at + 1, 0, d.key); }
+  return order;
+}
 
-export interface SettingScope { accountingUnitId?: string; branchId?: string; userId?: string; date?: string }
+export interface SettingScope { accountingUnitId?: string; branchId?: string; userId?: string; /** Bậc do app khai: { accounting_unit: '12' }. */ scopes?: Record<string, string>; date?: string }
 export type SettingSource = { scope: SettingScopeType; scopeId: string; validFrom: string; version: number } | 'legacy' | 'default';
 export interface SettingRead { key: string; value: unknown; source: SettingSource; configVersion: number; /** Căn cứ của phiên bản đang áp (1.2); null khi nguồn là giá trị cũ / mặc định hoặc phiên bản chưa khai căn cứ. */ basis?: SettingBasis | null }
 export interface SettingVersion { scope: SettingScopeType; scopeId: string; value: unknown; validFrom: string; version: number; reason: string | null; basis: SettingBasis | null; by: string; at: string }
@@ -193,8 +220,8 @@ export function checkSettingValue(valueType: string, v: unknown): string | null 
 
 /** Phạm vi đã khai được dùng cho đọc: (loại, mã) theo thứ tự hẹp → rộng, chỉ phạm vi registry cho phép. */
 function scopeChain(entry: SettingEntry, scope: SettingScope): { type: SettingScopeType; id: string }[] {
-  const given: Record<SettingScopeType, string | undefined> = { user: scope.userId, branch: scope.branchId, accounting_unit: scope.accountingUnitId, tenant: '' };
-  return SCOPE_ORDER.filter((t) => entry.scopes.includes(t) && given[t] !== undefined).map((t) => ({ type: t, id: given[t]! }));
+  const given = (t: string): string | undefined => (t === 'user' ? scope.userId : t === 'branch' ? scope.branchId : t === 'tenant' ? '' : scope.scopes?.[t] ?? (t === 'accounting_unit' ? scope.accountingUnitId : undefined));
+  return scopeOrder().filter((t) => entry.scopes.includes(t as never) && given(t) !== undefined).map((t) => ({ type: t, id: given(t)! }));
 }
 
 async function configVersion(trx: Db, tenantId: string): Promise<number> {
@@ -270,7 +297,8 @@ export async function setSetting(
   if (entry.permission && !who.can(entry.permission)) throw Errors.forbidden(`Ghi "${key}" cần quyền ${entry.permission}`);
   const scope = input.scope ?? 'tenant';
   const scopeId = scope === 'tenant' ? '' : (input.scopeId ?? '').trim();
-  if (!entry.scopes.includes(scope)) throw Errors.validation(`Khoá "${key}" không đặt theo phạm vi ${scope} (chỉ: ${entry.scopes.join(', ')})`);
+  if (!entry.scopes.includes(scope as never)) throw Errors.validation(`Khoá "${key}" không đặt theo phạm vi ${scope} (chỉ: ${entry.scopes.join(', ')})`);
+  if (scope !== 'tenant' && !scopeOrder().includes(scope)) throw Errors.validation(`Bậc cài đặt "${scope}" chưa đăng ký (registerSettingScopes)`);
   if (scope !== 'tenant' && !/^\d+$/.test(scopeId)) throw Errors.validation(`Phạm vi ${scope} cần scopeId là định danh số`);
   const bad = checkSettingValue(entry.valueType, input.value);
   if (bad) throw Errors.validation(`Giá trị của "${key}" ${bad}`);
@@ -376,11 +404,14 @@ export async function settingImpact(
 }
 
 const scopeFor = (scope: SettingScopeType, id: string, date: string): SettingScope =>
-  scope === 'user' ? { userId: id, date } : scope === 'branch' ? { branchId: id, date } : scope === 'accounting_unit' ? { accountingUnitId: id, date } : { date };
+  scope === 'user' ? { userId: id, date } : scope === 'branch' ? { branchId: id, date } : scope === 'tenant' ? { date } : { scopes: { [scope]: id }, ...(scope === 'accounting_unit' ? { accountingUnitId: id } : {}), date };
 
 /** Phạm vi hẹp phải trỏ tới một bản ghi có thật của đơn vị (định danh, không phải mã — ECP-04). */
 async function assertScopeExists(trx: Db, tenantId: string, scope: SettingScopeType, id: string): Promise<void> {
-  const table = scope === 'user' ? sql`users` : scope === 'branch' ? sql`branches` : sql`accounting_units`;
+  const def = extraScopes.get(scope);
+  if (def) { if (!(await def.exists(trx, tenantId, id))) throw Errors.notFound(`${scope} ${id} của đơn vị`); return; }
+  if (scope !== 'user' && scope !== 'branch') throw Errors.validation(`Bậc cài đặt "${scope}" chưa đăng ký (registerSettingScopes)`);
+  const table = scope === 'user' ? sql`users` : sql`branches`;
   const r = await sql<{ n: number }>`SELECT count(*)::int AS n FROM ${table} WHERE tenant_id = ${tenantId} AND id = ${id}::bigint`.execute(trx);
   if (!r.rows[0]?.n) throw Errors.notFound(`${scope} ${id} của đơn vị`);
 }

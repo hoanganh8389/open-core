@@ -49,6 +49,9 @@ export const CORE_COVERED_BY_KETOAN: Readonly<Record<string, string>> = {
   // open-ketoan sinh ở 0156 (sau 0005 theo thứ tự tên) và do trigger đồng bộ; open-ketoan thêm bản tương đương (0187_truc_chung_tu.sql — open-ketoan đã tới 0186; PHASE-004 W1-4) khi lên trục chứng từ
   // qua R-FLOW, rồi đổi giá trị dưới đây thành tên tệp đó. Tới lúc ấy mã document-spine của lõi không dùng được trên CSDL open-ketoan.
   '0005_platform_truc_chung_tu.sql': 'chờ open-ketoan 0187_truc_chung_tu.sql (sau 0156) — PHASE-004 S004-W1-4, R-FLOW',
+  // [2026-11-28 09:52 PM Johnny Chu - Chu Hoàng Anh] S004-W2-4 — không chạy trên CSDL open-ketoan: ràng buộc cũ của kế toán (liệt kê accounting_unit) vẫn hợp lệ với mọi giá trị nó ghi;
+  // kế toán đăng ký bậc accounting_unit bằng registerSettingScopes. Bản cài mới của app khác nhận 0006 bình thường.
+  '0006_platform_bac_cai_dat_mo.sql': 'không chạy — ràng buộc cũ của open-ketoan vẫn hợp lệ (PHASE-004 Q-P4-4)',
 };
 
 const record = (c: MigrationClient, name: string) => c.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING', [name]);

@@ -10,7 +10,7 @@
 import type { FastifyError, FastifyInstance } from 'fastify';
 import { ZodError, z } from 'zod';
 import { ERROR_CATALOG, ERROR_CODES, type ApiSuccess, type ErrorCode, type ErrorReason, type PageMeta } from '@bizcity/contracts';
-import { AppError, classifyLedgerTriggerError, withRemedy } from './errors.js';
+import { AppError, classifyDbError, withRemedy } from './errors.js';
 import { currentTraceId } from './tracing.js';
 import { ghiKiem } from './nhat-ky-kiem.js';
 
@@ -94,7 +94,7 @@ export function registerErrorHandler(app: FastifyInstance): void {
     // Lỗi ràng buộc / trigger ở CSDL: thông điệp tiếng Việt có chủ đích (bút toán không cân, sổ cái chỉ thêm…)
     const pgCode = (err as { code?: string }).code;
     // [2026-11-08 02:05 PM Johnny Chu - Chu Hoàng Anh] PHASE-029 — S029-33: trigger sổ cái (cân, khoá kỳ, chỉ thêm) ra đúng mã §5 trước khi rơi về POSTING_FAILED
-    const trigger = classifyLedgerTriggerError(err);
+    const trigger = classifyDbError(err);
     // [2026-11-10 10:50 AM Johnny Chu - Chu Hoàng Anh] PHASE-022 — S022-17 (RV-R1-06): lỗi từ trigger CSDL mang step = db-trigger và phương án khắc phục (BIZCITY-ERRORS-v1 §4b mục 4)
     const dbStep = { context: { step: 'db-trigger' } };
     if (trigger) return send(trigger.code, err.message, withRemedy(trigger.code, { ...(trigger.reason ? withReason(trigger.reason) : {}), ...dbStep }, trigger.reason));

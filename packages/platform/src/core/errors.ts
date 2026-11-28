@@ -102,6 +102,25 @@ export function classifyLedgerTriggerError(err: unknown): { code: ErrorCode; rea
   return undefined;
 }
 
+// [2026-11-28 09:52 PM Johnny Chu - Chu Hoàng Anh] S004-W2-4 (PHASE-004 Q-P4-3, R-CORE-8) — bộ phân loại lỗi CSDL do app đăng ký: app biết trigger / ràng buộc của bảng nghiệp vụ của nó, lõi không biết.
+// Bộ phân loại trả mã chuẩn (hoặc undefined ⇒ thử bộ kế). Chuyển tiếp: `classifyLedgerTriggerError` (nợ — thuộc kế toán, dời ở B-6) còn là bộ MẶC ĐỊNH tới khi app
+// đăng ký bộ của mình kèm `replaceDefaults`; sau đó lõi xoá hẳn (S004-W2-6).
+export type DbErrorClassifier = (err: unknown) => { code: ErrorCode; reason?: ErrorReason } | undefined;
+const defaultClassifiers: DbErrorClassifier[] = [classifyLedgerTriggerError];
+let appClassifiers: DbErrorClassifier[] = [];
+let useDefaults = true;
+export function registerDbErrorClassifier(fn: DbErrorClassifier, opts: { replaceDefaults?: boolean } = {}): void {
+  appClassifiers.push(fn);
+  if (opts.replaceDefaults) useDefaults = false;
+}
+/** Chỉ cho kiểm thử: về trạng thái ban đầu. */
+export function resetDbErrorClassifiers(): void { appClassifiers = []; useDefaults = true; }
+/** Phân loại một lỗi CSDL qua các bộ đã đăng ký (app trước, mặc định sau). */
+export function classifyDbError(err: unknown): { code: ErrorCode; reason?: ErrorReason } | undefined {
+  for (const fn of [...appClassifiers, ...(useDefaults ? defaultClassifiers : [])]) { const r = fn(err); if (r) return r; }
+  return undefined;
+}
+
 /**
  * Mã lỗi (bizcity_errors@1) của một lỗi bất kỳ, khớp cách core/http.ts trả cho người gọi: AppError giữ mã; lỗi kiểm dữ liệu →
  * VALIDATION_ERROR; lỗi trigger / ràng buộc của CSDL theo SQLSTATE; còn lại INTERNAL_ERROR. Dùng cho trace (core/tracing.ts).
@@ -109,7 +128,7 @@ export function classifyLedgerTriggerError(err: unknown): { code: ErrorCode; rea
 export function errorCodeOf(err: unknown): ErrorCode {
   if (err instanceof AppError) return err.code;
   if (err instanceof ZodError || (err as { validation?: unknown } | null)?.validation) return ERROR_CODES.VALIDATION;
-  const trigger = classifyLedgerTriggerError(err);
+  const trigger = classifyDbError(err);
   if (trigger) return trigger.code;
   const pg = (err as { code?: unknown } | null)?.code;
   if (pg === '23514' || pg === '42501') return ERROR_CODES.POSTING_FAILED;

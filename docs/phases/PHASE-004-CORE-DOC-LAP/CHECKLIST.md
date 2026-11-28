@@ -20,7 +20,10 @@
 | S004-W2-2 | dời ≈ 50 kiểu bảng kế toán sang `AppDatabase` của open-ketoan (cơ chế đã có) + xuất kiểu trợ giúp + mở rộng bài kiểm kiểu (B-1) | open-core + open-ketoan | ☐ |
 | S004-W2-3a | lõi: `definePort` / `providePort` / `ctx.port` + bí danh `ctx.ledger` → cổng `ledger` (B-2) | open-core | ☑ 62 / 62 |
 | S004-W2-3b | open-ketoan: gói `@bizcity/ledger-port` (kiểu + khoá `LEDGER`) + `providePort(LEDGER, …)` mang luật `ownDocument` / effect; codemod 49 chỗ; xuất lại kiểu từ contracts | open-ketoan (R-FLOW) | ☐ |
-| S004-W2-4 | móc khai báo: `registerSettingScopes` + **migration 0006** (bỏ ràng buộc bậc cứng), `registerSignRoles`, `registerDbErrorClassifier`, `registerDiagnostic`; `BOOK_MODE` (B-6…B-9, B-11) | open-core | ☐ |
+| S004-W2-4a | lõi: `registerSettingScopes` + **migration 0006**; `registerDbErrorClassifier` (B-6, B-8) | open-core | ☑ 66 / 66 |
+| S004-W2-4b | `documents/signature.routes.ts` (ký phiếu kế toán: vai `cashier`, `chief_accountant`, quyền `periods:lock`…) **dời nguyên tệp** sang open-ketoan (B-7) — không cần móc `registerSignRoles`: lõi đã có `documents.sign` chung theo `SIGN_ROLE_RE` | open-core + open-ketoan | ☐ |
+| S004-W2-4c | `BOOK_MODE` (B-9): cần cơ chế app mở rộng `env` của lõi (`extendEnv`) — làm cùng S004-W2-6 | open-core | ☐ |
+| — | chẩn đoán (B-11): **đã có** `registerDiagnostics` — không cần móc mới | — | ☑ |
 | S004-W2-5 | `masterdata/*` sang Kernel kế toán (B-3…B-5) | open-core + open-ketoan | ☐ |
 | S004-W0 | phát hành **0.6.0** (tìm chứng từ, danh sách + xuất) | open-core | ☐ |
 | S004-W2-6 | kiểm ranh giới chuyển sang chặn; phát hành **0.7.0** | open-core | ☐ |
