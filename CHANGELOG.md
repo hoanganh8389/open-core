@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (tài liệu — LANES / CLAIMS)
+- 2026-11-29 — **Hai lane trên open-core** (<!-- [2026-11-29 12:29 AM Johnny Chu - Chu Hoàng Anh] LANES -->): `docs/phases/LANES.md` — lane **R** (ranh giới + tương thích open-ketoan: PHASE-004 W1–W3, S004-W2-9, PHASE-001, ADR-0001, phát hành) và lane **T** (ba trụ cột: `S004-DM-*` Danh mục, `S004-CT-*` Chứng từ, `S004-DB-*` + W5 Đồng bộ, chuẩn NC8-STD); chỗ giáp ranh đã chốt (`MASTERDATA` ≠ `entity_links`; bảng cơ chế ≠ bảng danh mục); luật sửa tệp chung; khuôn bàn giao + nhật ký; yêu cầu giữa hai lane. `docs/phases/CLAIMS.md` — giữ chỗ việc, số migration (0008 trống), số ADR (0002–0004 lane T), số R-CORE. Trỏ từ AGENTS.md, mục lục phase, checklist PHASE-004.
+
 ### Đổi (S004-W2-2 — kiểu bảng kế toán ra khỏi Database của lõi)
 - 2026-11-29 — <!-- [2026-11-29 12:10 AM Johnny Chu - Chu Hoàng Anh] S004-W2-2 --> **`Database` = `CoreDatabase` + `AppDatabase`**: chỉ 21 bảng do migration lõi tạo có kiểu sẵn; 110 bảng / khung nhìn của open-ketoan sang **khu cách ly** `@bizcity/platform/ketoan-legacy/db-types` (gộp vào `AppDatabase` khi được import). Kiểu trợ giúp `Timestamp`, `TimestampDefault`, `DateOnly`, `Numeric`, `Json`, `JsonDefault`, `JsonNullable` xuất ra cho app. `masterdata/*`, `documents/signature.routes`, `core/catalog-warn` vào khu cách ly — đường cũ là tệp trỏ (deprecated, xoá ở 0.8). **Mới:** `registerApiKeyResolver({ prefix, resolve })` — khoá có tiền tố riêng do app giải; khoá cài đặt open-pos `okti_` sang `ketoan-legacy` (`installKetoanLegacy()`). **Phá vỡ với app đang dùng bảng kế toán:** chạy `tools/doi-nguon/ketoan-0.7.mjs` (open-ketoan: 13 tệp sửa · 3 tệp thêm). Kiểm: `tsconfig.core-only.json` + `test/types-ketoan` + `test/api-key-resolver.test.mjs` trong `pnpm test` (76 / 76); ma trận: open-cake 0 lỗi mới, open-ketoan sau codemod 0 lỗi mới (vẫn 7 lỗi cũ); sổ ranh giới 154 → 97.
 
