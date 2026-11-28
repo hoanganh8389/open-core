@@ -114,6 +114,14 @@ Lane nào sửa tệp chung cũng theo đúng luật dưới. Xung đột merge 
 
 ## 7. Nhật ký bàn giao
 
+### 2026-11-29 12:45 AM · lane R · S004-W1-7a (E-1…E-7 → 0)
+- PR: (mở) nhánh `feat/s004-w1-2b-loi-kieu-ketoan`. #30, #32 đã merge.
+- Tệp chung đã chạm: `db/migrate.ts` — `pendingMigrations(q?)` tuỳ chọn kết nối (chỉ thêm) · `ketoan-legacy/index.ts` — `SYSTEM_ROLES` · `ketoan-legacy/pos-installation-auth.ts` — `installKetoanLegacy()` gọi `ketoanAuthzPreset()` · `tools/doi-nguon/ketoan-0.7.mjs` — luật E-5…E-7 · CHANGELOG khối riêng.
+- Số đã giữ / nhả: không.
+- Kiểm: `pnpm test` có CSDL 90 / 90 · `ma-tran --only ketoan --strict` ĐẠT (MỚI 0) · `ma-tran --only cake --strict` ĐẠT · `kiem-ranh-gioi --check` ĐẠT (97, không tăng).
+- Lane kia cần biết / cần làm: **T-1 (PR #33) giờ so được với 0** — `ma-tran --only ketoan --strict` phải ĐẠT (MỚI 0) thay vì "giống danh sách lỗi của origin/main". Codemod là bước bắt buộc của ma trận; PR của lane T mà làm codemod cần thêm luật ⇒ báo R.
+- Việc kế tiếp của lane: S004-W2-9 cổng `MASTERDATA` + phạm vi vai qua cổng (B-15).
+
 ### 2026-11-29 12:39 AM · lane R · ADR-0001 + S004-W1-3b / 3c / 5a
 - PR: [#30](https://github.com/hoanganh8389/open-core/pull/30) (mở) — ADR-0001 + R-CORE-9, đã gộp main (LANES, #29) và làm hai yêu cầu §6; [#32](https://github.com/hoanganh8389/open-core/pull/32) (mở, chồng #30) — bộ đo bản 2, `do-api.mjs`, `dien-tap.mjs`.
 - Tệp chung đã chạm: `AGENTS.md` — thêm R-CORE-9 (#30) · `CHANGELOG.md` — khối riêng S004-W1-3b (#32) · CHECKLIST PHASE-004 — dòng W1-3b / 3c / 5a (nhóm W1, của R).

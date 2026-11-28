@@ -48,6 +48,13 @@ export function doiNguon(dir, { dry = false } = {}) {
       return [keep.length ? `import ${kw}{ ${keep.join(', ')} } from ${q}${FROM}${q};` : null, `import ${kw}{ ${leg.join(', ')} } from ${q}${TO}${q};`].filter(Boolean).join('\n');
     });
     if (/^export \* from ['"]@bizcity\/platform\/db\/types['"];?\s*$/m.test(o) && !o.includes(TO)) o = o.replace(/^(export \* from (['"])@bizcity\/platform\/db\/types\2;?)\s*$/m, `$1\nexport * from $2${TO}$2; // đổi nguồn lõi 0.7 (S004-W2-2): kiểu bảng kế toán ở khu cách ly`);
+    // [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a (E-7) — SYSTEM_ROLES (danh sách vai tĩnh của kế toán) không còn ở core/authz/legacy ⇒ lấy từ khu cách ly
+    o = o.replace(/import\s+\{([^}]*\bSYSTEM_ROLES\b[^}]*)\}\s*from\s*(['"])@bizcity\/platform\/core\/authz\/legacy\2;?/, (m, list, q) => {
+      const keep = list.split(',').map((x) => x.trim()).filter((x) => x && x !== 'SYSTEM_ROLES');
+      return [keep.length ? `import { ${keep.join(', ')} } from ${q}@bizcity/platform/core/authz/legacy${q};` : null, `import { SYSTEM_ROLES } from ${q}@bizcity/platform/ketoan-legacy/index${q}; // đổi nguồn lõi 0.7 (E-7)`].filter(Boolean).join('\n');
+    });
+    // (E-5, E-6) Role của lõi là string; Role của @ketoan/contracts là union vai kế toán ⇒ ép kiểu vai bổ sung đọc từ lõi (chỉ kiểu, không đổi logic)
+    if (/import\s+type\s+\{[^}]*\bRole\b[^}]*\}\s*from\s*['"]@ketoan\/contracts['"]/.test(o) && /\bextraAuthz\b/.test(o)) o = o.replace(/\.\.\.extra\.roles\]/g, '...(extra.roles as Role[])]');
     if (o !== s) put(f, o);
   }
   for (const g of GOI) {
