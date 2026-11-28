@@ -34,11 +34,11 @@ Ví dụ: `@bizcity/platform/master-data` không được import `@bizcity/platf
 | `web-shell` | G-1 | **gói** | chưa có (S003-6) |
 | `ui-kit` | G-1, G-2: app nhúng / app ngoài tiến trình dùng ui-kit mà không cần shell | **gói** | có ở open-ketoan (`packages/ui-kit`), chuẩn EXTENSION §3b |
 | `action-client` | G-1, G-2 | **gói** (nhỏ, sinh kiểu từ registry action) | chưa có |
-| `reporting` | chưa có app thứ hai cần | **hoãn** — báo cáo trước mắt là một loại màn (`view: "report"`) trên `defineListAction` + `aggregate` | — |
+| `reporting` | G-2: Kế toán (BCTC) và Kiot (báo cáo bán hàng) cùng cần — YC-P5-13 <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 --> | **gói** — Report Registry, chạy nền, in / PDF / Excel, lineage ([85](85-REPORTING.md)); không chứa báo cáo nghiệp vụ | chưa có |
 | `testing` | G-3 | **gói** dev | `test/_csdl.mjs` trong platform |
 | `cli` | G-3 | **gói** dev | có ở open-ketoan (`packages/cli`) |
 
-**Kết quả:** 10 gói phát hành + 4 đường con. Đường con được giữ nguyên tên export. Nếu sau này một đường con đủ điều kiện G-1…G-4 thì tách ra thành gói, đường cũ thành tệp chuyển tiếp (R-CORE-2). App không phải sửa ngay.
+**Kết quả:** 10 gói phát hành (`contracts`, `platform`, `server`, `module-sdk`, `action-client`, `ui-kit`, `web-shell`, `reporting`, `testing`, `cli`) + 4 đường con. Đường con được giữ nguyên tên export. Nếu sau này một đường con đủ điều kiện G-1…G-4 thì tách ra thành gói, đường cũ thành tệp chuyển tiếp (R-CORE-2). App không phải sửa ngay.
 
 ```text
 open-core/packages/
@@ -55,6 +55,7 @@ open-core/packages/
 ├── action-client/    @bizcity/action-client    gọi action có kiểu, sinh từ registry
 ├── ui-kit/           @bizcity/ui-kit           thành phần, token (bizcity_ux@1)
 ├── web-shell/        @bizcity/web-shell        khung app + bộ vẽ màn từ defineScreen
+├── reporting/        @bizcity/reporting        defineReport, chạy nền, in / PDF / Excel, lineage (không có báo cáo nghiệp vụ)
 ├── testing/          @bizcity/testing          CSDL thử, dựng module mẫu, vector conformance (dev)
 └── cli/              @bizcity/cli              scaffold, module add / upgrade, doctor, scoreboard (dev)
 ```

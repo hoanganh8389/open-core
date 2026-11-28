@@ -29,6 +29,25 @@
 | S005-ML-2 | phụ thuộc module + hook vòng đời + màn Phân hệ | **R** | S004-W3-1 | ☐ |
 | S005-ML-3 | `@bizcity/cli`: scaffold module / entity, module install / enable, doctor, scoreboard dx | **R** | — | ☐ |
 | S005-ML-4 | `@bizcity/testing`: CSDL thử, chạy hook hai lần, vector conformance | **R** | — | ☐ |
+| **F6** | **Settings / Meta** ([70](70-SETTINGS-META.md)) <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 --> | | | |
+| S005-F6-1 | `defineSetting` một tên + màn Cài đặt sinh từ registry | T | — | ☐ |
+| S005-F6-2 | bậc `workspace` / `org`; `entity_meta` có phạm vi (trường phụ thuộc tổ chức) — giữ số migration ở CLAIMS | T | S003-2 | ☐ |
+| **F7** | **Activity & Notification** ([75](75-ACTIVITY-NOTIFICATION.md)) | | | |
+| S005-F7-1 | `entity_activities` + `ctx.activity.{note, task, log}` cho mọi `EntityRef` | T | S003-9 | ☐ |
+| S005-F7-2 | `defineNotificationRule` + kênh `email` / `zalo` / `webhook` qua outbox; chuông; Việc của tôi | T | — | ☐ |
+| **F8** | **Search / Import / Export** ([80](80-SEARCH-IMPORT-EXPORT.md)) | | | |
+| S005-F8-1 | `/api/v1/search` đa thực thể theo quyền + palette Ctrl K | T | S003-20 | ☐ |
+| S005-F8-2 | saved views + bulk actions qua action | T | S003-15 | ☐ |
+| S005-F8-3 | nhập: ghép cột → xem trước → dry-run từng dòng qua action → ghi theo lô; XLSX (ADR phụ thuộc) | T | S003-10 (= S005-F2-3) | ☐ |
+| **F9** | **Reporting** ([85](85-REPORTING.md)) | | | |
+| S005-F9-1 | `@bizcity/reporting`: `defineReport`, màn báo cáo, drill-down, PDF / Excel, chạy nền, lineage | T | — | ☐ |
+| **UC** | **Upgrade & Conformance** ([90](90-UPGRADE-CONFORMANCE.md)) | | | |
+| S005-UC-1 | `bizcity release check` 7 bước + `release-report.json` (`bizcity_conformance_report@1`) | **R** | S004-W1-3, W2-6 | ☐ |
+| S005-UC-2 | migration theo phiên bản module (`migrations.since`, `reversible`); bộ CSDL mẫu theo bản (N-1, N-2) | **R** | — | ☐ |
+| **BX** | **Bánh xe đóng góp** ([95](95-BANH-XE-DONG-GOP.md)) | | | |
+| S005-BX-1 | `tools/ung-vien-loi.mjs` + bảng "Ứng viên lõi" + mục "Đóng góp lõi" trong scoreboard | T | — | ☐ |
+| S005-BX-2 | `bizcity dev link-core` (chế độ core-dev) + `bizcity doctor --tim` | R | S005-ML-3 | ☐ |
+| S005-BX-3 | đề xuất R-CORE-10 "Lõi trước" + luật SC-STD ở open-platform + bàn giao khối AGENTS / mẫu PR cho từng repo app | T | — | ☐ |
 | **F5** | **Dùng thật** | | | |
 | S005-F5-1 | open-cake: một thực thể + một màn chuyển sang khai báo; đo Scoreboard DX trước / sau | T (bàn giao open-cake) | S003-7 | ☐ |
 | S005-F5-2 | open-ketoan: theo LANES §7 (sau B1) | R | S003-8 | ⛔ claim NT-HT-003 |

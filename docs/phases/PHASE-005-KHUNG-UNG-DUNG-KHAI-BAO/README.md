@@ -2,7 +2,7 @@
 
 <!-- [2026-11-29 12:53 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — chủ (2026-11-29): "BIZCITY OPEN CORE LEAN" năm lớp L1–L5; 14 gói đề xuất; "developer chỉ tập trung viết nghiệp vụ"; Model Registry sinh schema / metadata giao diện / bộ lọc / import mapping / API đọc; ghi nhạy cảm vẫn qua Action + Conformance Gate; Item Master chung, mỗi app mở rộng thuộc tính; defineScreen; Module Lifecycle; scoreboard đo việc developer đỡ phải viết. Lane T (LANES.md). -->
 
-> **Loại:** thiết kế (chưa có mã của phase này) · **Lane:** T (thiết kế + Entity / View / Scoreboard DX), R (Server / Module SDK / CLI — W3 của PHASE-004, theo đặc tả ở [50](50-MODULE-LIFECYCLE.md)) · **Chờ chủ chốt:** Q-P5-1…8 (§5)
+> **Loại:** thiết kế (chưa có mã của phase này) · **Lane:** T (thiết kế + Entity / View / Scoreboard DX), R (Server / Module SDK / CLI — W3 của PHASE-004, theo đặc tả ở [50](50-MODULE-LIFECYCLE.md)) · **Chờ chủ chốt:** Q-P5-1…14 (§5, đề xuất ở [05](05-DE-XUAT-CHOT.md)) · **Yêu cầu gốc:** [00](00-YEU-CAU-CHU.md)
 > **Đứng trên:** R-CORE-4…9 · ADR-0001 (danh mục: lõi giữ khung) · NC-008 (ba trụ cột, chốt ①) · `bizcity_list@1` · `bizcity_module@1` · `bizcity_ux@1` · mockup f1–f20 ([docs/ui](../../ui/mockup-shots))
 > **Không mở lại** việc đã có chủ ở phase khác: phase này **gom** S003-3 / 4 / 6 / 9 / 10 / 15 (PHASE-003) và S004-W3 (PHASE-004) dưới một mô hình khai báo, mã việc gốc giữ nguyên.
 
@@ -37,12 +37,20 @@ Developer chỉ viết **luật nghiệp vụ** (action ghi, quy tắc, workflow
 
 | Tệp | Trả lời câu hỏi nào của chủ |
 |---|---|
+| [00 — Yêu cầu của chủ](00-YEU-CAU-CHU.md) <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 --> | sổ yêu cầu YC-P5-01…15 (nguyên ý chủ) ↔ tài liệu ↔ việc |
+| [05 — Phương án đề xuất](05-DE-XUAT-CHOT.md) | đề xuất cho Q-P5-1…14 kèm lý do, giá phải trả, cách quay lui |
 | [10 — Gói và lớp](10-GOI-VA-LOP.md) | 14 gói có nên tách hết không? Lean là gì? |
 | [20 — Entity Registry](20-ENTITY-REGISTRY.md) | Model Registry vai trò gì, có quan trọng không? Khai báo một lần ⇒ sinh schema, metadata giao diện, bộ lọc, import mapping, API đọc thế nào? Ghi nhạy cảm chặn ra sao? |
 | [30 — Item Master: cùng ID, mỗi app mở rộng](30-ITEM-MASTER-MO-RONG.md) | Cùng `item_id`, Cake / Kiot / Kế toán thêm thuộc tính riêng thế nào? |
 | [40 — View Framework](40-VIEW-FRAMEWORK.md) | `defineScreen` sinh gì; khớp ảnh mockup; vibe coding |
 | [50 — Module Lifecycle](50-MODULE-LIFECYCLE.md) | Vòng đời module và cơ chế quản lý |
 | [60 — Scoreboard DX](60-SCOREBOARD-DX.md) | Chấm điểm thế nào, bao giờ; thao tác nào developer đỡ phải viết |
+| [70 — Settings / Meta](70-SETTINGS-META.md) | WordPress × Odoo ⇒ Settings Registry, User / Entity Meta, Workspace / Org Settings, trường phụ thuộc tổ chức |
+| [75 — Activity & Notification](75-ACTIVITY-NOTIFICATION.md) | hoạt động, việc, thông báo, audit, logs / trace dùng chung mọi app |
+| [80 — Search / Import / Export](80-SEARCH-IMPORT-EXPORT.md) | tìm đa thực thể, saved views, bulk, Excel, mapping, dry-run, lỗi từng dòng; nhập qua action |
+| [85 — Reporting](85-REPORTING.md) | Report Registry; Core không tính số nghiệp vụ |
+| [90 — Upgrade & Conformance](90-UPGRADE-CONFORMANCE.md) | dây chuyền phát hành 7 bước trên công cụ đang có |
+| [95 — Bánh xe đóng góp](95-BANH-XE-DONG-GOP.md) | làm app thì lõi lớn lên: luật "Lõi trước", dò ứng viên lõi, rút lên lõi, điểm |
 | [CHECKLIST](CHECKLIST.md) | việc, lane, trạng thái |
 
 ## 4. Nguyên tắc
@@ -60,9 +68,11 @@ Developer chỉ viết **luật nghiệp vụ** (action ghi, quy tắc, workflow
 
 ## 5. Câu hỏi chờ chủ chốt
 
+<!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 --> Phương án đề xuất có lý do đầy đủ ở [05](05-DE-XUAT-CHOT.md); sáu câu mới Q-P5-9…14 (Settings, Activity, nhập, báo cáo, phát hành, bánh xe) cũng ở đó. Q-P5-1 đổi: `reporting` là **gói** (YC-P5-13 đã có hai app dùng), không hoãn.
+
 | Mã | Câu hỏi | ① Đề xuất | ② Khác |
 |---|---|---|---|
-| Q-P5-1 | 14 gói như sơ đồ? | **10 gói phát hành**: `entity`, `master-data`, `documents`, `sync` là **đường con** của `@bizcity/platform` (cùng runtime, cùng giao dịch); `reporting` hoãn tới khi 2 app cần ([10](10-GOI-VA-LOP.md)) | tách đủ 14 gói ngay |
+| Q-P5-1 | 14 gói như sơ đồ? | **10 gói phát hành** (kể cả `reporting`); `entity`, `master-data`, `documents`, `sync` là **đường con** của `@bizcity/platform` (cùng runtime, cùng giao dịch) ([10](10-GOI-VA-LOP.md)) | tách đủ 14 gói ngay |
 | Q-P5-2 | Tên API | **`defineEntity` / `extendEntity` / `registerField` / `registerRelation` / `registerValidator`** như chủ đề xuất; `defineScreen` (thay `registerScreens` cũ, giữ bí danh) | `defineModel` / `defineView` |
 | Q-P5-3 | Trường mở rộng lưu ở đâu? | **ba chỗ theo khai báo**: `meta` (`entity_meta`, lõi hoá từ open-cake 0103 — trường ít, không tính toán), `extension` (bảng riêng của app 1-1 theo ID — trường nhiều / cần ràng buộc / chỉ mục), `column` (chỉ chủ dữ liệu) | mọi trường mở rộng vào JSONB |
 | Q-P5-4 | Ghi sinh tự động cho lớp nào? | **chỉ `config` và `record`** (danh mục nhỏ của chính app, bản ghi mềm); `master` chỉ ở app chủ và qua action của chủ; `document`, `ledger`, `replica` **không bao giờ** | cho mọi lớp, chặn bằng quyền |

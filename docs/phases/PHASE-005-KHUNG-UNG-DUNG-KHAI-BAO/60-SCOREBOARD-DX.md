@@ -8,7 +8,7 @@ Scoreboard hiện có (`docs/scoreboard`, ERP-12 × app, 20 mục P1–P20) tr�
 
 Một lõi có đủ 20 mục vẫn có thể bắt developer viết tay route, zod, React list, importer. Scoreboard DX đo đúng phần đó.
 
-## 2. Hai mươi bốn thao tác phổ thông
+## 2. Ba mươi thao tác phổ thông
 
 Đây là những thứ **mọi** màn nghiệp vụ cần, và developer **không nên** phải tự viết.
 
@@ -38,6 +38,12 @@ Một lõi có đủ 20 mục vẫn có thể bắt developer viết tay route, 
 | TP-22 | chống trùng (SĐT, mã) + cảnh báo | tay | `unique` / validator khai báo |
 | TP-23 | lưu trữ / khôi phục (không xoá) | lõi có cho chứng từ | `lifecycle: 'archive'` mọi thực thể |
 | TP-24 | bốn trạng thái + lỗi có cách sửa | tay mỗi màn | bộ vẽ màn tự có |
+| TP-25 | màn Cài đặt + nguồn giá trị + lịch sử <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 --> | tay | `defineSetting` ([70](70-SETTINGS-META.md)) |
+| TP-26 | trường phụ thuộc tổ chức (theo chi nhánh / pháp nhân) | tay | `scoped: [...]` |
+| TP-27 | thông báo theo sự kiện + kênh | gọi `sendNotification` tay | `defineNotificationRule` ([75](75-ACTIVITY-NOTIFICATION.md)) |
+| TP-28 | việc (task) có hạn trên bản ghi | tay | `activity.task` |
+| TP-29 | tìm đa thực thể + saved views | tay | registry + `user_meta` ([80](80-SEARCH-IMPORT-EXPORT.md)) |
+| TP-30 | báo cáo: tham số, nhóm, drill-down, PDF / Excel, lineage | tay | `defineReport` ([85](85-REPORTING.md)) |
 
 ## 3. Chấm điểm
 
@@ -52,7 +58,7 @@ Một lõi có đủ 20 mục vẫn có thể bắt developer viết tay route, 
 
 Có ba con số, cùng sinh bởi `tools/scoreboard-dx.mjs`:
 
-1. **Điểm DX của app** = tổng mức ÷ (24 × 3), tính %. Mỗi mức > 0 phải có bằng chứng là đường dẫn mã, giống luật của scoreboard ERP-12.
+1. **Điểm DX của app** = tổng mức ÷ (30 × 3), tính %. Mỗi mức > 0 phải có bằng chứng là đường dẫn mã, giống luật của scoreboard ERP-12.
 2. **Bài chuẩn "tính năng vàng"**:
    - `@bizcity/testing/golden` là module mẫu cố định: một danh mục `golden.nhom_khach` (config) + một chứng từ `golden.phieu_yeu_cau` (có workflow, dòng, hoạt động, nhập, xuất).
    - Công cụ đếm **số dòng developer viết** (bỏ chú thích, bỏ tệp sinh) và **số tệp**.

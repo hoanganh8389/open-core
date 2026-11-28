@@ -11,6 +11,16 @@
   - **50:** Module Lifecycle (đặc tả cho lane R).
   - **60:** Scoreboard DX — 24 thao tác phổ thông, mức D0–D3, tính năng vàng, nợ viết tay, bánh cóc, đích theo bản.
   - **CHECKLIST** F0–F5; 8 câu hỏi Q-P5 chờ chủ chốt.
+  - **Bổ sung** <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 -->:
+    - **00:** sổ yêu cầu của chủ YC-P5-01…15.
+    - **05:** phương án đề xuất Q-P5-1…14 kèm lý do / giá / quay lui (`reporting` thành gói).
+    - **70:** Settings / Meta theo WordPress × Odoo, trường phụ thuộc tổ chức.
+    - **75:** Activity & Notification — năm vai, một API.
+    - **80:** Search / Import / Export — nhập qua action + dry-run.
+    - **85:** Reporting — Core không tính số nghiệp vụ.
+    - **90:** Upgrade & Conformance — dây chuyền 7 bước trên công cụ đang có.
+    - **95:** bánh xe đóng góp — "Lõi trước", dò ứng viên lõi, core-dev, điểm đóng góp.
+    - TP-25…30; CHECKLIST F6–F9, UC, BX.
   - Chỉ tài liệu.
 
 ### Thêm (S004-W1-3b / 3c / 5a — diễn tập nâng cấp: bộ đo bản 2, dò API, chạy lại + quay lui)
