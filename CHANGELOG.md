@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S004-W1-3b / 3c / 5a — diễn tập nâng cấp: bộ đo bản 2, dò API, chạy lại + quay lui)
+- 2026-11-29 — <!-- [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b --> **`do-bat-bien.mjs` bản 2** (`bizcity_dien_tap_bat_bien@2`): nội dung từng dòng của sổ / chứng từ / danh mục (256 ô theo khoá, `--chi-tiet <mã> --o <ô>`, `--dong` + `--dong-truoc/--dong-sau` chỉ ra khoá dòng lệch); nhóm **M** Master Data (ADR-0001 MD-1…MD-4: ULID, mã chồng hiệu lực / cấp lại, ĐVT gốc + tỷ lệ, kho mồ côi, cây có vòng, loại kho); nhóm **R** báo cáo dựng lại (cân đối phát sinh, công nợ, nhập xuất kho, thuế GTGT); nhóm **S** vân lược đồ + sổ migration; **mục bắt buộc theo hồ sơ** (`--ho-so open-ketoan|core`) — thiếu bảng / cột ⇒ đo thoát 1 và so lệch; `--so --chat` đòi giống hệt. **`do-api.mjs`**: kịch bản báo cáo + ma trận quyền qua API (POST luôn `dryRun=1`), so bản A ↔ B. **`dien-tap.mjs`**: trên bản chép (không đụng nguồn) nâng cấp → chạy lại migration (giống hệt) → quay lui từ bản sao lưu (giống hệt trước) → nâng cấp lại (tái lập) → biên bản. Tự kiểm 16 ca.
+
 ### Thêm (S004-DM-1…3 — cơ chế danh mục ở lõi, NC-008 W2)
 - 2026-11-29 — **Danh mục ở lõi = cơ chế, không phải bảng danh mục** (<!-- [2026-11-29 12:16 AM Johnny Chu - Chu Hoàng Anh] S004-DM-1…3 — NC-008 (chủ chốt ① Q-NC8-1…10, 2026-11-28) -->, ADR-P2 / P3 / P6 của NC-008): lõi không có bảng hàng / ĐVT / đối tác (R-CHAIN-0, R-PLAT-3).
   - **`newId(kind)`** (`@bizcity/contracts`): ULID cho trục khoá bằng ID (`item`, `contact`, `document`, `event`); trục khoá bằng `code` (`partner`, `branch`, `warehouse`, `org_unit`) bị từ chối. `ulidFrom(ms, bytes)` thuần cho vector (đúng 80 bit ngẫu nhiên, khác `newSiteId` cũ lấy byte % 32), `ulidTime`. Vector `01ARYZ6S41000G40R40M30E209` kiểm bằng cách tính độc lập; bản PHP cùng vector ở W1.

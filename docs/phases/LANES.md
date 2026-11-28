@@ -108,11 +108,19 @@ Lane nào sửa tệp chung cũng theo đúng luật dưới. Xung đột merge 
 
 | Ngày | Từ → tới | Yêu cầu | Trạng thái |
 |---|---|---|---|
-| 2026-11-29 | T → R | ADR-0001 D1 "Khung sở hữu — Cơ chế": thêm `entity_links` + `data_authority` (bảng cơ chế, ADR-0002 của lane T) để ADR không ngầm hiểu "lõi không có bảng nào cho danh mục". Không chặn PR #30 — sửa sau cũng được. | mở |
-| 2026-11-29 | T → R | Tên mã: ADR-0001 dùng **MD-1…MD-5** cho **bất biến**. Lane T đã đổi mã việc từ `S004-MD-*` sang **`S004-DM-*`**; mã nghiệm thu của NC-008 viết hai chữ số (**MD-01…07**) là **ca kiểm**. Đề nghị giữ ba nghĩa này, không dùng lại. | mở |
-| 2026-11-29 | T → R | Khi lane R mở 0.7.0: kèm migration 0007 và `core/master-data.ts` nếu PR #29 đã merge; ghi `0007` vào ghi chú phát hành và vào bộ đo bất biến nếu đo bảng mới. | mở |
+| 2026-11-29 | T → R | ADR-0001 D1 "Khung sở hữu — Cơ chế": thêm `entity_links` + `data_authority` (bảng cơ chế, ADR-0002 của lane T) để ADR không ngầm hiểu "lõi không có bảng nào cho danh mục". Không chặn PR #30 — sửa sau cũng được. | **xong** (R, #30: D1 ghi hai bảng cơ chế; D5 ghi `MASTERDATA` ≠ `entity_links`) |
+| 2026-11-29 | T → R | Tên mã: ADR-0001 dùng **MD-1…MD-5** cho **bất biến**. Lane T đã đổi mã việc từ `S004-MD-*` sang **`S004-DM-*`**; mã nghiệm thu của NC-008 viết hai chữ số (**MD-01…07**) là **ca kiểm**. Đề nghị giữ ba nghĩa này, không dùng lại. | **xong** (R, #30: ghi ở đầu D3; bộ đo nhóm M dùng mã mục `M-n`, ghi bất biến `MD-n`) |
+| 2026-11-29 | T → R | Khi lane R mở 0.7.0: kèm migration 0007 và `core/master-data.ts` nếu PR #29 đã merge; ghi `0007` vào ghi chú phát hành và vào bộ đo bất biến nếu đo bảng mới. | **bộ đo xong** (R, #32: W-4 `entity_links` rỗng, W-5 `data_authority` rỗng sau nâng cấp) · ghi chú 0.7.0: khi phát hành |
 
 ## 7. Nhật ký bàn giao
+
+### 2026-11-29 12:39 AM · lane R · ADR-0001 + S004-W1-3b / 3c / 5a
+- PR: [#30](https://github.com/hoanganh8389/open-core/pull/30) (mở) — ADR-0001 + R-CORE-9, đã gộp main (LANES, #29) và làm hai yêu cầu §6; [#32](https://github.com/hoanganh8389/open-core/pull/32) (mở, chồng #30) — bộ đo bản 2, `do-api.mjs`, `dien-tap.mjs`.
+- Tệp chung đã chạm: `AGENTS.md` — thêm R-CORE-9 (#30) · `CHANGELOG.md` — khối riêng S004-W1-3b (#32) · CHECKLIST PHASE-004 — dòng W1-3b / 3c / 5a (nhóm W1, của R).
+- Số đã giữ / nhả: ADR-0001 · R-CORE-9 (đã ghi ở CLAIMS); không giữ migration.
+- Kiểm: `pnpm test` có CSDL → ĐẠT (84 / 84 trước khi gộp main; chạy lại sau gộp ở PR).
+- Lane kia cần biết / cần làm: bộ đo có W-4 / W-5 (hai bảng 0007 phải rỗng sau nâng cấp open-ketoan) — nếu lane T đổi 0007 để đổ dữ liệu sẵn thì báo R sửa hai mục này.
+- Việc kế tiếp của lane: S004-W2-9 cổng `MASTERDATA` + phạm vi vai qua cổng (B-15) — chỉ dùng `definePort`, không đụng `entity_links`.
 
 ### 2026-11-29 12:29 AM · lane T · LANES + S004-DM-1…3
 - PR: [#29](https://github.com/hoanganh8389/open-core/pull/29) (mở) — `newId`, `entity_links`, `data_authority`; PR tài liệu này (mở).
