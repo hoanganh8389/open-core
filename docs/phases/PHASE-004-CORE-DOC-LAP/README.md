@@ -92,7 +92,10 @@ Xong khi: cake ↔ POS và cake ↔ kế toán chạy trên hộp vào / changef
 | **Q-P4-4** | bậc `accounting_unit` do kế toán tự khai | **vướng ở CSDL:** lõi 0001 có ràng buộc `setting_values_scope_type_check` liệt kê cứng `accounting_unit` ⇒ lõi thêm migration **0006**: bỏ ràng buộc liệt kê cứng, thay bằng kiểm theo sổ đăng ký bậc (giữ `scope_type = 'tenant' ⇔ scope_id rỗng`); `registerSettingScopes([{ key: 'accounting_unit', between: ['tenant', 'branch'], resolve }])` — `resolve` đổi chi nhánh → đơn vị hạch toán (`branches.accounting_unit_id`); `CORE_COVERED_BY_KETOAN['0006…']` = "không chạy" (ràng buộc cũ của kế toán vẫn hợp lệ) |
 | **Q-P4-5** | kế toán đổi nguồn **một lần ở 0.7.0**, sau khi ranh giới sạch và diễn tập đạt | **0.6.0** = phát hành cái đã gộp (tìm chứng từ, danh sách + xuất); **0.7.0** = W2 (kiểm ranh giới chặn, kiểu bảng dời, cổng + bí danh, móc khai báo, 0006). **Điều kiện tối thiểu để đổi nguồn:** làm xong kiểu bảng (Q-P4-2) **và** 0006 *trước* khi đổi (dời sau thì lõi xoá kiểu kế toán đang dùng ⇒ gãy); `masterdata/*` sang Kernel và xoá bí danh `ctx.ledger` làm **sau** đổi nguồn được (tương thích nguồn) |
 
+| **Q-P4-6** | `@bizcity/contracts` còn nội dung kế toán (B-12 — phát hiện lúc đo W2-1) | **đề xuất:** tách gói `@bizcity/accounting-contracts` do open-ketoan phát hành (vouchers, invoices, costing-formula, ledger-query, intake-findings, legal-basis, print-*, quy-tac/*, bảng `ROLES`); `@bizcity/contracts` giữ hợp đồng dùng chung (spine, doc-refs, documents, api, errors, remedy, findings, money, lineage, item-master / dvt / entity-codes, catalog-hint…); xuất lại một bản phát hành rồi bỏ. **Chờ chủ chốt** |
+
 ## Nhật ký
 
 - 2026-11-28: mở PHASE-004; đo hiện trạng; viết 10 (bản đồ tương thích), 20 (diễn tập), 30 (ranh giới).
+- 2026-11-28: bộ kiểm ranh giới đo lần đầu 158 vi phạm / 22 tệp; phát hiện contracts cũng có nội dung kế toán ⇒ B-12 + Q-P4-6.
 - 2026-11-28: chủ chốt Q-P4-1…5 (§6) theo phương án cụ thể; sửa tên mã lỗi `UNBALANCED` → `UNBALANCED_ENTRY`.

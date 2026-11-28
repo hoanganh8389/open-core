@@ -1,0 +1,85 @@
+{
+  "$comment": "[2026-11-28 09:37 PM Johnny Chu - Chu Hoàng Anh] S004-W2-1 — sổ nợ ranh giới Core (R-CORE-8, PHASE-004 · 30): số vi phạm mỗi (tệp, luật) còn lại; CHỈ ĐƯỢC GIẢM. Sinh bằng node tools/kiem-ranh-gioi.mjs --ghi. S004-W2-6: sổ rỗng + chạy --strict.",
+  "rules": {
+    "R-BANG": "tên bảng kế toán trong mã lõi",
+    "R-IMPORT": "import @ketoan/* hoặc đường dẫn của app",
+    "R-SO": "cổng sổ cứng (ctx.ledger / registerLedger*)",
+    "R-VAI": "vai / vai ký / quyền kế toán cứng",
+    "R-THANG": "bậc cài đặt kế toán cứng (accounting_unit)",
+    "R-ENV": "cấu hình sổ cứng (BOOK_MODE)",
+    "R-TEP": "tệp chuyển tiếp *-ketoan-* (xoá sau B4)"
+  },
+  "total": 158,
+  "files": {
+    "packages/contracts/src/documents.ts": {
+      "R-SO": 1
+    },
+    "packages/contracts/src/enums.ts": {
+      "R-VAI": 2
+    },
+    "packages/contracts/src/errors.ts": {
+      "R-VAI": 3
+    },
+    "packages/contracts/src/intake-findings.ts": {
+      "R-VAI": 21
+    },
+    "packages/contracts/src/ledger-query.ts": {
+      "R-SO": 1
+    },
+    "packages/contracts/src/print-profile.ts": {
+      "R-VAI": 2
+    },
+    "packages/contracts/src/remedy.ts": {
+      "R-VAI": 3
+    },
+    "packages/platform/src/config/env.ts": {
+      "R-ENV": 1
+    },
+    "packages/platform/src/core/actions.ts": {
+      "R-SO": 17
+    },
+    "packages/platform/src/core/apps.ts": {
+      "R-VAI": 2
+    },
+    "packages/platform/src/core/authz-ketoan-legacy.ts": {
+      "R-VAI": 23,
+      "R-TEP": 1
+    },
+    "packages/platform/src/core/authz-manifest.ts": {
+      "R-THANG": 1
+    },
+    "packages/platform/src/core/authz/scope.ts": {
+      "R-BANG": 1
+    },
+    "packages/platform/src/core/libraries/index.ts": {
+      "R-BANG": 1
+    },
+    "packages/platform/src/core/settings.ts": {
+      "R-BANG": 2,
+      "R-THANG": 4
+    },
+    "packages/platform/src/db/migrate-ketoan-legacy.ts": {
+      "R-TEP": 1
+    },
+    "packages/platform/src/db/types.ts": {
+      "R-BANG": 42,
+      "R-THANG": 1
+    },
+    "packages/platform/src/documents/signature.routes.ts": {
+      "R-BANG": 3,
+      "R-VAI": 8
+    },
+    "packages/platform/src/masterdata/catalog-ensure.ts": {
+      "R-BANG": 7
+    },
+    "packages/platform/src/masterdata/default-warehouse.ts": {
+      "R-BANG": 1
+    },
+    "packages/platform/src/masterdata/partner.repository.ts": {
+      "R-BANG": 8
+    },
+    "packages/platform/src/system/diagnostics.ts": {
+      "R-VAI": 1
+    }
+  }
+}

@@ -19,17 +19,21 @@
 | B-10 | `core/authz-ketoan-legacy.ts`, `db/migrate-ketoan-legacy.ts` | tệp chuyển tiếp (preset vai kế toán, hook migration cũ) | open-ketoan `apps/api` | giữ ở lõi tới B4 (S001-9) để kế toán chuyển một lần; xoá khỏi lõi ngay sau |
 | B-11 | `system/diagnostics.ts` | **đã sạch** — chỉ mục chung (`MIGRATIONS_PENDING`, `DB_WRITABLE`, `EVIDENCE_CHAIN`, `TENANT_ISOLATION`, `EVENT_DEAD`); mục kiểm sổ (Nợ = Có, công nợ ↔ 331…) đang ở open-ketoan | — | thêm móc `registerDiagnostic({ code, run })` để app gắn mục của mình vào cùng màn / API (thay đường riêng) |
 
+| B-12 | `@bizcity/contracts` (31 tệp) <!-- [2026-11-28 09:37 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 W2-1 — bộ kiểm ranh giới đo thêm: contracts cũng chứa nội dung kế toán --> | **rò rỉ chưa kiểm kê ở bản đầu:** vai kế toán (`ROLES`, `chief_accountant`) và `owner: 'chief_accountant'` trong danh mục khắc phục, khuôn chứng từ kế toán nhập tay (`vouchers`), hoá đơn (`invoices`), công thức giá vốn (`costing-formula`), truy vấn / nộp sổ (`ledger-query`, `IngestResult` ở `documents`), phát hiện nhập sổ (`intake-findings`, 375 dòng), căn cứ pháp lý (`legal-basis`), hồ sơ / mẫu in kế toán (`print-profile`, `print-templates`), bộ quy tắc VN (`quy-tac/*`: đối tượng, nhóm hàng, tổ chức ngân hàng) | gói **`@bizcity/accounting-contracts`** do open-ketoan phát hành (đề xuất Q-P4-6); lõi giữ phần dùng chung (liệt kê dưới) | giữ xuất lại từ `@bizcity/contracts` một bản phát hành (deprecated) rồi bỏ; vai: `Role = string` đã làm (P2b-3) — chỉ cần dời bảng `ROLES` + nhãn |
+
+**Giữ ở `@bizcity/contracts` (hợp đồng dùng chung nhiều app):** `spine`, `doc-refs`, `documents` (phần `DocRef`, `DocLink`, đầu phiếu — trừ `IngestResult`), `api`, `errors`, `remedy`, `findings`, `money`, `module`, `connections`, `ket-noi`, `ma-tra-cuu`, `loi-trinh-duyet`, `ban-dieu-tra`, `lineage` (`bizcity_lineage@1`), `item-master` / `dvt` / `entity-codes` (trụ cột mặt hàng, đơn vị nhỏ nhất, mã — R-CANON-18), `catalog-hint` (`bizcity_catalog_hint@1`, chuẩn danh mục dùng chung; bộ `quy-tac/*` nó đọc là dữ liệu VN → sang `accounting-contracts`, `catalog-hint` nhận bộ quy tắc qua đăng ký), `library-*`.
+
 **Không phải rò rỉ (giữ ở lõi):** `quy-tac.ts` (lỗi theo quy tắc khai báo — cơ chế), `catalog-warn.ts` (cảnh báo mềm có lý do — cơ chế), `libraries/*` (thư viện có băm nội dung — cơ chế; nội dung thư viện VN ở `vn-rulepacks` của kế toán), `date-rules.ts` (khoá ngày chứng từ), `evidence-export.ts`, 12 quyền nền.
 
 ## 2. Bộ kiểm ranh giới (chạy trong `pnpm test`)
 
-`tools/kiem-ranh-gioi.mjs` (việc S004-W2-1) — **KHÔNG ĐẠT** khi `packages/*/src` của lõi:
+`tools/kiem-ranh-gioi.mjs` (S004-W2-1, **đã có**) — đo từng (tệp, luật) trong `packages/*/src` (bỏ chú thích), so với sổ nợ `docs/scoreboard/ranh-gioi.json`. Chế độ: không cờ = in số đo; `--check` (trong `pnpm test`) **chặn khi số vi phạm TĂNG**; `--ghi` cập nhật sổ (từ chối nếu tăng); `--strict` chặn mọi vi phạm (S004-W2-6). Luật đo: R-BANG (tên bảng kế toán), R-IMPORT (`@ketoan/*`), R-SO (`ctx.ledger` / `registerLedger*` / `LedgerQuery`), R-VAI (vai / vai ký / quyền kế toán), R-THANG (`accounting_unit`), R-ENV (`BOOK_MODE`), R-TEP (tệp `*-ketoan-*`). **Đo lần đầu 2026-11-28: 158 vi phạm / 22 tệp** (R-BANG 65 · R-VAI 65 · R-SO 19 · R-THANG 6 · R-TEP 2 · R-ENV 1). Ý định ban đầu của bộ kiểm — **KHÔNG ĐẠT** khi `packages/*/src` của lõi:
 - nhắc tên bảng nằm trong danh sách bảng nghiệp vụ (`ledger_`, `accounting_`, `inventory_`, `stock_`, `tax_`, `debt_`, `purchase_`, `sales_`, `warehouses`, `items`, `partners`, `period_locks`, `cost_`, `voucher_`) ở mã chạy (không tính chú thích / tài liệu);
 - import `@ketoan/*` hoặc đường dẫn của app;
 - khai quyền / vai / vai ký có tiền tố nghiệp vụ;
 - có tệp `*-ketoan-*` sau mốc B4.
 
-Có danh sách **nợ ranh giới** (`docs/scoreboard/ranh-gioi.json`) liệt kê B-1…B-10 còn mở; mỗi PR chỉ được giảm, không được thêm (như `no-chuan` của open-platform).
+Sổ nợ `ranh-gioi.json` liệt kê số vi phạm còn mở theo tệp; mỗi PR chỉ được giảm, không được thêm (như `no-chuan` của open-platform). Phân bố nợ lần đầu: `db/types.ts` (R-BANG 42), `core/authz-ketoan-legacy.ts` (R-VAI 23), `contracts/intake-findings.ts` (R-VAI 21), `core/actions.ts` (R-SO 17), `masterdata/*` (R-BANG 16), `documents/signature.routes.ts` (R-VAI 8 + R-BANG 3).
 
 ## 3. Cổng (port) thay cho `ctx.ledger`
 
@@ -55,7 +59,7 @@ export const LEDGER = definePort<{ query(q: LedgerQuery): Promise<LedgerQueryRow
 
 | Bước | Việc | Chạm hành vi sổ? |
 |---|---|---|
-| W2-1 | bộ kiểm ranh giới + danh sách nợ (đo, chưa chặn) | không |
+| W2-1 | bộ kiểm ranh giới + sổ nợ (đo; `--check` chặn tăng) — **xong** | không |
 | W2-2 | `CoreDatabase` + app mở rộng kiểu (B-1) | không — chỉ kiểu |
 | W2-3 | cơ chế cổng + `@bizcity/ledger-port` + bí danh `ctx.ledger` (B-2) | không — cùng hàm, đổi đường gọi |
 | W2-4 | móc khai báo: thang cài đặt, vai ký, bộ phân loại lỗi CSDL, mục chẩn đoán (B-6, B-7, B-8, B-11); `BOOK_MODE` (B-9) | không |

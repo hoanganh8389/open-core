@@ -15,7 +15,8 @@
 | S004-W1-6 | diễn tập: bản sao CSDL dev → bản sao CSDL chạy thật; biên bản | open-ketoan | ☐ |
 | S004-W1-7 | B2–B4 của PHASE-001 (sửa E-1…E-7 + R-1, đổi nguồn gói, đóng băng, xoá nền riêng) | open-ketoan | ⛔ claim NT-HT-003 / NT-MH-011 / HT20 |
 | **W2** | **Ranh giới Core** ([30](30-RANH-GIOI-CORE.md)) | | |
-| S004-W2-1 | `tools/kiem-ranh-gioi.mjs` + `ranh-gioi.json` (nợ B-1…B-10) — đo, chưa chặn | open-core | ☐ |
+| S004-W2-1 | `tools/kiem-ranh-gioi.mjs` + `ranh-gioi.json` — đo; `--check` chặn tăng (trong `pnpm test`) | open-core | ☑ 158 vi phạm / 22 tệp |
+| S004-W2-8 | tách `@bizcity/accounting-contracts` (B-12, Q-P4-6 — chờ chủ chốt) | open-core + open-ketoan | ☐ |
 | S004-W2-2 | dời ≈ 50 kiểu bảng kế toán sang `AppDatabase` của open-ketoan (cơ chế đã có) + xuất kiểu trợ giúp + mở rộng bài kiểm kiểu (B-1) | open-core + open-ketoan | ☐ |
 | S004-W2-3 | cổng `definePort` / `ctx.port` + `@bizcity/ledger-port` + bí danh `ctx.ledger` (B-2) | open-core + open-ketoan | ☐ |
 | S004-W2-4 | móc khai báo: `registerSettingScopes` + **migration 0006** (bỏ ràng buộc bậc cứng), `registerSignRoles`, `registerDbErrorClassifier`, `registerDiagnostic`; `BOOK_MODE` (B-6…B-9, B-11) | open-core | ☐ |
