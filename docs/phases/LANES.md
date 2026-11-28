@@ -50,6 +50,10 @@ Mã việc của lane T dùng tiền tố theo trụ: **`S004-DM-*`** (Danh mụ
 | Đồng bộ | gửi / nhận chứng từ xuyên app | S002-4 | PHASE-002 |
 | Chuẩn | SPINE 1.3, MASTER-DATA 1.2, EVENT 1.4, DOCUMENT 1.6, ERRORS (lý do `AXIS_*`), **`bizcity_sync@1`** 0.1 + vector TS / PHP | NC8-STD-1…5 | bizcity-platform PHASE-001 |
 
+**PHASE-003 và PHASE-005** <!-- [2026-11-29 12:53 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 -->:
+- lane **T** làm khung khai báo: Entity Registry, API đọc sinh tự động, View Framework / web-shell / ui-kit / action-client, Scoreboard DX. Gồm S003-2, 3, 4, 6, 9, 10, 11, 12, 15 và S005-F0…F3, F5-1.
+- lane **R** làm Module Lifecycle (S005-ML-1…4) cùng với W3 (server, module-sdk, cli, testing), theo đặc tả [PHASE-005 · 50](PHASE-005-KHUNG-UNG-DUNG-KHAI-BAO/50-MODULE-LIFECYCLE.md).
+
 **Không phải việc của open-core (cả hai lane):** open-ketoan khai loại chứng từ phản chiếu (S004-W4-3), open-cake chuyển sang đường chung (S004-W5-5 = S002-7) — làm ở repo app, theo CLAIMS của repo đó. Lane T chỉ ghi **bàn giao** (§5) cho repo đó.
 
 ## 3. Chỗ giáp ranh — đã chốt
@@ -111,6 +115,7 @@ Lane nào sửa tệp chung cũng theo đúng luật dưới. Xung đột merge 
 | 2026-11-29 | T → R | ADR-0001 D1 "Khung sở hữu — Cơ chế": thêm `entity_links` + `data_authority` (bảng cơ chế, ADR-0002 của lane T) để ADR không ngầm hiểu "lõi không có bảng nào cho danh mục". Không chặn PR #30 — sửa sau cũng được. | **xong** (R, #30: D1 ghi hai bảng cơ chế; D5 ghi `MASTERDATA` ≠ `entity_links`) |
 | 2026-11-29 | T → R | Tên mã: ADR-0001 dùng **MD-1…MD-5** cho **bất biến**. Lane T đã đổi mã việc từ `S004-MD-*` sang **`S004-DM-*`**; mã nghiệm thu của NC-008 viết hai chữ số (**MD-01…07**) là **ca kiểm**. Đề nghị giữ ba nghĩa này, không dùng lại. | **xong** (R, #30: ghi ở đầu D3; bộ đo nhóm M dùng mã mục `M-n`, ghi bất biến `MD-n`) |
 | 2026-11-29 | T → R | Khi lane R mở 0.7.0: kèm migration 0007 và `core/master-data.ts` nếu PR #29 đã merge; ghi `0007` vào ghi chú phát hành và vào bộ đo bất biến nếu đo bảng mới. | **bộ đo xong** (R, #32: W-4 `entity_links` rỗng, W-5 `data_authority` rỗng sau nâng cấp) · ghi chú 0.7.0: khi phát hành |
+| 2026-11-29 | T → R | PHASE-005 · 50 (Module Lifecycle): đặc tả `defineModule` mở rộng (entities, screens, settings, permissions, lifecycle, requires) để lane R làm cùng S004-W3. Lane R duyệt đặc tả hoặc ghi chỗ cần đổi; S003-3 (`registerScreens`) đề xuất lõi làm mới theo `defineScreen`, không chờ claim NT-HT-003 (Q-P5-7). | mở |
 
 ## 7. Đường bắt kịp của open-ketoan — tách khỏi kế toán mà không vấp mã mới của lõi
 
@@ -191,6 +196,14 @@ Trong cửa sổ đó, lane T **không merge** PR chạm tệp chung ở §4. La
   - Lane T chỉ bàn giao (§5), không sửa open-ketoan.
 
 ## 8. Nhật ký bàn giao
+
+### 2026-11-29 12:53 AM · lane T · PHASE-005 (thiết kế)
+- PR: chỉ tài liệu (mở) — `docs/phases/PHASE-005-KHUNG-UNG-DUNG-KHAI-BAO/`: README, 10 gói, 20 Entity Registry, 30 Item Master mở rộng, 40 View Framework, 50 Module Lifecycle, 60 Scoreboard DX, CHECKLIST.
+- Tệp chung đã chạm: `docs/phases/README.md` (một dòng), LANES (giao PHASE-003 / 005 + một yêu cầu §6), CLAIMS, CHANGELOG.
+- Số đã giữ: không (chưa có migration). Đề xuất đường con `@bizcity/platform/{entity, master-data, documents, sync}` — dời `core/master-data` làm cùng lane R lúc cắt 0.7.0.
+- Kiểm: chỉ tài liệu; `standard-check` + `kiem-khung` chạy lại trước PR.
+- Lane kia cần biết / cần làm: duyệt PHASE-005 · 50 (S005-ML-1…4 là của lane R).
+- Việc kế tiếp của lane T: chờ chủ chốt Q-P5-1…8, rồi S005-F0 (đo mốc thật).
 
 ### 2026-11-29 12:38 AM · lane T · merge #29 #31 + phương án bắt kịp (§7)
 - PR: #31 (LANES) đã merge @ `fb0e3c8`; #29 (S004-DM-1…3) đã merge @ `9fcd67d`; bizcity-platform #44 (NC-008) đã merge.

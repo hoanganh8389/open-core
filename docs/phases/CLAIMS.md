@@ -17,6 +17,8 @@
 | T | S004-DM-4 `defineAxis` + bảng bản sao | `core/master-data.ts`, migration (giữ số khi bắt đầu) | — | giữ chỗ (#29 đã merge, bắt đầu được) | 2026-11-29 |
 | T | S004-W5-1…4 + S004-DB-1…4 đồng bộ | `core/events.ts`, `core/sync/*` (mới), migration (giữ số khi bắt đầu) | — | giữ chỗ, chờ `bizcity_sync@1` 0.1 | 2026-11-29 |
 | T | S004-CT-1…5 chứng từ | `core/document-spine.ts`, `core/documents.ts` | — | giữ chỗ | 2026-11-29 |
+| T | PHASE-005 thiết kế + S005-F0…F3, F5-1 | `docs/phases/PHASE-005-*`; sau này `platform/src/entity/*`, `packages/{web-shell, ui-kit, action-client}` | `docs/khung-ung-dung` | mở PR (thiết kế) | 2026-11-29 |
+| R | S005-ML-1…4 Module Lifecycle (theo đặc tả PHASE-005 · 50) | `packages/{server, module-sdk, cli, testing}` | — | đề xuất, chờ lane R nhận | 2026-11-29 |
 
 ## Số đã giữ
 

@@ -2,6 +2,17 @@
 
 ## [Chưa phát hành]
 
+### Thêm (tài liệu — PHASE-005 khung ứng dụng khai báo, lane T)
+- 2026-11-29 — **PHASE-005** (<!-- [2026-11-29 12:53 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 -->): thiết kế năm lớp L1–L5 trên mã đang có.
+  - **10:** 14 gói ⇒ 10 gói phát hành + 4 đường con của `@bizcity/platform`, tiêu chí tách G-1…G-4, luật phụ thuộc.
+  - **20:** Entity Registry — `defineEntity` sinh zod / JSON Schema / `ListDef` / API đọc / metadata giao diện / import mapping; sáu lớp thực thể; ghi nhạy cảm qua Action + Conformance Gate SC-ENT-1…6.
+  - **30:** Item Master cùng `item_id`, mỗi app `extendEntity` (`meta` / `extension` / `column`).
+  - **40:** `defineScreen` khớp mockup f1–f4; lối thoát.
+  - **50:** Module Lifecycle (đặc tả cho lane R).
+  - **60:** Scoreboard DX — 24 thao tác phổ thông, mức D0–D3, tính năng vàng, nợ viết tay, bánh cóc, đích theo bản.
+  - **CHECKLIST** F0–F5; 8 câu hỏi Q-P5 chờ chủ chốt.
+  - Chỉ tài liệu.
+
 ### Thêm (S004-W1-3b / 3c / 5a — diễn tập nâng cấp: bộ đo bản 2, dò API, chạy lại + quay lui)
 - 2026-11-29 — <!-- [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b --> **`do-bat-bien.mjs` bản 2** (`bizcity_dien_tap_bat_bien@2`): nội dung từng dòng của sổ / chứng từ / danh mục (256 ô theo khoá, `--chi-tiet <mã> --o <ô>`, `--dong` + `--dong-truoc/--dong-sau` chỉ ra khoá dòng lệch); nhóm **M** Master Data (ADR-0001 MD-1…MD-4: ULID, mã chồng hiệu lực / cấp lại, ĐVT gốc + tỷ lệ, kho mồ côi, cây có vòng, loại kho); nhóm **R** báo cáo dựng lại (cân đối phát sinh, công nợ, nhập xuất kho, thuế GTGT); nhóm **S** vân lược đồ + sổ migration; **mục bắt buộc theo hồ sơ** (`--ho-so open-ketoan|core`) — thiếu bảng / cột ⇒ đo thoát 1 và so lệch; `--so --chat` đòi giống hệt. **`do-api.mjs`**: kịch bản báo cáo + ma trận quyền qua API (POST luôn `dryRun=1`), so bản A ↔ B. **`dien-tap.mjs`**: trên bản chép (không đụng nguồn) nâng cấp → chạy lại migration (giống hệt) → quay lui từ bản sao lưu (giống hệt trước) → nâng cấp lại (tái lập) → biên bản. Tự kiểm 16 ca.
 
