@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (tài liệu)
+- 2026-11-28 — **PHASE-002 dòng dữ liệu xuyên app** (<!-- [2026-11-28 05:18 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 -->): ba lớp liền mạch (hình giống nhau · định danh chung · đường chuyển có hợp đồng), sáu thiếu sót G-1…G-6 và phương án, Q-DD-1…4, việc S002-1…7.
+
 ### Thêm (S001-4)
 - 2026-11-28 — **`schema_migrations.source`** (<!-- [2026-11-28 05:17 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-4 -->): trình chạy tự thêm cột `source` (mặc định `app`, dòng cũ giữ `app`) và `module` (trước chỉ open-ketoan có, từ 0053) — chạy lại vô hại; mỗi dòng mới ghi đúng nguồn (`platform` / `app` / `mod_<key>`), kể cả dòng ghi nhận bằng `coveredBy`. Khoá chính giữ `name` (planMigrations đã chặn trùng tên giữa các nguồn). Thử lại 183 migration open-ketoan: cài mới / nâng cấp như S001-3.
 
