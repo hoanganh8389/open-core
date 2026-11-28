@@ -88,7 +88,7 @@ Lane nào sửa tệp chung cũng theo đúng luật dưới. Xung đột merge 
 
 **Khi nào:** cuối mỗi phiên, và mỗi khi merge một PR làm thay đổi một tệp chung ở §4.
 
-**Ở đâu:** thêm một khối vào §7 tệp này (mới nhất ở trên), trong cùng PR với việc đó hoặc một PR chỉ-tài-liệu.
+**Ở đâu:** thêm một khối vào §8 tệp này (mới nhất ở trên), trong cùng PR với việc đó hoặc một PR chỉ-tài-liệu.
 
 **Khuôn:**
 
@@ -112,7 +112,98 @@ Lane nào sửa tệp chung cũng theo đúng luật dưới. Xung đột merge 
 | 2026-11-29 | T → R | Tên mã: ADR-0001 dùng **MD-1…MD-5** cho **bất biến**. Lane T đã đổi mã việc từ `S004-MD-*` sang **`S004-DM-*`**; mã nghiệm thu của NC-008 viết hai chữ số (**MD-01…07**) là **ca kiểm**. Đề nghị giữ ba nghĩa này, không dùng lại. | **xong** (R, #30: ghi ở đầu D3; bộ đo nhóm M dùng mã mục `M-n`, ghi bất biến `MD-n`) |
 | 2026-11-29 | T → R | Khi lane R mở 0.7.0: kèm migration 0007 và `core/master-data.ts` nếu PR #29 đã merge; ghi `0007` vào ghi chú phát hành và vào bộ đo bất biến nếu đo bảng mới. | **bộ đo xong** (R, #32: W-4 `entity_links` rỗng, W-5 `data_authority` rỗng sau nâng cấp) · ghi chú 0.7.0: khi phát hành |
 
-## 7. Nhật ký bàn giao
+## 7. Đường bắt kịp của open-ketoan — tách khỏi kế toán mà không vấp mã mới của lõi
+
+<!-- [2026-11-29 12:38 AM Johnny Chu - Chu Hoàng Anh] LANES §7 — chủ: "bảo đảm phiên kia cứ tách ra khỏi open-ketoan và bắt kịp đà nâng cấp tiếp theo của open-core mà không bị conflict, phương án cụ thể". -->
+
+**Ý chính:** open-ketoan **không đuổi theo `main`** của open-core. Nó chỉ nhận lõi qua **bản phát hành** (tgz ghim số) do lane R cắt. Lane T làm trên `main` nhưng phải giữ hai cam kết:
+- mọi thay đổi **chỉ thêm**;
+- mọi migration mới **không chạy trên CSDL kế toán** khi chưa được nhận.
+
+Nhờ vậy, mỗi lần lane R nâng open-ketoan chỉ phải xử lý **một khoảng chênh đã biết**, không phải một `main` đang chạy.
+
+### 7.1 Bốn cam kết của lane T (mỗi PR)
+
+| # | Cam kết | Cách kiểm (bắt buộc trước khi merge) |
+|---|---|---|
+| T-1 | **Chỉ thêm ở API công khai** | chạy `pnpm run ma-tran -- --ketoan <bản open-ketoan> --only ketoan` trên nhánh **và** trên worktree `origin/main`; lọc dòng `✗`, sắp, `diff`. Đạt khi: **khớp tên thiếu 0** và **danh sách ✗ giống hệt `origin/main`** (không thêm lỗi nào). Đo 2026-11-29 trên `main` @ `9fcd67d`: khớp tên 647 import · thiếu 0; khớp kiểu "MỚI 7" — 7 lỗi có sẵn của lane R (authz legacy, chữ ký `migrate`), **không do lane T**. Khi lane R đưa "MỚI" về 0 (PHASE-001 B2), cổng đổi thành `--strict` phải ĐẠT. |
+| | — mã mới vào đường con mới (`core/master-data`, `core/sync/*`…); | |
+| | — không đổi chữ ký / không xoá export mà open-ketoan hoặc open-cake đang import; | |
+| | — bắt buộc đổi ⇒ tệp chuyển tiếp một bản phát hành (R-CORE-2) + một dòng ở §6 gửi lane R. | |
+| T-2 | **Migration lõi mới = "chờ" trên CSDL kế toán**: thêm dòng `CORE_COVERED_BY_KETOAN` với giá trị "chờ open-ketoan lên lõi" | test `migrate.test.mjs` (đã có, chặn nếu thiếu quyết định). |
+| | — kế toán nhận bảng khi nào là việc của lane R / open-ketoan, qua R-FLOW; | |
+| | — lõi nâng phiên bản **không bao giờ** tự đổi CSDL kế toán. | |
+| T-3 | **Không chạm khu cách ly**: không import, không thêm, không sửa `packages/platform/src/ketoan-legacy/**` và các tệp trỏ `masterdata/*`. Đó là vùng lane R đang dời về Kernel kế toán. | `git diff --name-only origin/main` không có đường đó; `kiem-ranh-gioi --check` không tăng. |
+| T-4 | **Dây tương thích ngược với feed kế toán đang chạy** | vector SC-SPINE-5 của bizcity-platform vẫn ĐẠT với feed hiện tại của open-ketoan. |
+| | — `registerSyncFeed`, con trỏ, phong bì 1.4 phải đọc được feed `/api/v1/sync/:axis` hiện tại của open-ketoan (con trỏ cũ `<updated_at>\|<id>` nhận trong thời gian chuyển, NC-008 Q-NC8-4); | |
+| | — kế toán không phải đổi feed để lõi mới chạy. | |
+
+### 7.2 Nhịp phát hành và nâng cấp (lane R chủ trì)
+
+Mỗi bản phát hành lõi đi bốn bước:
+
+1. **Đóng gói.**
+   - Lane R gom `main` (gồm cả việc lane T đã merge), chạy `pnpm test` có CSDL, `ma-tran --chay-that`, rồi đóng tgz.
+   - Ghi chú phát hành có mục **"Nâng cấp open-ketoan"**:
+     - migration mới và quyết định `coveredBy`;
+     - API thêm / deprecated;
+     - codemod (`tools/doi-nguon/ketoan-<bản>.mjs`) nếu có đổi đường nhập.
+2. **Diễn tập.**
+   - Trên bản sao CSDL kế toán: `tools/dien-tap/do-bat-bien` đo trước → nâng → đo sau.
+   - Lệch ngoài danh sách trắng ⇒ không lên.
+   - Bảng cơ chế của lane T là "bảng mới rỗng" — đã nằm trong danh sách trắng.
+3. **Đổi số ghim ở open-ketoan** (một PR theo R-FLOW của open-ketoan): tgz mới + codemod + test của kế toán.
+4. **Ghi nhận:** một khối bàn giao ở §8, kèm số bản lõi mà open-ketoan đang ghim.
+
+Lane T **không** phát hành và không đổi số ghim của app.
+
+Lane T muốn một việc vào bản kế tiếp ⇒ merge trước khi lane R đóng gói và ghi ở §6.
+
+### 7.3 Cửa sổ đóng băng
+
+Lane R báo đóng băng ở §6 (ngày giờ bắt đầu, dự kiến kết thúc, tệp chung bị khoá) khi đang:
+- đổi nguồn gói open-ketoan sang lõi (PHASE-001 B3 / B4);
+- cắt bản phát hành;
+- xoá khu cách ly.
+
+Trong cửa sổ đó, lane T **không merge** PR chạm tệp chung ở §4. Lane T vẫn mở PR, vẫn làm trong tệp riêng của trụ.
+
+### 7.4 Nhịp gộp hằng ngày (cả hai lane)
+
+- **Trước khi mở PR:**
+  - `git merge origin/main` vào nhánh của mình;
+  - chạy `pnpm test` có `TEST_DATABASE_URL`, 0 bỏ qua;
+  - chạy `ma-tran` (T-1).
+- PR nhỏ, merge sớm; không để nhánh sống quá một ngày khi có chạm tệp chung.
+- Xung đột ở tệp chung ⇒ giữ cả hai phần (§4); chạy lại test sau khi gỡ.
+- **Mỗi lane chỉ làm trong thư mục làm việc của mình** (§1). Cần xem `main` thì dùng worktree riêng, không `checkout` trong thư mục của lane kia.
+
+### 7.5 Khi nào trụ cột vào open-ketoan
+
+- **Trước khi open-ketoan lên lõi** (claim B1 chưa trả):
+  - kế toán giữ `sync.service.ts` và ánh xạ riêng;
+  - lõi chỉ cam kết T-4 (dây tương thích);
+  - phần Cake / Kiot dùng **kế toán giả** đúng hợp đồng.
+- **Sau khi open-ketoan ghim bản lõi có trụ cột:** lane R (hoặc phiên của open-ketoan) mở việc ở open-ketoan theo NC-008 W5:
+  - feed qua `registerSyncFeed`;
+  - sửa ID trên dây (Q-NC8-7);
+  - đổi `coveredBy` của 0007 / bảng đồng bộ thành tên migration tương đương của kế toán.
+  - Lane T chỉ bàn giao (§5), không sửa open-ketoan.
+
+## 8. Nhật ký bàn giao
+
+### 2026-11-29 12:38 AM · lane T · merge #29 #31 + phương án bắt kịp (§7)
+- PR: #31 (LANES) đã merge @ `fb0e3c8`; #29 (S004-DM-1…3) đã merge @ `9fcd67d`; bizcity-platform #44 (NC-008) đã merge.
+- **CI GitHub không chạy** ở cả ba PR và ở mọi lần merge `main` gần đây: *"The job was not started because your account is locked due to a billing issue"*.
+  - Bằng chứng là kiểm tại máy: `pnpm test` 82 / 82 ĐẠT, 0 bỏ qua; `standard-check` 0 chặn.
+- **Sự cố:** lane T đã lỡ `git checkout --detach origin/main` trong `D:/projects/open-core` (thư mục lane R) khoảng một phút.
+  - Đã trả lại `feat/s004-w1-3b-do-bat-bien-v2` @ `e352d30`. Thư mục không có thay đổi chưa commit, không mất gì.
+  - Nếu lane R thấy gì lạ trong khoảng 12:36–12:38 AM thì do việc này. Luật §7.4 dòng cuối viết ra từ sự cố này.
+- Lane kia cần biết / cần làm:
+  - đọc §7; xác nhận T-1…T-4 và quy trình 7.2;
+  - khi cắt 0.7.0, thêm mục "Nâng cấp open-ketoan" (0007 = chờ, `core/master-data` thêm mới);
+  - `ma-tran --only ketoan --strict` trên `main` @ `9fcd67d` đang **KHÔNG ĐẠT** vì 7 lỗi kiểu có sẵn (khớp tên 647 · thiếu 0). Đưa 7 lỗi này về 0 là việc của lane R (PHASE-001 B2); tới lúc đó T-1 dùng so danh sách với `origin/main`.
+- Việc kế tiếp của lane T: S004-DM-4 (`defineAxis`) — giữ số migration ở CLAIMS khi cần.
 
 ### 2026-11-29 12:39 AM · lane R · ADR-0001 + S004-W1-3b / 3c / 5a
 - PR: [#30](https://github.com/hoanganh8389/open-core/pull/30) (mở) — ADR-0001 + R-CORE-9, đã gộp main (LANES, #29) và làm hai yêu cầu §6; [#32](https://github.com/hoanganh8389/open-core/pull/32) (mở, chồng #30) — bộ đo bản 2, `do-api.mjs`, `dien-tap.mjs`.
