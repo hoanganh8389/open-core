@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Copyright (c) 2026 Johnny Chu (Chu Hoàng Anh) / BizCity. GPL-2.0-or-later. See LICENSE.
-// [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3c (PHASE-004 · 20 §4 bước 7, H-4) — dò HÀNH VI qua API: kết quả báo cáo + ma trận phân quyền, bản A ↔ bản B.
+// [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3c (PHASE-004 · 20 §4 bước 7, H-4) — dò HÀNH VI qua API: kết quả báo cáo + ma trận phân quyền, bản A ↔ bản B.
 //   Bộ đo bất biến đọc CSDL; cái nó không thấy là hành vi của MÃ (bản A tính báo cáo / quyết quyền thế nào so với bản B). Công cụ này gọi API của từng bản
 //   theo một tệp kịch bản, ghi trạng thái + băm thân JSON (đã chuẩn hoá: khoá xếp thứ tự, bỏ khoá thay đổi theo lần gọi), rồi so.
 //   CHỈ ĐỌC: báo cáo là GET; ô quyền là GET hoặc POST kèm ?dryRun=1 (action của lõi chạy thử rồi huỷ; action không khai dryRun thì từ chối, không chạy thật).

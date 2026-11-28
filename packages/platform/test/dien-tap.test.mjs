@@ -1,7 +1,7 @@
 // [2026-11-28 10:05 PM Johnny Chu - Chu Hoàng Anh] S004-W1-3 — tự kiểm bộ đo bất biến (tools/dien-tap/do-bat-bien.mjs) trên CSDL lõi + bảng sổ dựng giả theo cột thật của open-ketoan:
 // nâng cấp không chạm dữ liệu ⇒ ĐẠT; làm sai từng loại (lệch Nợ / Có, đổi trạng thái chứng từ, cột mới khác mặc định, hoạt động bịa ra, bảng sổ mất) ⇒ bắt đúng mục;
 // mốc sai sẵn của dữ liệu thật giữ nguyên ⇒ không tính là lệch; bộ đo chỉ đọc; CLI --out / --so trả mã thoát đúng.
-// [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b — bản 2: nội dung từng dòng (ô lệch + khoá dòng lệch), Master Data (MD-1…MD-4), báo cáo dựng lại (R),
+// [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b — bản 2: nội dung từng dòng (ô lệch + khoá dòng lệch), Master Data (MD-1…MD-4), báo cáo dựng lại (R),
 //   mục bắt buộc thiếu bảng ⇒ KHÔNG ĐẠT (hồ sơ open-ketoan / core), so --chat giống hệt (S: lược đồ + sổ migration).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -94,7 +94,7 @@ test('đủ nhóm L / D / M / R / H / S / W, mã không trùng; mỗi mục khai
 test('đo: sổ cân, số dư khớp, danh mục giữ MD-1…MD-4, chuỗi bằng chứng nguyên vẹn; đủ mục bắt buộc; chỉ đọc', { skip }, async () => {
   const a = await doLan();
   const k = a.ket_qua;
-  for (const m of ['L-2', 'L-4', 'L-6', 'H-1.chuoi', 'W-1', 'W-2', 'M-1.ulid', 'M-2.chong', 'M-2.tai', 'M-3.goc', 'M-3.ty_le', 'M-4.mo_coi', 'M-4.vong', 'M-4.loai']) assert.equal(k[m].n, '0', m);
+  for (const m of ['L-2', 'L-4', 'L-6', 'H-1.chuoi', 'W-1', 'W-2', 'W-4', 'W-5', 'M-1.ulid', 'M-2.chong', 'M-2.tai', 'M-3.goc', 'M-3.ty_le', 'M-4.mo_coi', 'M-4.vong', 'M-4.loai']) assert.equal(k[m].n, '0', m);
   assert.deepEqual(thieuBatBuoc(a).map(([x]) => x), [], 'đủ mục bắt buộc');
   assert.equal(k['L-8.2'].n, '6'); assert.ok(Object.keys(k['L-8.2'].o).length >= 1);
   assert.equal(k['D-1'].n, '2'); assert.equal(k['D-2'].n, '3'); assert.equal(k['D-3'].n, '2'); assert.equal(k['M-1'].n, '2');

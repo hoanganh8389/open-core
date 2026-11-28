@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Copyright (c) 2026 Johnny Chu (Chu Hoàng Anh) / BizCity. GPL-2.0-or-later. See LICENSE.
 // [2026-11-28 10:05 PM Johnny Chu - Chu Hoàng Anh] S004-W1-3 (PHASE-004 · 20 §3) — bộ đo BẤT BIẾN cho diễn tập nâng cấp open-ketoan lên Core release trên bản sao CSDL.
-// [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b — bản 2 (bizcity_dien_tap_bat_bien@2): nội dung TỪNG DÒNG sổ / chứng từ (băm chia 256 ô + tệp dòng --dong),
+// [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b — bản 2 (bizcity_dien_tap_bat_bien@2): nội dung TỪNG DÒNG sổ / chứng từ (băm chia 256 ô + tệp dòng --dong),
 //   nhóm M (Master Data — ADR-0001 MD-1…MD-4), nhóm R (kết quả báo cáo dựng lại bằng SQL), nhóm S (vân lược đồ + sổ migration), mục BẮT BUỘC theo hồ sơ
 //   (thiếu bảng / cột ⇒ KHÔNG ĐẠT, không còn "không áp dụng" cho mục bắt buộc), chế độ so --chat (giống hệt — cho chạy lại migration và khôi phục bản sao lưu).
 // CHỈ ĐỌC (mọi câu là SELECT, chạy trong giao dịch READ ONLY).
@@ -179,6 +179,9 @@ export const MUC = [
   { ma: 'W-2', nhom: 'W', bb: 'core', ten: 'bảng mới document_activities rỗng (lịch sử cũ không bịa ra)', kieu: 'sau', can: { document_activities: ['id'] }, sql: `SELECT count(*)::text AS n FROM document_activities` },
   { ma: 'W-3', nhom: 'W', bb: 'core', ten: 'không đầu phiếu nào vi phạm khuôn loại chứng từ (cũ lẫn mới)', kieu: 'sau', can: { business_documents: ['doc_type'] },
     sql: `SELECT count(*)::text AS n FROM business_documents WHERE doc_type !~ '^[a-z][a-z0-9_-]*\\.[a-z][a-z0-9_-]*$'` },
+  // [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b — bảng cơ chế 0007 (lane T, S004-DM-2/3; LANES §6): nâng cấp không được tự sinh ánh xạ / tự gán chủ dữ liệu
+  { ma: 'W-4', nhom: 'W', bb: 'core', ten: 'bảng mới entity_links rỗng (nâng cấp không bịa ánh xạ ID)', kieu: 'sau', can: { entity_links: ['tenant_id'] }, sql: `SELECT count(*)::text AS n FROM entity_links` },
+  { ma: 'W-5', nhom: 'W', bb: 'core', ten: 'bảng mới data_authority rỗng (chủ dữ liệu chỉ ghi khi app khai trục)', kieu: 'sau', can: { data_authority: ['tenant_id', 'axis'] }, sql: `SELECT count(*)::text AS n FROM data_authority` },
 ];
 
 async function coCot(client) {

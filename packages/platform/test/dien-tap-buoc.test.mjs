@@ -1,4 +1,4 @@
-// [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-5a / W1-3c — tự kiểm trình diễn tập (tools/dien-tap/dien-tap.mjs) và bộ dò API (tools/dien-tap/do-api.mjs):
+// [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-5a / W1-3c — tự kiểm trình diễn tập (tools/dien-tap/dien-tap.mjs) và bộ dò API (tools/dien-tap/do-api.mjs):
 //   migration lặp lại được + quay lui khôi phục giống hệt + nâng cấp lại tái lập ⇒ ĐẠT; migration không lặp lại được ⇒ B2 hỏng; migration chạm dữ liệu ⇒ B1 hỏng; CSDL nguồn không bị đụng.
 //   Bộ dò API: báo cáo đổi số / ô quyền đổi trạng thái ⇒ lệch; POST luôn kèm dryRun=1; khoá thay đổi theo lần gọi không làm lệch.
 import { test, before, after } from 'node:test';

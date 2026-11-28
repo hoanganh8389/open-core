@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Copyright (c) 2026 Johnny Chu (Chu Hoàng Anh) / BizCity. GPL-2.0-or-later. See LICENSE.
-// [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-5a (PHASE-004 · 20 §4) — trình diễn tập phần CSDL: nâng cấp, CHẠY LẠI migration, QUAY LUI (khôi phục bản sao lưu), nâng cấp lại.
+// [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-5a (PHASE-004 · 20 §4) — trình diễn tập phần CSDL: nâng cấp, CHẠY LẠI migration, QUAY LUI (khôi phục bản sao lưu), nâng cấp lại.
 //   Không đụng CSDL nguồn: chép sang dt_<nhãn>_a (CREATE DATABASE … TEMPLATE) rồi làm mọi việc trên bản chép. Mỗi bước đo bằng do-bat-bien.mjs và so:
 //     B1 nâng cấp      truoc ↔ sau          luật thường (lệch ngoài danh sách trắng = 0)
 //     B2 chạy lại      sau ↔ sau2           --chat: giống hệt (migration lặp lại không đổi gì, kể cả lược đồ)
