@@ -62,3 +62,4 @@ Một chuỗi mẫu cake → POS → kho → kế toán chạy trên bốn CSDL 
 
 - 2026-11-28: mở phase (kế hoạch), từ phân tích dòng dữ liệu xuyên app.
 - 2026-11-28: <!-- [2026-11-28 05:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 — chủ (2026-11-28): "Q-DD không cần hỏi sâu, xuyên suốt để thống nhất api, quy tắc, nguyên tắc là ok" ⇒ chốt theo đề xuất --> Q-DD-1…4 chốt theo đề xuất; S002-4 hết chặn.
+- 2026-11-28: <!-- [2026-11-28 05:25 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 S002-2 --> **S002-2 ☑** — `packages/contracts/src/spine.ts`: zod một bản cho mọi app; test bằng vector spine 1.2 của open-platform (một nguồn sự thật); `qtyMatchesUnits` kiểm `qty = unitQty × unitRatio` bằng số nguyên. Khuôn `doc_ref` trên dây là tập con của khuôn lưu open-ketoan ⇒ không phá CSDL đang chạy. Test 22 / 22; ma trận không lỗi mới.

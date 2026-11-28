@@ -20,6 +20,7 @@ export * from './money.js';
 export * from './ledger-query.js';
 // [2026-11-01 12:16 AM Johnny Chu - Chu Hoàng Anh] PHASE-010 — documents.* (PHASES 2.7): docRef, liên kết, phiên bản, đính kèm.
 export * from './doc-refs.js';
+export * from './spine.js'; // [2026-11-28 05:22 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 S002-2 — định danh chung trên dây (spine 1.2)
 export * from './invoices.js';
 export * from './connections.js';
 // [2026-11-02 07:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-022 — phương án khắc phục có cấu trúc (bizcity_remedy@1)

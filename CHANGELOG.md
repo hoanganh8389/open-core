@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S002-2)
+- 2026-11-28 — **`@bizcity/contracts` spine.ts** (<!-- [2026-11-28 05:25 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 S002-2 -->): zod cho định danh chung trên dây theo spine 1.2 — `tenantSchema`, `siteSchema`, `blogRefSchema`, `subSchema`, `ulidSchema`, `uomSchema`, `branchCodeSchema`, `partnerCodeSchema`, `spineDocRefSchema` (`SPINE_DOC_REF_RE`), `qtySchema`, `ratioSchema`, `itemRefSchema`, `partnerRefSchema`, `contactRefSchema`, `branchRefSchema`, `uomRefSchema`, `qtyLineSchema`, `docLinkSchema`, `envelopeSchema`, `qtyMatchesUnits` (số nguyên, không số thực). Test chạy **vector của open-platform** (`refs.vectors.json`): mọi ca hợp lệ / sai khớp; thêm trục ở spine mà chưa có zod ⇒ test đỏ. `DOC_REF_RE` (khuôn lưu, CHECK 0045 open-ketoan) giữ nguyên — khuôn trên dây là tập con.
+
 ### Thêm (tài liệu)
 - 2026-11-28 — **PHASE-002 dòng dữ liệu xuyên app** (<!-- [2026-11-28 05:18 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 -->): ba lớp liền mạch (hình giống nhau · định danh chung · đường chuyển có hợp đồng), sáu thiếu sót G-1…G-6 và phương án, Q-DD-1…4, việc S002-1…7.
 
