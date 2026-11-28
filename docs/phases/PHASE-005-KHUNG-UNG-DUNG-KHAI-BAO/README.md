@@ -2,7 +2,7 @@
 
 <!-- [2026-11-29 12:53 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — chủ (2026-11-29): "BIZCITY OPEN CORE LEAN" năm lớp L1–L5; 14 gói đề xuất; "developer chỉ tập trung viết nghiệp vụ"; Model Registry sinh schema / metadata giao diện / bộ lọc / import mapping / API đọc; ghi nhạy cảm vẫn qua Action + Conformance Gate; Item Master chung, mỗi app mở rộng thuộc tính; defineScreen; Module Lifecycle; scoreboard đo việc developer đỡ phải viết. Lane T (LANES.md). -->
 
-> **Loại:** thiết kế (chưa có mã của phase này) · **Lane:** T (thiết kế + Entity / View / Scoreboard DX), R (Server / Module SDK / CLI — W3 của PHASE-004, theo đặc tả ở [50](50-MODULE-LIFECYCLE.md)) · **Chờ chủ chốt:** Q-P5-1…14 (§5, đề xuất ở [05](05-DE-XUAT-CHOT.md)) · **Yêu cầu gốc:** [00](00-YEU-CAU-CHU.md)
+> **Loại:** thiết kế (chưa có mã của phase này) · **Lane:** T (thiết kế + Entity / View / Scoreboard DX), R (Server / Module SDK / CLI — W3 của PHASE-004, theo đặc tả ở [50](50-MODULE-LIFECYCLE.md)) · **Đã chốt 2026-11-29:** Q-P5-1…14 theo [05](05-DE-XUAT-CHOT.md) · **Yêu cầu gốc:** [00](00-YEU-CAU-CHU.md)
 > **Đứng trên:** R-CORE-4…9 · ADR-0001 (danh mục: lõi giữ khung) · NC-008 (ba trụ cột, chốt ①) · `bizcity_list@1` · `bizcity_module@1` · `bizcity_ux@1` · mockup f1–f20 ([docs/ui](../../ui/mockup-shots))
 > **Không mở lại** việc đã có chủ ở phase khác: phase này **gom** S003-3 / 4 / 6 / 9 / 10 / 15 (PHASE-003) và S004-W3 (PHASE-004) dưới một mô hình khai báo, mã việc gốc giữ nguyên.
 
@@ -66,7 +66,7 @@ Developer chỉ viết **luật nghiệp vụ** (action ghi, quy tắc, workflow
    - Mỗi đợt ≤ 4 bước và ra một thứ thấy được.
    - Đo bằng Scoreboard DX, không bằng số tính năng.
 
-## 5. Câu hỏi chờ chủ chốt
+## 5. Câu hỏi đã chốt (2026-11-29, chủ đồng ý cả bộ)
 
 <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 --> Phương án đề xuất có lý do đầy đủ ở [05](05-DE-XUAT-CHOT.md); sáu câu mới Q-P5-9…14 (Settings, Activity, nhập, báo cáo, phát hành, bánh xe) cũng ở đó. Q-P5-1 đổi: `reporting` là **gói** (YC-P5-13 đã có hai app dùng), không hoãn.
 

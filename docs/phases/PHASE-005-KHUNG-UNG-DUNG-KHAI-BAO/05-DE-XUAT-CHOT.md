@@ -2,7 +2,7 @@
 
 <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-09: phương án đề xuất cho 8 câu Q-P5 (kèm lý do, giá phải trả, cách quay lui) + 6 câu mới từ YC-P5-10…15. Trạng thái: ĐỀ XUẤT, chờ chủ chốt. -->
 
-> **Trạng thái:** đề xuất. Chủ trả lời "OK cả bộ" hoặc nêu câu muốn đổi. Câu đã chốt ⇒ ghi ngày chốt vào cột cuối, cập nhật README §5.
+> **Trạng thái:** **ĐÃ CHỐT 2026-11-29** — chủ đồng ý cả bộ (§3). Chủ trả lời "OK cả bộ" hoặc nêu câu muốn đổi. Câu đã chốt ⇒ ghi ngày chốt vào cột cuối, cập nhật README §5.
 
 ## 1. Tám câu ban đầu
 
@@ -100,4 +100,4 @@
 
 | Câu | Chốt ngày | Phương án |
 |---|---|---|
-| Q-P5-1…14 | — | chờ |
+| Q-P5-1…14 | **2026-11-29** <!-- [2026-11-29 01:07 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — chủ: "ok đồng ý" ⇒ chốt phương án đề xuất Q-P5-1…14 --> | phương án đề xuất ở §1–2, nguyên văn (chủ: "ok đồng ý") |
