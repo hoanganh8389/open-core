@@ -7,14 +7,14 @@
 
 | # | Chỗ | Là gì | Đi đâu | Cách |
 |---|---|---|---|---|
-| B-1 | `db/types.ts` | kiểu Kysely của ≈ 50 bảng kế toán (`ledger_*`, `accounting_*`, `inventory_*`, `stock_*`, `tax_*`, `debt_*`, `purchase_*`, `sales_*`, `warehouses`, `items`, `partners`, `period_locks`, `cost_norms`, `voucher_*`…) | open-ketoan `apps/api/src/db/types.ts` | lõi xuất `CoreDatabase` (chỉ bảng lõi); app `interface Database extends CoreDatabase { … }` và dùng `Kysely<Database>` của mình (Q-P4-2) |
+| B-1 | `db/types.ts` | kiểu Kysely của ≈ 50 bảng kế toán (`ledger_*`, `accounting_*`, `inventory_*`, `stock_*`, `tax_*`, `debt_*`, `purchase_*`, `sales_*`, `warehouses`, `items`, `partners`, `period_locks`, `cost_norms`, `voucher_*`…) | open-ketoan `apps/api/src/db/types.ts` | dùng cơ chế **đã có** `AppDatabase` + `declare module '@bizcity/platform/db/types'` (P2b-4): lõi chỉ khai bảng lõi, kế toán gộp ≈ 50 kiểu của mình; không đổi 237 chỗ `import { db }` (Q-P4-2, chốt) |
 | B-2 | `core/actions.ts` — `ctx.ledger.{query, submit, cancel, get, allocateDebt}` + `registerLedgerReader / Submitter / CancelGate` + kiểu `LedgerQuery`, `IngestResult` | cổng sổ trong ngữ cảnh action của **mọi** app | cổng chung của lõi + gói cổng sổ của kế toán | §3 (Q-P4-1) |
 | B-3 | `masterdata/default-warehouse.ts` | kho mặc định theo chi nhánh | open-ketoan Kernel (chủ danh mục theo R-CHAIN-0) | dời nguyên; app khác đọc qua API / changefeed của kế toán |
 | B-4 | `masterdata/partner.repository.ts` | đối tượng công nợ (`PartnerAccountingInfo`…) | open-ketoan Kernel | như B-3 |
 | B-5 | `masterdata/catalog-ensure.ts` | bảo đảm danh mục hàng / ĐVT | open-ketoan Kernel | như B-3 |
-| B-6 | `core/errors.ts` — `classifyLedgerTriggerError` | đổi lỗi trigger bảng sổ sang mã chuẩn | open-ketoan Kernel | lõi giữ **móc** `registerDbErrorClassifier(fn)`; mã `UNBALANCED`, `POSTING_FAILED` vẫn trong danh mục lỗi chung (Q-P4-3); `PERIOD_LOCKED` là của lõi (khoá ngày chứng từ chung — `date-rules.ts`) |
+| B-6 | `core/errors.ts` — `classifyLedgerTriggerError` | đổi lỗi trigger bảng sổ sang mã chuẩn | open-ketoan Kernel | lõi giữ **móc** `registerDbErrorClassifier(fn)` (gọi từ `errors.ts` và `http.ts`); mã `UNBALANCED_ENTRY`, `POSTING_FAILED` vẫn trong danh mục lỗi chung — đã có `category: ledger`, `owner: kernel` (Q-P4-3, chốt); `PERIOD_LOCKED` là của lõi (khoá ngày chứng từ chung — `date-rules.ts`) |
 | B-7 | `documents/signature.routes.ts` — `SIGN_ROLES = preparer, cashier, chief_accountant, director` | vai ký của chứng từ kế toán | app khai | `registerSignRoles([...])`; lõi chỉ giữ cơ chế ký theo vai + phiên bản |
-| B-8 | `core/settings.ts` — bậc `accounting_unit` cứng trong thang | thang cài đặt kế toán | thang lõi `install → site → tenant → branch → user` (Q-PIL-6) + bậc app khai | `registerSettingScopes([{ key: 'accounting_unit', after: 'tenant' }])` (Q-P4-4) |
+| B-8 | `core/settings.ts` — bậc `accounting_unit` cứng trong thang | thang cài đặt kế toán | thang lõi `install → site → tenant → branch → user` (Q-PIL-6) + bậc app khai | lõi **0006** bỏ ràng buộc `setting_values_scope_type_check` liệt kê cứng; `registerSettingScopes([{ key: 'accounting_unit', between: ['tenant', 'branch'], resolve }])` (Q-P4-4, chốt) |
 | B-9 | `config/env.ts` — `BOOK_MODE` | chế độ sổ nội bộ / thuế | open-ketoan cấu hình | dời biến + kiểm sang app |
 | B-10 | `core/authz-ketoan-legacy.ts`, `db/migrate-ketoan-legacy.ts` | tệp chuyển tiếp (preset vai kế toán, hook migration cũ) | open-ketoan `apps/api` | giữ ở lõi tới B4 (S001-9) để kế toán chuyển một lần; xoá khỏi lõi ngay sau |
 | B-11 | `system/diagnostics.ts` | **đã sạch** — chỉ mục chung (`MIGRATIONS_PENDING`, `DB_WRITABLE`, `EVIDENCE_CHAIN`, `TENANT_ISOLATION`, `EVENT_DEAD`); mục kiểm sổ (Nợ = Có, công nợ ↔ 331…) đang ở open-ketoan | — | thêm móc `registerDiagnostic({ code, run })` để app gắn mục của mình vào cùng màn / API (thay đường riêng) |
@@ -36,7 +36,8 @@ Có danh sách **nợ ranh giới** (`docs/scoreboard/ranh-gioi.json`) liệt k�
 ```ts
 // lõi — cơ chế chung, không biết "sổ"
 export function definePort<T>(name: string): PortKey<T>;
-export function providePort<T>(key: PortKey<T>, impl: (tx: ActionTx, auth: AuthContext) => T): void;
+export function providePort<T>(key: PortKey<T>, make: (c: PortCall) => T): void;
+// PortCall = { tx, auth, tenantId, actionId, effect: 'read' | 'write', dryRun } — bên cấp tự kiểm luật (action đọc không nộp / huỷ; docKey mang tiền tố module)
 // trong action: ctx.port(key) — thiếu nhà cung cấp ⇒ CAPABILITY_MISSING (đã có trong danh mục lỗi)
 
 // gói cổng sổ do open-ketoan phát hành: @bizcity/ledger-port
@@ -45,9 +46,10 @@ export const LEDGER = definePort<{ query(q: LedgerQuery): Promise<LedgerQueryRow
 // module của kế toán: ctx.port(LEDGER).submit(doc)
 ```
 
-- Luật sở hữu giữ như cũ: `ownDocument(module, doc)` (docKey `<module>:…`), action đọc không nộp / huỷ — lõi kiểm ở `providePort` qua cờ `effect` của action đang chạy.
+- Luật sở hữu giữ như cũ nhưng **do bên cấp kiểm**: `ownDocument(module, doc)` (docKey `<module>:…`), action đọc không nộp / huỷ — lõi chỉ truyền `effect` + `actionId` trong `PortCall`.
+- Đo: `ctx.ledger` có **49 chỗ gọi / 25 tệp, đều ở open-ketoan** (`modules/pos` 8, `phieu-ban`, `xuat-dieu-chinh`, kernel, test) ⇒ cổng chỉ cần chạy cùng tiến trình.
 - App khác (POS, cake) muốn ghi sổ: **không** gọi cổng trực tiếp xuyên tiến trình — gửi chứng từ qua cửa nạp của kế toán (`bizcity_ledger_intake@1`, W5). Cổng chỉ dùng trong cùng tiến trình với Accounting Kernel.
-- Chuyển tiếp: `ctx.ledger` giữ một bản phát hành (0.7) dưới dạng bí danh của `ctx.port(LEDGER)` và báo `deprecated`; xoá ở 0.8.
+- Chuyển tiếp: `ctx.ledger` giữ ở 0.7 dưới dạng bí danh của `ctx.port(LEDGER)` (deprecated, **không đụng 25 tệp**); codemod `ctx.ledger.` → `ctx.port(LEDGER).` (49 chỗ); xoá bí danh ở 0.8. Kiểu `LedgerQuery` / `IngestResult` xuất lại từ `@bizcity/ledger-port` trước, dời hẳn ở bước cuối W2.
 
 ## 4. Thứ tự làm (W2)
 

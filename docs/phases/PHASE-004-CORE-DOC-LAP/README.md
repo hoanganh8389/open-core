@@ -80,16 +80,19 @@ Việc còn lại để hai app **cùng** dùng:
 
 Xong khi: cake ↔ POS và cake ↔ kế toán chạy trên hộp vào / changefeed / đối soát của lõi; mã riêng của cake cho việc này bỏ; một sự kiện gửi lặp, đến muộn, mất rồi phát lại đều cho cùng kết quả (test).
 
-## 6. Câu hỏi cần chủ chốt
+## 6. Quyết định (chủ chốt 2026-11-28) <!-- [2026-11-28 09:33 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — chủ chốt Q-P4-1…5 (2026-11-28, "đồng ý") theo phương án cụ thể -->
 
-| Mã | Câu hỏi | Đề xuất |
+Đo thêm trước khi chốt: `ctx.ledger` có **49 chỗ gọi trong 25 tệp, tất cả ở open-ketoan** (`modules/pos` 8, `phieu-ban`, `xuat-dieu-chinh`, kernel, test) ⇒ cổng chỉ chạy trong cùng tiến trình; app ngoài nộp sổ qua cửa nạp HTTP. Lõi **đã có** cơ chế mở rộng kiểu bảng (`AppDatabase` + `declare module`, bài kiểm `test/types/app-database.ts`, P2b-4). Mã lỗi sổ đã mang `category: 'ledger'`, `owner: 'kernel'`.
+
+| Mã | Quyết định | Cách làm cụ thể |
 |---|---|---|
-| Q-P4-1 | Cổng sổ (`ctx.ledger`) ra khỏi lõi thế nào | lõi cấp **cổng chung** `definePort<T>(name)` / `ctx.port(name)`; kiểu cổng sổ (`LedgerQuery`, `IngestResult`…) nằm trong gói của kế toán (`@bizcity/ledger-port`, kế toán phát hành); app khác muốn nộp sổ thì phụ thuộc gói đó — [30 §3](30-RANH-GIOI-CORE.md#3-cổng-port-thay-cho-ctxledger) |
-| Q-P4-2 | Kiểu bảng kế toán trong `Database` của lõi | lõi chỉ khai bảng lõi; app **mở rộng** bằng `interface AppDatabase extends CoreDatabase` (kiểu Kysely theo app) |
-| Q-P4-3 | Mã lỗi sổ (`UNBALANCED`, `POSTING_FAILED`, lỗi trigger sổ) | giữ trong **danh mục lỗi chung** của contracts (chuẩn `bizcity_errors@1` đã liệt kê, app khác cần đọc được) nhưng bộ phân loại lỗi trigger sổ (`classifyLedgerTriggerError`) sang kế toán; `PERIOD_LOCKED` ở lõi (khoá ngày chứng từ là chung) |
-| Q-P4-4 | Thang cài đặt `accounting_unit` | thang lõi `install → site → tenant → branch → user` (Q-PIL-6); kế toán khai bậc `accounting_unit` qua `registerSettingScopes` |
-| Q-P4-5 | Thời điểm kế toán đổi nguồn gói | sau W2 + diễn tập đạt; lõi phát hành **0.7.0** (ranh giới sạch) làm bản kế toán lên; kế toán đóng băng `packages/platform` ngay lúc đổi nguồn |
+| **Q-P4-1** | `ctx.ledger` rời lõi bằng **cổng chung**; kiểu sổ nằm trong `@bizcity/ledger-port` do kế toán phát hành | lõi: `definePort<T>(name)`, `providePort(key, make)` với `PortCall = { tx, auth, tenantId, actionId, effect, dryRun }`, `ctx.port(key)` (thiếu nhà cung cấp ⇒ `CAPABILITY_MISSING`). Kế toán: `LEDGER` + nhà cung cấp mang nguyên luật cũ (action đọc không nộp / huỷ; `docKey` mang tiền tố module — `ownDocument`). **Chuyển tiếp:** `ctx.ledger` là bí danh của `ctx.port(LEDGER)` ở 0.7 (deprecated, không đụng 25 tệp), codemod `ctx.ledger.` → `ctx.port(LEDGER).` (49 chỗ), xoá bí danh ở 0.8. Kiểu `LedgerQuery` / `IngestResult` xuất lại từ `ledger-port` trước, dời hẳn ở bước cuối W2 |
+| **Q-P4-2** | lõi chỉ khai kiểu bảng lõi; app tự mở rộng | dùng cơ chế **đã có** `AppDatabase` + `declare module '@bizcity/platform/db/types'`; dời ≈ 50 kiểu bảng kế toán sang `apps/api/src/db/types.ts` của kế toán; lõi xuất kiểu trợ giúp (`Json`, `Generated`, `Timestamp`…); 237 chỗ `import { db }` không đổi; mở rộng bài kiểm kiểu có bảng giả kế toán + `@ts-expect-error` |
+| **Q-P4-3** | mã lỗi sổ **ở lại** danh mục chung; bộ phân loại lỗi trigger sổ sang kế toán | lõi: `registerDbErrorClassifier(fn)` — `errors.ts` và `http.ts` (hai chỗ đang gọi `classifyLedgerTriggerError`) gọi lần lượt các bộ đã đăng ký; kế toán đăng ký bộ phân loại + bảng thông điệp trigger. Mã `UNBALANCED_ENTRY`, `POSTING_FAILED` giữ (app khác nhận lỗi từ API kế toán cần đúng mã + gợi ý); `PERIOD_LOCKED` giữ ở lõi (khoá ngày chứng từ là chung — `date-rules.ts`, `documents:bypass-date-lock`) |
+| **Q-P4-4** | bậc `accounting_unit` do kế toán tự khai | **vướng ở CSDL:** lõi 0001 có ràng buộc `setting_values_scope_type_check` liệt kê cứng `accounting_unit` ⇒ lõi thêm migration **0006**: bỏ ràng buộc liệt kê cứng, thay bằng kiểm theo sổ đăng ký bậc (giữ `scope_type = 'tenant' ⇔ scope_id rỗng`); `registerSettingScopes([{ key: 'accounting_unit', between: ['tenant', 'branch'], resolve }])` — `resolve` đổi chi nhánh → đơn vị hạch toán (`branches.accounting_unit_id`); `CORE_COVERED_BY_KETOAN['0006…']` = "không chạy" (ràng buộc cũ của kế toán vẫn hợp lệ) |
+| **Q-P4-5** | kế toán đổi nguồn **một lần ở 0.7.0**, sau khi ranh giới sạch và diễn tập đạt | **0.6.0** = phát hành cái đã gộp (tìm chứng từ, danh sách + xuất); **0.7.0** = W2 (kiểm ranh giới chặn, kiểu bảng dời, cổng + bí danh, móc khai báo, 0006). **Điều kiện tối thiểu để đổi nguồn:** làm xong kiểu bảng (Q-P4-2) **và** 0006 *trước* khi đổi (dời sau thì lõi xoá kiểu kế toán đang dùng ⇒ gãy); `masterdata/*` sang Kernel và xoá bí danh `ctx.ledger` làm **sau** đổi nguồn được (tương thích nguồn) |
 
 ## Nhật ký
 
 - 2026-11-28: mở PHASE-004; đo hiện trạng; viết 10 (bản đồ tương thích), 20 (diễn tập), 30 (ranh giới).
+- 2026-11-28: chủ chốt Q-P4-1…5 (§6) theo phương án cụ thể; sửa tên mã lỗi `UNBALANCED` → `UNBALANCED_ENTRY`.
