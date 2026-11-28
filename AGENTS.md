@@ -40,4 +40,5 @@
 pnpm install
 pnpm test                                                     # kiem-khung + test các gói
 node ../bizcity-platform/tools/standard-check.mjs --repo .    # bộ kiểm của open-platform
+pnpm run ma-tran -- --ketoan ../open-ketoan --cake ../open-cake   # ma trận app (S001-1): đổi mã lõi ⇒ báo lỗi MỚI ở open-ketoan / open-cake (R-PLAT-4)
 ```
