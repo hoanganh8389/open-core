@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S003-20 — tìm chứng từ chuẩn hoá)
+- 2026-11-28 — **`core.document.list`** (<!-- [2026-11-28 08:48 PM Johnny Chu - Chu Hoàng Anh] S003-20 -->, NC-006 §3, R-DOCX-6): `core/list-query.ts` (tham số URL ⇄ ListQuery của `bizcity_list@1`, chạy cùng vector với bizcity-platform), `core/document-search.ts` — `documentSearch.list` trên trục chứng từ: `q`, `f.<cột>.<phép>` (16 cột, phép khai theo cột), `sort` tới 3 khoá, con trỏ keyset gắn chữ ký sắp xếp (đổi cách sắp xếp mà giữ con trỏ cũ ⇒ báo rõ), `count=exact`, `sums` (tính theo tiền hạch toán; nguyên tệ khi lọc một tiền tệ); mặc định ẩn chứng từ lưu trữ; phạm vi vai (đơn vị / module) giao với bộ lọc, không mở rộng được. `documentListAction` (GET /api/v1/documents, MCP chỉ đọc) — app đưa vào `mountActions`. Chứng từ của mọi app ghi qua document-spine (quản lý hoặc phản chiếu) có mặt ở đây — palette ⌘K, danh sách chéo module. Test 6 ca. `pnpm test` có CSDL 51 / 51.
+
 ## [0.5.0] — 2026-11-28
 <!-- [2026-11-28 08:18 PM Johnny Chu - Chu Hoàng Anh] S003-14b — phát hành 0.5.0: trục chứng từ (quản lý + phản chiếu), đa tiền tệ, test runtime lõi -->
 

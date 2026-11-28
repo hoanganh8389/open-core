@@ -25,3 +25,4 @@
 | S003-17 | `media` + trình điều khiển S3-compatible (R2 / S3 / MinIO) + màn Media (NC-007 §6) | ☐ |
 | S003-18 | `ledger_ref {book, org_unit_code}` + cây đơn vị + catalog feed / đề xuất từ kế toán (NC-007 §1–2) | ☐ |
 | S003-19 | `Money` + `fx_rate` ở trục chứng từ (đa tiền tệ, Q-ERP-1 chốt có — NC-007 §8) | ◐ lõi xong: `currency` / `fx_rate` / `total_fc` (0005), contracts `currencyDigits` / `roundCurrency` / `toBaseAmount`, `resolveMoney`; còn bảng tỷ giá phía kế toán, spine 1.3 |
+| S003-20 | tìm chứng từ chuẩn hoá `core.document.list` + `list-query.ts` (NC-006 §3, NC-007 §3) | ◐ lõi xong (51 / 51); còn palette ⌘K ở web-shell, app đưa action vào mountActions |
