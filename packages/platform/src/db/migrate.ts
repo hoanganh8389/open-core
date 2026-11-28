@@ -40,6 +40,9 @@ export interface MigrationHooks {
   afterApply?(c: MigrationClient, log: (m: string) => void): Promise<void>;
   /** Cho pendingMigrations: file này coi như đã áp dù chưa có trong schema_migrations. */
   isApplied?(file: string, done: Set<string>): boolean;
+  // [2026-11-28 05:08 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 — app có sẵn nội dung của một migration nguồn khác (vd migration LÕI đã nằm trong dãy của app: open-ketoan 0183 ≡ lõi 0003).
+  /** Trả lý do (chuỗi) ⇒ ghi nhận file là đã áp, KHÔNG chạy SQL; null / undefined ⇒ chạy như thường. Gọi cho mọi file chưa có trong schema_migrations. */
+  coveredBy?(file: string, source: string): string | null | undefined;
 }
 
 export interface MigrationSet {
@@ -90,6 +93,14 @@ export async function runMigrations(log: (msg: string) => void = console.log, op
       await opts.hooks?.beforeApply?.(client, done, log);
       for (const m of plan) {
         if (done.has(m.file)) continue;
+        // [2026-11-28 05:08 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 — nội dung đã có ở nguồn khác ⇒ ghi nhận, không chạy lại (chống tạo trùng bảng)
+        const cover = opts.hooks?.coveredBy?.(m.file, m.source);
+        if (cover) {
+          await client.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING', [m.file]);
+          done.add(m.file);
+          log(`→ ${m.file} (${m.source}) đã có ở ${cover} — ghi nhận, không chạy`);
+          continue;
+        }
         const sql = await readFile(m.full, 'utf8');
         log(`→ Áp migration ${m.file}${m.source === 'app' ? '' : ` (${m.source})`}`);
         await client.query('BEGIN');
@@ -129,7 +140,9 @@ export async function appliedSchemaVersion(c: { query: (q: string) => Promise<{ 
 
 /** Các file migration CHƯA áp (API dùng khi khởi động: thiếu thì không chạy, báo chạy job db-migrate). */
 export async function pendingMigrations(q: MigrationClient, opts: MigrationSet & { hooks?: MigrationHooks } = {}): Promise<string[]> {
-  const files = planMigrations(opts).map((m) => m.file);
+  // [2026-11-28 05:08 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 — bỏ file nguồn khác đã có nội dung (coveredBy)
+  const plan = planMigrations(opts).filter((m) => !opts.hooks?.coveredBy?.(m.file, m.source));
+  const files = plan.map((m) => m.file);
   const has = await q.query<{ ok: boolean }>("SELECT to_regclass('schema_migrations') IS NOT NULL AS ok");
   if (!has.rows[0]?.ok) return files;
   const done = new Set((await q.query<{ name: string }>('SELECT name FROM schema_migrations')).rows.map((r) => r.name));

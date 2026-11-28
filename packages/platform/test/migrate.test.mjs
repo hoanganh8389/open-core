@@ -58,3 +58,32 @@ test('hook riêng open-ketoan vẫn giữ hành vi cũ (gộp file gốc, đổi
   assert.equal(h.isApplied('0031_thue_kkkn.sql', done), true);
   assert.equal(h.isApplied('0101_app.sql', done), false);
 });
+
+// [2026-11-28 05:08 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 — coveredBy: migration lõi mà app đã có sẵn nội dung ⇒ ghi nhận, không chạy (không tạo trùng bảng)
+test('coveredBy: CSDL mới, lõi và app cùng tạo một bảng ⇒ chỉ chạy bản của app, lõi được ghi nhận; pending rỗng', { skip: !url && 'không có TEST_DATABASE_URL' }, async () => {
+  const c = new pg.Client({ connectionString: url }); await c.connect();
+  try {
+    await c.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
+    const core = dir({ '0001_core_nen.sql': 'CREATE TABLE nen_chung (id int);', '0002_core_moi.sql': 'CREATE TABLE core_moi (id int);' });
+    const ketoan = dir({ '0001_goc.sql': 'CREATE TABLE nen_chung (id int, ten text);', '0183_x.sql': 'SELECT 1;' });
+    const hooks = { coveredBy: (f) => (f === '0001_core_nen.sql' ? '0001_goc.sql' : null) };
+    const log = [];
+    const applied = await runMigrations((m) => log.push(m), { connectionString: url, sources: [{ name: 'platform', dir: core }, { name: 'app', dir: ketoan }], hooks });
+    assert.deepEqual(applied, ['0001_goc.sql', '0002_core_moi.sql', '0183_x.sql']);
+    assert.ok(log.some((l) => l.includes('0001_core_nen.sql (platform) đã có ở 0001_goc.sql')));
+    const names = (await c.query('SELECT name FROM schema_migrations ORDER BY 1')).rows.map((r) => r.name);
+    assert.deepEqual(names, ['0001_core_nen.sql', '0001_goc.sql', '0002_core_moi.sql', '0183_x.sql']);
+    const cols = (await c.query("SELECT count(*)::int n FROM information_schema.columns WHERE table_name = 'nen_chung'")).rows[0].n;
+    assert.equal(cols, 2, 'bảng là bản của app (2 cột), không bị bản lõi tạo trước');
+    assert.deepEqual(await pendingMigrations(c, { sources: [{ name: 'platform', dir: core }, { name: 'app', dir: ketoan }], hooks }), []);
+  } finally { await c.end(); }
+});
+
+test('open-ketoan: bốn migration lõi hiện có đều có bản tương đương trong dãy của open-ketoan', async () => {
+  const { CORE_COVERED_BY_KETOAN, ketoanLegacyHooks } = await import('../dist/db/migrate-ketoan-legacy.js');
+  const { PLATFORM_MIGRATIONS_DIR } = await import('../dist/db/paths.js');
+  const core = planMigrations({ sources: [{ name: 'platform', dir: PLATFORM_MIGRATIONS_DIR }] }).map((m) => m.file);
+  assert.deepEqual(core, Object.keys(CORE_COVERED_BY_KETOAN).sort(), 'thêm migration lõi ⇒ quyết định nó có chạy trên CSDL open-ketoan không (PHASE-001 R-4)');
+  for (const f of core) assert.ok(ketoanLegacyHooks.coveredBy(f, 'platform'));
+  assert.equal(ketoanLegacyHooks.coveredBy('0186_doc_bao_cao_pos.sql', 'app'), null);
+});

@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S001-3)
+- 2026-11-28 — **hook `coveredBy`** (<!-- [2026-11-28 05:13 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 -->): migration của nguồn khác mà app đã có sẵn nội dung ⇒ ghi nhận, không chạy (trình chạy + `pendingMigrations`); `ketoanLegacyHooks` khai `CORE_COVERED_BY_KETOAN` (lõi 0001 / 0002 ⇐ dãy gốc open-ketoan, 0003 ⇐ 0183, 0004 ⇐ 0184). Thử thật với 183 migration của open-ketoan trên Postgres 16: cài mới — 183 tệp chạy, 4 tệp lõi ghi nhận, pending 0; nâng cấp — bản cũ 139 bảng, bật lõi chạy thêm 0 tệp, vẫn 139 bảng.
+
 ### Thêm (S001-2)
 - 2026-11-28 — **`appRoot()` / PlatformConfig** (<!-- [2026-11-28 05:03 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-2 -->): `core/app-root.ts` — gốc app theo thứ tự `BIZCITY_APP_ROOT` → gói trong repo app (cách cũ) → gói trong `node_modules` thì đi lên tới `bizcity.app.json`; năm chỗ tính "lùi N cấp" (`db/paths.ts`, `core/settings.ts`, `core/version.ts`, `core/libraries/{index,context}.ts`) dùng chung; `CONTROL_MIGRATIONS_DIR` ghi đè được bằng biến môi trường. Tên export giữ nguyên (R-CORE-2). Test 5 ca (repo, npm, pnpm, Docker, biến môi trường). Ma trận: open-ketoan không lỗi mới (vẫn 7 lỗi §1.1), open-cake 0; **chạy thật**: tgz cài vào bản tạm của open-cake ⇒ `appRoot` đúng gốc open-cake, 199 / 199 test.
 

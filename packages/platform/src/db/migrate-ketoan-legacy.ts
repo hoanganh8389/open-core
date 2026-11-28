@@ -38,6 +38,15 @@ const RENAMED: Readonly<Record<string, string>> = {
   '0165_hop_dong_mua_xuyen_suot.sql': '0163_hop_dong_mua_xuyen_suot.sql',
 };
 
+// [2026-11-28 05:08 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 — migration LÕI (open-core packages/platform/db/migrations) mà dãy của open-ketoan đã có sẵn nội dung
+//   (PHASE-001 R-4): ghi nhận, không chạy — kể cả CSDL mới (dãy của open-ketoan tự tạo đủ bảng). Migration lõi mới hơn 0004 chạy như thường.
+export const CORE_COVERED_BY_KETOAN: Readonly<Record<string, string>> = {
+  '0001_platform_nen_tang.sql': '0001_goc_* … 0067 (26 bảng nền)',
+  '0002_platform_vai_theo_app.sql': 'ràng buộc vai của open-ketoan (giữ vai kế toán, ketoanAuthzPreset)',
+  '0003_platform_external_sub.sql': '0183_nguoi_dung_external_sub.sql',
+  '0004_platform_secrets.sql': '0184_tenant_secrets.sql',
+};
+
 const record = (c: MigrationClient, name: string) => c.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING', [name]);
 
 export const ketoanLegacyHooks: MigrationHooks = {
@@ -60,6 +69,7 @@ export const ketoanLegacyHooks: MigrationHooks = {
     await c.query('DROP TABLE _run_log_export');
     if (rows.length) log(`→ Ghi ${rows.length} dòng nhật ký cũ ra JSONL (DATA_DIR/nhat-ky)`);
   },
+  coveredBy: (file) => CORE_COVERED_BY_KETOAN[file] ?? null,
   isApplied(file, done) {
     if (done.has(LAST_OLD) && BASELINE.includes(file)) return true;
     return RENAMED[file] !== undefined && done.has(RENAMED[file]!);
