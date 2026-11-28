@@ -4,7 +4,8 @@
 //   Mỗi app: (1) KHỚP TÊN — mọi import tới @bizcity/platform/<đường>, @bizcity/contracts, @ketoan/contracts có đúng tệp + tên export ở open-core;
 //            (2) KHỚP KIỂU — tsc của app trên mã lõi đang sửa; báo lỗi MỚI so với mốc (cùng app trên bản lõi nó đang dùng).
 //   Không sửa repo app: chép bản git vào thư mục tạm (--work), cài phụ thuộc ở đó, nối gói lõi bằng junction / symlink.
-// Dùng: node tools/ma-tran-app.mjs [--ketoan ../open-ketoan] [--ketoan-ref origin/dev] [--cake ../open-cake] [--cake-ref HEAD] [--work <tạm>] [--only ketoan|cake]
+// Dùng: node tools/ma-tran-app.mjs [--ketoan ../open-ketoan] [--ketoan-ref origin/dev] [--cake ../open-cake] [--cake-ref HEAD] [--work <tạm>] [--only ketoan|cake] [--strict]
+//        [--chay-that]  (open-cake: cài lõi bằng tgz, chạy đủ test — cần CAKE_TEST_DATABASE_URL)
 import { execSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -99,7 +100,36 @@ function cake() {
   for (const p of ['platform', 'contracts']) link(path.join(CORE, 'packages', p), path.join(api, p));
   let now;
   try { now = tscErrors(sh(tc, dir, true)); } finally { for (const p of ['platform', 'contracts']) link(orig[p], path.join(api, p)); }
-  return { names, base, now, pkgErr: new Set() };
+  const runtime = process.argv.includes('--chay-that') ? cakeRuntime(dir) : null;
+  return { names, base, now, pkgErr: new Set(), runtime };
+}
+
+// [2026-11-28 05:39 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-5 — làn CHẠY THẬT (--chay-that): đóng lõi đang sửa thành tgz (tools/dong-goi.mjs), cài vào bản tạm
+//   của open-cake bằng file: + overrides, chạy đủ test của app trên Postgres (CAKE_TEST_DATABASE_URL). Không nối junction vào thư mục lõi: junction kéo zod / fastify
+//   của open-core ⇒ hai bản, instanceof ZodError sai (PHASE-001 nhật ký S001-2). Xong trả package.json / lockfile gốc của bản tạm.
+function cakeRuntime(dir) {
+  const url = process.env.CAKE_TEST_DATABASE_URL;
+  if (!url) return { skipped: 'thiếu CAKE_TEST_DATABASE_URL' };
+  const ver = JSON.parse(readFileSync(path.join(CORE, 'package.json'), 'utf8')).version;
+  const out = path.join(WORK, 'tgz'); rmSync(out, { recursive: true, force: true });
+  sh(`node tools/dong-goi.mjs ${ver} "${out}"`, CORE);
+  const files = ['apps/api/package.json', 'package.json', 'pnpm-lock.yaml'];
+  const saved = Object.fromEntries(files.map((f) => [f, readFileSync(path.join(dir, f), 'utf8')]));
+  const tgz = (p) => `file:${path.join(out, `bizcity-${p}-${ver}.tgz`).split(path.sep).join('/')}`;
+  try {
+    const api = JSON.parse(saved['apps/api/package.json']); api.dependencies['@bizcity/contracts'] = tgz('contracts'); api.dependencies['@bizcity/platform'] = tgz('platform');
+    writeFileSync(path.join(dir, 'apps/api/package.json'), JSON.stringify(api, null, 2) + '\n');
+    const root = JSON.parse(saved['package.json']); root.pnpm = { ...(root.pnpm ?? {}), overrides: { ...(root.pnpm?.overrides ?? {}), '@bizcity/contracts': tgz('contracts') } };
+    writeFileSync(path.join(dir, 'package.json'), JSON.stringify(root, null, 2) + '\n');
+    sh('pnpm install --no-frozen-lockfile', dir);
+    process.env.TEST_DATABASE_URL = url; // test của app đọc TEST_DATABASE_URL; thiếu ⇒ test CSDL bị bỏ qua âm thầm
+    const r = sh(`pnpm exec vitest run`, dir, true).replace(/\x1b\[[0-9;]*m/g, '');
+    const m = /Tests\s+(?:(\d+) failed \| )?(\d+) passed(?: \| (\d+) skipped)?/.exec(r);
+    return { failed: Number(m?.[1] ?? (m ? 0 : NaN)), passed: Number(m?.[2] ?? 0), skipped: Number(m?.[3] ?? 0), tail: r.split('\n').filter((l) => /FAIL|Tests /.test(l)).slice(0, 12) };
+  } finally {
+    for (const f of files) writeFileSync(path.join(dir, f), saved[f]);
+    sh('pnpm install --frozen-lockfile', dir, true);
+  }
 }
 
 mkdirSync(WORK, { recursive: true });
@@ -117,6 +147,8 @@ for (const [name, fn] of [['open-ketoan', ketoan], ['open-cake', cake]]) {
     if (r.pkgErr.size) { log(`  ✗ gói lõi không dựng được trong app (${r.pkgErr.size} lỗi)`); for (const e of [...r.pkgErr].slice(0, 10)) log(`    ${e}`); }
     log(`  khớp kiểu: mốc ${r.base.size} lỗi · trên lõi đang sửa ${r.now.size} · MỚI ${fresh.length} · hết ${fixed.length}`);
     for (const e of fresh.slice(0, 40)) log(`    ✗ ${e}`);
+    if (r.runtime?.skipped) log(`  chạy thật: bỏ qua (${r.runtime.skipped})`);
+    else if (r.runtime) { log(`  chạy thật (tgz): ${r.runtime.passed} test qua · ${r.runtime.failed} hỏng · ${r.runtime.skipped} bỏ qua`); if (r.runtime.failed !== 0) { fail++; for (const l of r.runtime.tail) log(`    ${l.trim()}`); } }
     const res = { app: name, at: new Date().toISOString(), core: sh('git rev-parse HEAD', CORE).trim(), names: r.names.n, namesMissing: r.names.miss.length, base: r.base.size, now: r.now.size, fresh, fixed };
     writeFileSync(path.join(WORK, `${name}.json`), JSON.stringify(res, null, 2));
     if (r.names.miss.length || r.pkgErr.size) fail++;
