@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S002-1)
+- 2026-11-28 — **`tools/kiem-luoc-do.mjs`** (<!-- [2026-11-28 05:34 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 S002-1 -->): dựng CSDL chỉ có migration lõi và CSDL của app (open-ketoan: dãy riêng + `ketoanLegacyHooks`), so **cột · ràng buộc · trigger · RLS** của mọi bảng lõi; khác biệt có chủ ý ghi kèm lý do (`DA_BIET`), khác lạ ⇒ KHÔNG ĐẠT. Lần đầu: 28 bảng, 547 mục, 12 khác có chủ ý (ràng buộc vai kế toán, khoá ngoại / trigger kế toán), **0 khác lạ** — bốn bảng chứng từ, `document_sequences`, `document_signatures`, `mcp_confirm_tokens`, `event_outbox` đã có trong `0001` lõi và khớp từng cột với open-ketoan.
+
 ### Thêm (S002-2)
 - 2026-11-28 — **`@bizcity/contracts` spine.ts** (<!-- [2026-11-28 05:25 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 S002-2 -->): zod cho định danh chung trên dây theo spine 1.2 — `tenantSchema`, `siteSchema`, `blogRefSchema`, `subSchema`, `ulidSchema`, `uomSchema`, `branchCodeSchema`, `partnerCodeSchema`, `spineDocRefSchema` (`SPINE_DOC_REF_RE`), `qtySchema`, `ratioSchema`, `itemRefSchema`, `partnerRefSchema`, `contactRefSchema`, `branchRefSchema`, `uomRefSchema`, `qtyLineSchema`, `docLinkSchema`, `envelopeSchema`, `qtyMatchesUnits` (số nguyên, không số thực). Test chạy **vector của open-platform** (`refs.vectors.json`): mọi ca hợp lệ / sai khớp; thêm trục ở spine mà chưa có zod ⇒ test đỏ. `DOC_REF_RE` (khuôn lưu, CHECK 0045 open-ketoan) giữ nguyên — khuôn trên dây là tập con.
 
