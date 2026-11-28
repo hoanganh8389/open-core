@@ -14,9 +14,11 @@
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { appRoot } from '../core/app-root.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-export const DB_DIR = process.env.DB_DIR || path.resolve(here, '../../../../db');
+// [2026-11-28 04:54 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-2 — gốc app qua appRoot() (đúng cả khi gói nằm trong node_modules)
+export const DB_DIR = process.env.DB_DIR || path.join(appRoot(), 'db');
 export const MIGRATIONS_DIR = path.join(DB_DIR, 'migrations');
 export const SEEDS_DIR = process.env.SEEDS_DIR || path.join(DB_DIR, 'seeds');
 // [2026-11-14 01:47 PM Johnny Chu - Chu Hoàng Anh] PHASE-036 — S036-11: true = máy chủ đặt SEEDS_DIR (bộ danh mục của công ty), false = db/seeds đóng kèm (TI08 báo bộ đang đọc)

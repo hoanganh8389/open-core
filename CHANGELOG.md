@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S001-2)
+- 2026-11-28 — **`appRoot()` / PlatformConfig** (<!-- [2026-11-28 05:03 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-2 -->): `core/app-root.ts` — gốc app theo thứ tự `BIZCITY_APP_ROOT` → gói trong repo app (cách cũ) → gói trong `node_modules` thì đi lên tới `bizcity.app.json`; năm chỗ tính "lùi N cấp" (`db/paths.ts`, `core/settings.ts`, `core/version.ts`, `core/libraries/{index,context}.ts`) dùng chung; `CONTROL_MIGRATIONS_DIR` ghi đè được bằng biến môi trường. Tên export giữ nguyên (R-CORE-2). Test 5 ca (repo, npm, pnpm, Docker, biến môi trường). Ma trận: open-ketoan không lỗi mới (vẫn 7 lỗi §1.1), open-cake 0; **chạy thật**: tgz cài vào bản tạm của open-cake ⇒ `appRoot` đúng gốc open-cake, 199 / 199 test.
+
 ### Thêm
 - 2026-11-28 — **S001-1 ma trận app** (<!-- [2026-11-28 04:52 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-1 -->): `pnpm run ma-tran` (`tools/ma-tran-app.mjs`) — chép open-ketoan / open-cake vào thư mục tạm, đo khớp tên (import ↔ export lõi) và khớp kiểu (`tsc` trên lõi đang sửa so với mốc), báo lỗi MỚI; `--strict` chặn khi có lỗi mới. Lần đầu: open-ketoan 646 / 646 tên, 7 lỗi kiểu mới (PHASE-001 §1.1); open-cake 65 / 65, 0 lỗi mới.
 - 2026-11-28 — **PHASE-001 open-ketoan chạy trên open-core** (tài liệu; <!-- [2026-11-28 04:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 -->): đo khớp tên 646 / 646 import, khớp kiểu 7 lỗi mới (đều do P2b), 11 vấn đề lúc chạy R-1…R-11, phương án B (lớp chuyển tiếp trước), việc S001-1…9.
