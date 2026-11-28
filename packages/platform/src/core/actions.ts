@@ -45,6 +45,7 @@ import { withSpan } from './tracing.js';
 import { documents } from './documents.js';
 import { documentSpine, type DocumentHeader, type DocumentHeaderInput } from './document-spine.js';
 import { workflowActor } from './workflow.js';
+import { findPort, resolvePort, type PortCall, type PortKey } from './ports.js';
 import { readSetting } from './settings.js';
 import { moduleSecretDecls, secretsFor, type SecretsApi } from './secrets.js';
 // [2026-11-09 11:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-030 — S030-51a (B5a, 26 §4.1 ①): ctx.libraries — kiểm theo thư viện dùng chung trong action
@@ -110,6 +111,12 @@ export interface ActionContext {
    * `<module>:`, sourceSystem = mã module (module không ghi đè / huỷ chứng từ của nguồn khác). Không số tài khoản: luật định khoản
    * của Kernel + cấu hình đơn vị quyết. Lỗi định khoản ném ra → cả action huỷ (dữ liệu module và sổ cùng commit hoặc cùng huỷ).
    */
+  /**
+   * [2026-11-28 09:41 PM Johnny Chu - Chu Hoàng Anh] S004-W2-3 — cổng của app có kiểu (Q-P4-1): `ctx.port(LEDGER)` … Lõi chỉ truyền giao dịch + người gọi + mã action + effect; bên cấp tự kiểm luật của nó.
+   * Chưa có nhà cung cấp ⇒ CAPABILITY_MISSING.
+   */
+  port<T>(key: PortKey<T>): T;
+  /** @deprecated PHASE-004: dùng `ctx.port(LEDGER)` của @bizcity/ledger-port (kế toán). Còn tới 0.8; nếu app đã `providePort` cổng tên `ledger` thì các hàm dưới chuyển thẳng sang cổng đó. */
   ledger: {
     query(q: LedgerQuery): Promise<LedgerQueryRow[]>;
     submit(doc: Record<string, unknown> & { docKey: string; docType: string }): Promise<IngestResult>;
@@ -489,6 +496,7 @@ async function runActionUntraced<I extends z.AnyZodObject, O extends z.ZodTypeAn
           return { data: prev.response as z.infer<O>, status: prev.status_code, meta: { ...meta, idempotency: 'replayed' as const, ...(receipt ? { receipt } : {}) } };
         }
       }
+      const portCall: PortCall = { tx: trx, auth, tenantId, actionId: def.id, effect: def.effect, dryRun };
       const ctxMeta = makeMeta(def.id, responseMeta);
       const ctx: ActionContext = {
         actor: { id: auth?.actor ?? 'public', name: auth?.actorName ?? '', kind: auth?.kind ?? 'user' },
@@ -516,12 +524,15 @@ async function runActionUntraced<I extends z.AnyZodObject, O extends z.ZodTypeAn
             });
           },
         },
+        port: (key) => resolvePort(key, portCall),
         ledger: {
           query: (q) => {
+            const lp = findPort<ActionContext['ledger']>('ledger', portCall); if (lp) return lp.query(q); // [2026-11-28 09:41 PM Johnny Chu - Chu Hoàng Anh] S004-W2-3 — cổng đã cấp ⇒ chuyển thẳng
             if (!ledgerReader) throw new Error('Chưa đăng ký bộ đọc sổ (registerLedgerReader ở app.ts)');
             return ledgerReader(trx, tenantId, q);
           },
           submit: async (doc) => {
+            const lp = findPort<ActionContext['ledger']>('ledger', portCall); if (lp) return lp.submit(doc);
             const mod = def.id.split('.')[0]!;
             if (def.effect !== 'write') throw new Error(`Action đọc ${def.id} không được nộp chứng từ (ctx.ledger.submit chỉ trong action ghi)`);
             if (!ledgerSubmitter) throw new Error('Chưa đăng ký cửa nộp chứng từ (registerLedgerSubmitter ở app.ts)');
@@ -529,6 +540,7 @@ async function runActionUntraced<I extends z.AnyZodObject, O extends z.ZodTypeAn
             return ledgerSubmitter(trx, auth, ownDocument(mod, doc, 'module'));
           },
           cancel: async (docKey, reason) => {
+            const lp = findPort<ActionContext['ledger']>('ledger', portCall); if (lp) return lp.cancel(docKey, reason);
             const mod = def.id.split('.')[0]!;
             if (def.effect !== 'write') throw new Error(`Action đọc ${def.id} không được huỷ chứng từ (ctx.ledger.cancel chỉ trong action ghi)`);
             if (!ledgerCancelGate) throw new Error('Chưa đăng ký cửa huỷ chứng từ (registerLedgerCancelGate ở app.ts)');
@@ -538,6 +550,7 @@ async function runActionUntraced<I extends z.AnyZodObject, O extends z.ZodTypeAn
           },
           // [2026-11-02 06:20 PM Johnny Chu - Chu Hoàng Anh] PHASE-011 — 3.16: allocateDebt chạy thật (ledger.allocate-debt available)
           allocateDebt: async (input) => {
+            const lp = findPort<ActionContext['ledger']>('ledger', portCall); if (lp) return lp.allocateDebt(input);
             const mod = def.id.split('.')[0]!;
             if (def.effect !== 'write') throw new Error(`Action đọc ${def.id} không được đối trừ công nợ (ctx.ledger.allocateDebt chỉ trong action ghi)`);
             if (!ledgerCancelGate) throw new Error('Chưa đăng ký cửa sổ của Kernel (registerLedgerCancelGate ở app.ts)');
@@ -547,6 +560,7 @@ async function runActionUntraced<I extends z.AnyZodObject, O extends z.ZodTypeAn
             return ledgerCancelGate.allocate(trx, tenantId, input, auth.actor);
           },
           get: async (docKey) => {
+            const lp = findPort<ActionContext['ledger']>('ledger', portCall); if (lp) return lp.get(docKey);
             const mod = def.id.split('.')[0]!;
             if (!ledgerCancelGate) throw new Error('Chưa đăng ký cửa đọc chứng từ (registerLedgerCancelGate ở app.ts)');
             ownDocument(mod, { docKey }, 'module');

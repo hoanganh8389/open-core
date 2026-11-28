@@ -18,7 +18,8 @@
 | S004-W2-1 | `tools/kiem-ranh-gioi.mjs` + `ranh-gioi.json` — đo; `--check` chặn tăng (trong `pnpm test`) | open-core | ☑ 158 vi phạm / 22 tệp |
 | S004-W2-8 | tách `@bizcity/accounting-contracts` (B-12, Q-P4-6 — chờ chủ chốt) | open-core + open-ketoan | ☐ |
 | S004-W2-2 | dời ≈ 50 kiểu bảng kế toán sang `AppDatabase` của open-ketoan (cơ chế đã có) + xuất kiểu trợ giúp + mở rộng bài kiểm kiểu (B-1) | open-core + open-ketoan | ☐ |
-| S004-W2-3 | cổng `definePort` / `ctx.port` + `@bizcity/ledger-port` + bí danh `ctx.ledger` (B-2) | open-core + open-ketoan | ☐ |
+| S004-W2-3a | lõi: `definePort` / `providePort` / `ctx.port` + bí danh `ctx.ledger` → cổng `ledger` (B-2) | open-core | ☑ 62 / 62 |
+| S004-W2-3b | open-ketoan: gói `@bizcity/ledger-port` (kiểu + khoá `LEDGER`) + `providePort(LEDGER, …)` mang luật `ownDocument` / effect; codemod 49 chỗ; xuất lại kiểu từ contracts | open-ketoan (R-FLOW) | ☐ |
 | S004-W2-4 | móc khai báo: `registerSettingScopes` + **migration 0006** (bỏ ràng buộc bậc cứng), `registerSignRoles`, `registerDbErrorClassifier`, `registerDiagnostic`; `BOOK_MODE` (B-6…B-9, B-11) | open-core | ☐ |
 | S004-W2-5 | `masterdata/*` sang Kernel kế toán (B-3…B-5) | open-core + open-ketoan | ☐ |
 | S004-W0 | phát hành **0.6.0** (tìm chứng từ, danh sách + xuất) | open-core | ☐ |

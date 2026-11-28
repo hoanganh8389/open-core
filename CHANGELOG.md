@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S004-W2-3 — cổng mở có kiểu)
+- 2026-11-28 — **`definePort` / `providePort` / `ctx.port`** (<!-- [2026-11-28 09:41 PM Johnny Chu - Chu Hoàng Anh] S004-W2-3 -->, PHASE-004 Q-P4-1): `core/ports.ts` — khoá cổng có kiểu `PortKey<T>`; nhà cung cấp nhận `PortCall { tx, auth, tenantId, actionId, effect, dryRun }` để **tự kiểm luật của nó** (vd cổng sổ của kế toán: action đọc không nộp / huỷ, docKey mang tiền tố module — lõi không biết các luật ấy); chưa có nhà cung cấp ⇒ `CAPABILITY_MISSING` nêu tên cổng. `ctx.port(KEY)` trong action. **`ctx.ledger` thành bí danh chuyển tiếp (deprecated):** app đã `providePort` cổng tên `ledger` thì `ctx.ledger.{query, submit, cancel, get, allocateDebt}` chuyển thẳng sang cổng đó, chưa cấp thì chạy cổng cũ (`registerLedger*`) ⇒ kế toán đổi dần, không phải sửa 25 tệp một lúc. Test 5 ca chạy thật + bài kiểm kiểu (`test/types/port-typed.ts`: sai tham số / sai kiểu trả ⇒ lỗi biên dịch). `pnpm test` 62 / 62; open-cake 199 / 199; open-ketoan vẫn đúng 7 lỗi kiểu cũ, không thêm.
+
 ### Thêm (S004-W2-1 — kiểm ranh giới Core)
 - 2026-11-28 — **`tools/kiem-ranh-gioi.mjs`** (<!-- [2026-11-28 09:37 PM Johnny Chu - Chu Hoàng Anh] S004-W2-1 -->, R-CORE-8): đo theo (tệp, luật) mã lõi còn chứa nghiệp vụ kế toán — R-BANG, R-IMPORT, R-SO, R-VAI, R-THANG, R-ENV, R-TEP (bỏ chú thích) — so với sổ nợ `docs/scoreboard/ranh-gioi.json`; `--check` (trong `pnpm test`) **chặn khi số vi phạm tăng**, `--ghi` chỉ ghi khi không tăng, `--strict` cho S004-W2-6. Đo lần đầu **158 vi phạm / 22 tệp** (R-BANG 65 · R-VAI 65 · R-SO 19 · R-THANG 6 · R-TEP 2 · R-ENV 1). Phát hiện: `@bizcity/contracts` cũng chứa nội dung kế toán ⇒ PHASE-004 B-12 + Q-P4-6.
 
