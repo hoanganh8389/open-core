@@ -114,6 +114,14 @@ Lane nào sửa tệp chung cũng theo đúng luật dưới. Xung đột merge 
 
 ## 7. Nhật ký bàn giao
 
+### 2026-11-29 01:09 AM · lane R · S004-W2-10 (B-15 phần SQL còn lại)
+- PR: (mở) nhánh `feat/s004-b15-sql-tho`, chồng S004-W2-9.
+- Tệp chung đã chạm: `core/settings.ts` — `registerSettingImpactSource`, bậc `branch` qua `MASTERDATA` · `db/site-backup.ts` — `registerBackupRequiredTables`, `inspectBackup` thêm `missing` · `tools/kiem-ranh-gioi.mjs` — TABLES thêm `fiscal_periods`, `intake_inbox`, `posting_log`, `branches` · `test/hooks-w24.test.mjs` — nhà cấp `MASTERDATA` giả cho bậc branch.
+- Số đã giữ / nhả: không.
+- Kiểm: `pnpm test` có CSDL 96 / 96 · `ma-tran --strict` hai app ĐẠT · sổ ranh giới 96 → 95.
+- Lane kia cần biết / cần làm: bộ kiểm ranh giới **giờ bắt** `branches`, `fiscal_periods`, `intake_inbox`, `posting_log` trong mã lõi — mã của lane T cần cây đơn vị thì gọi `MASTERDATA` (ghi yêu cầu §6 nếu thiếu hàm). Bậc cài đặt `branch` cần nhà cấp `MASTERDATA`.
+- Việc kế tiếp của lane: S004-W2-6 (kiểm ranh giới chặn: trả nốt R-SO / R-VAI hoặc khoanh vào khu cách ly) → phát hành 0.7.0.
+
 ### 2026-11-29 12:55 AM · lane R · S004-W2-9 (cổng MASTERDATA)
 - PR: (mở) nhánh `feat/s004-w2-9-cong-masterdata`, chồng lên S004-W1-7a.
 - Tệp chung đã chạm: `core/masterdata-port.ts` (mới, R) · `core/authz/scope.ts`, `store.ts` (chỉ phần đọc cây đơn vị / kho) · `ketoan-legacy/index.ts` (`installKetoanLegacy()` dời vào, thêm nhà cấp) · ADR-0001 D5 theo chữ ký thật · CHANGELOG khối riêng.

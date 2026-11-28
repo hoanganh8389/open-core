@@ -20,7 +20,9 @@ const TABLES = ['ledger_entries', 'ledger_lines', 'ledger_links', 'ledger_balanc
   'tax_codes', 'tax_invoices', 'tax_invoice_lines', 'tax_id_versions', 'tax_info_patches', 'taxpayer_profiles', 'debt_items', 'debt_allocations',
   'purchase_documents', 'purchase_policies', 'sales_lines', 'sales_payments', 'warehouses', 'warehouse_types', 'warehouse_type_ops',
   'items', 'item_codes', 'item_classification', 'item_classes', 'partners', 'partner_groups', 'period_locks', 'period_lock_events', 'cost_norms',
-  'voucher_templates', 'voucher_recurrences', 'voucher_recurrence_runs'];
+  'voucher_templates', 'voucher_recurrences', 'voucher_recurrence_runs',
+  // [2026-11-29 01:09 AM Johnny Chu - Chu Hoàng Anh] S004-W2-10 — đo thêm bảng B-15 bộ kiểm chưa biết (kỳ kế toán, bể chờ nạp, nhật ký định khoản, cây đơn vị)
+  'fiscal_periods', 'intake_inbox', 'posting_log', 'branches'];
 const tableRe = new RegExp(`(?:['"\`]|\\b(?:FROM|JOIN|INTO|UPDATE|TABLE)\\s+|^\\s{2}|\\bselectFrom\\()(?:${TABLES.join('|')})(?:['"\`]|\\s*:\\s*\\w+Table\\b|\\s|$)`, 'gm');
 
 /** Luật → hàm đếm trên mã đã bỏ chú thích. id ổn định (ghi vào sổ nợ). */

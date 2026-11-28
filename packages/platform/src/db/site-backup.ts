@@ -111,14 +111,27 @@ async function findSite(ref: string): Promise<SiteRow> {
   return r.rows[0];
 }
 
-/** Đọc mục lục bản sao lưu: số bảng, có dữ liệu sổ cái. Không đọc được → ném. */
-export async function inspectBackup(file: string): Promise<{ tables: number; ledger: boolean }> {
+// [2026-11-29 01:09 AM Johnny Chu - Chu Hoàng Anh] S004-W2-10 (B-15) — bảng BẮT BUỘC có trong bản sao lưu do app khai (kế toán: ledger_entries — sổ cái); lõi không biết bảng nghiệp vụ.
+export interface BackupRequiredTable { table: string; label: string }
+const requiredTables: BackupRequiredTable[] = [];
+export function registerBackupRequiredTables(list: BackupRequiredTable[]): void {
+  for (const t of list) {
+    if (!/^[a-z_][a-z0-9_]*$/.test(t.table)) throw new Error(`registerBackupRequiredTables: tên bảng "${t.table}" sai khuôn`);
+    if (!requiredTables.some((x) => x.table === t.table)) requiredTables.push(t);
+  }
+}
+const missingText = (missing: string[]) => missing.map((t) => `${requiredTables.find((x) => x.table === t)?.label ?? t} (${t})`).join(', ');
+
+/** Đọc mục lục bản sao lưu: số bảng, bảng bắt buộc thiếu dữ liệu. Không đọc được → ném. `ledger` (cũ) = đủ mọi bảng bắt buộc. */
+export async function inspectBackup(file: string): Promise<{ tables: number; ledger: boolean; missing: string[] }> {
   const toc = await tools.list(file);
   const lines = toc.split(/\r?\n/);
+  const missing = requiredTables.map((t) => t.table).filter((t) => !lines.some((l) => new RegExp(`^\\d+; \\d+ \\d+ TABLE DATA public ${t} `).test(l)));
   return {
     // mục "TABLE <schema> <tên>" = định nghĩa bảng; "TABLE DATA" / "TABLE ATTACH" là dữ liệu / gắn phân vùng — không đếm
     tables: lines.filter((l) => /^\d+; \d+ \d+ TABLE (?!DATA |ATTACH )\S+ \S+/.test(l)).length,
-    ledger: lines.some((l) => /^\d+; \d+ \d+ TABLE DATA public ledger_entries /.test(l)),
+    ledger: missing.length === 0,
+    missing,
   };
 }
 
@@ -137,11 +150,11 @@ export async function backupSite(ref: string, opts: BackupSiteOptions = {}): Pro
   const dir = path.resolve(opts.dir ?? path.join('backups', 'sites'), site.slug);
   await mkdir(dir, { recursive: true });
   const file = path.join(dir, `${site.slug}-${stampUtc()}.dump`);
-  let info: { tables: number; ledger: boolean };
+  let info: { tables: number; ledger: boolean; missing: string[] };
   try {
     await tools.dump(adminUrlFor(site.db_name), file);
     info = await inspectBackup(file);
-    if (!info.ledger) throw new Error('bản sao lưu thiếu dữ liệu sổ cái (ledger_entries)');
+    if (info.missing.length) throw new Error(`bản sao lưu thiếu dữ liệu bảng bắt buộc: ${missingText(info.missing)}`);
     if (info.tables === 0) throw new Error('bản sao lưu không có bảng nào');
   } catch (err) {
     await rename(file, `${file}.hong`).catch(() => undefined);
@@ -178,13 +191,13 @@ export async function importBackup(ref: string, file: string): Promise<BackupRec
   const site = await findSite(ref);
   if (!(await tools.available())) throw new SiteBackupError('SITE_BACKUP_UNAVAILABLE', 'Không có pg_dump / pg_restore trên máy chạy lệnh');
   const abs = path.resolve(file);
-  let info: { tables: number; ledger: boolean };
+  let info: { tables: number; ledger: boolean; missing: string[] };
   try {
     info = await inspectBackup(abs);
   } catch (err) {
     throw new SiteBackupError('SITE_BACKUP_FAILED', `Không đọc được tệp ${abs}: ${shortError(err)}`, { cause: err });
   }
-  if (!info.ledger || info.tables === 0) throw new SiteBackupError('SITE_BACKUP_FAILED', `Tệp ${abs} không phải bản sao lưu sổ kế toán (thiếu ledger_entries hoặc không có bảng)`);
+  if (info.missing.length || info.tables === 0) throw new SiteBackupError('SITE_BACKUP_FAILED', `Tệp ${abs} không phải bản sao lưu đủ của app (${info.tables === 0 ? 'không có bảng' : `thiếu ${missingText(info.missing)}`})`);
   const bytes = (await stat(abs)).size;
   const id = newSiteId();
   const ins = await controlPool().query<{ created_at: Date }>(
@@ -270,7 +283,7 @@ export async function restoreSite(ref: string, backupId: string, opts: RestoreSi
         `SELECT count(*) AS n FROM pg_class k JOIN pg_namespace s ON s.oid = k.relnamespace
           WHERE k.relkind IN ('r', 'p') AND s.nspname NOT IN ('pg_catalog', 'information_schema') AND s.nspname NOT LIKE 'pg\\_toast%'`)).rows[0]!.n);
       if (n !== b.tables) throw new Error(`số bảng sau khôi phục ${n}, bản sao lưu có ${b.tables}`);
-      if (!(await c.query("SELECT to_regclass('public.ledger_entries') AS t")).rows[0]?.t) throw new Error('thiếu bảng sổ cái');
+      for (const t of requiredTables) if (!(await c.query('SELECT to_regclass($1) AS t', [`public.${t.table}`])).rows[0]?.t) throw new Error(`thiếu bảng ${t.label} (${t.table})`);
       schemaVersion = await appliedSchemaVersion(c);
     } finally {
       await c.end();

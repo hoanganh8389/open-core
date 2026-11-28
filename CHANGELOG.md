@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Đổi (S004-W2-10 — cài đặt và sao lưu không đọc bảng kế toán)
+- 2026-11-29 — <!-- [2026-11-29 01:09 AM Johnny Chu - Chu Hoàng Anh] S004-W2-10 --> `registerSettingImpactSource({ lockedPeriodAt, pendingIntake })`: kỳ khoá (chặn đổi khoá loại A) và bể chờ nạp do app cấp — chưa đăng ký ⇒ không kỳ khoá, bể chờ 0. Bậc cài đặt `branch` xác nhận chi nhánh qua cổng `MASTERDATA` (thiếu nhà cấp ⇒ `NOT_FOUND`). `registerBackupRequiredTables([{ table, label }])`: bảng bắt buộc của bản sao lưu site; `inspectBackup` trả thêm `missing` (`ledger` cũ = đủ bảng bắt buộc). open-ketoan: `installKetoanLegacy()` đăng ký bản đúng SQL cũ + `ledger_entries`. Bộ kiểm ranh giới đo thêm 4 bảng.
+
 ### Thêm (S004-W2-9 — cổng MASTERDATA, phạm vi vai không đọc bảng kế toán)
 - 2026-11-29 — <!-- [2026-11-29 12:55 AM Johnny Chu - Chu Hoàng Anh] S004-W2-9 --> `core/masterdata-port.ts`: `MASTERDATA` (`orgScopes({ branch, warehouse, orgUnit })`) — lõi hỏi chủ danh mục về cây đơn vị / kho (ADR-0001 D5). `authz/scope.ts` (`lanGanTheoChiNhanh`) và `authz/store.ts` (nút `org_unit`) chỉ đọc bảng của lõi rồi gọi cổng. **Thiếu nhà cấp ⇒ đóng:** lần gán theo chi nhánh / kho / nút không cấp phạm vi; nút không tra được ⇒ lần gán `org_unit` không có scope (trước: path rỗng lọt vào `orgPaths`). Nhà cấp của open-ketoan (đúng SQL cũ) ở khu cách ly, đăng ký trong `installKetoanLegacy()`. Tự kiểm so đúng câu SQL cũ.
 
