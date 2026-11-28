@@ -10,7 +10,7 @@
     "R-TEP": "tệp chuyển tiếp *-ketoan-* (xoá sau B4)",
     "R-CACH-LY": "khu cách ly ketoan-legacy / import vào khu (xoá ở 0.8)"
   },
-  "total": 96,
+  "total": 95,
   "files": {
     "packages/contracts/src/documents.ts": {
       "R-SO": 1
@@ -53,7 +53,6 @@
       "R-BANG": 1
     },
     "packages/platform/src/core/settings.ts": {
-      "R-BANG": 1,
       "R-THANG": 2
     },
     "packages/platform/src/db/migrate-ketoan-legacy.ts": {

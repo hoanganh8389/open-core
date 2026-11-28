@@ -34,6 +34,10 @@ before(async () => {
   await c.query('CREATE TABLE branches (id bigint PRIMARY KEY, tenant_id bigint NOT NULL)');
   await c.query('INSERT INTO don_vi_thu VALUES (5, $1), (6, $1)', [t1]);
   await c.query('INSERT INTO branches VALUES (7, $1)', [t1]);
+  // [2026-11-29 01:09 AM Johnny Chu - Chu Hoàng Anh] S004-W2-10 — bậc branch: chi nhánh có thật do CHỦ danh mục xác nhận qua cổng MASTERDATA (không còn SQL branches ở lõi)
+  const { providePort } = await import('../dist/core/ports.js');
+  const { MASTERDATA } = await import('../dist/core/masterdata-port.js');
+  providePort(MASTERDATA, () => ({ orgScopes: async (ids) => ({ branch: Object.fromEntries(ids.branch.filter((x) => x === '7').map((x) => [x, { code: 'CN7' }])), warehouse: {}, orgUnit: {} }) }));
 });
 after(async () => { await c?.end(); await db.destroy(); });
 const tx = (fn) => db.transaction().execute(fn);

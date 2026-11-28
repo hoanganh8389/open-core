@@ -21,6 +21,7 @@ import type { Db } from '../db/client.js';
 import { writeAudit } from './audit.js';
 import { Errors } from './errors.js';
 import { appRoot } from './app-root.js';
+import { masterdataFor } from './masterdata-port.js';
 
 export interface SettingEntry {
   key: string;
@@ -352,14 +353,22 @@ export async function setSetting(
   return { key, value: input.value, before, source: { scope, scopeId, validFrom, version }, configVersion: cv, basis };
 }
 
-/** Kỳ đã khoá (khoá chung mọi loại chứng từ; thêm khoá riêng của chi nhánh khi khoá đặt theo chi nhánh) chứa `date`, hoặc null. */
+// [2026-11-29 01:09 AM Johnny Chu - Chu Hoàng Anh] S004-W2-10 (B-15, R-CORE-8) — kỳ khoá và bể chờ nạp là dữ liệu của APP (kế toán: fiscal_periods / period_locks / intake_inbox); lõi hỏi qua nguồn app đăng ký.
+//   Chưa đăng ký ⇒ không có kỳ khoá, bể chờ 0 (app không có sổ thì không có kỳ). open-ketoan đăng ký trong installKetoanLegacy().
+export interface SettingImpactSource {
+  /** Kỳ đã khoá chứa `date` (khoá chung; thêm khoá riêng chi nhánh khi `branchId`), hoặc null. */
+  lockedPeriodAt?(trx: Db, tenantId: string, date: string, branchId: string | null): Promise<{ year: number; month: number } | null>;
+  /** Số mục đang mở / chạy thử trong bể chờ đầu vào của app (gửi lại sẽ đọc phiên bản cài đặt mới). */
+  pendingIntake?(trx: Db, tenantId: string): Promise<number>;
+}
+let impactSource: SettingImpactSource = {};
+export function registerSettingImpactSource(src: SettingImpactSource): void { impactSource = { ...impactSource, ...src }; }
+/** Chỉ cho test. */
+export function resetSettingImpactSource(): void { impactSource = {}; }
+
+/** Kỳ đã khoá chứa `date`, hoặc null — theo nguồn app đăng ký (registerSettingImpactSource). */
 export async function lockedPeriodAt(trx: Db, tenantId: string, date: string, branchId: string | null): Promise<{ year: number; month: number } | null> {
-  const r = await sql<{ year: number; month: number }>`
-    SELECT p.year::int AS year, p.month::int AS month FROM fiscal_periods p
-    JOIN period_locks l ON l.period_id = p.id AND l.tenant_id = p.tenant_id AND l.doc_type = '*'
-    WHERE p.tenant_id = ${tenantId} AND ${date}::date BETWEEN p.start_date AND p.end_date
-      AND (l.branch_id IS NULL OR l.branch_id = ${branchId}::bigint) LIMIT 1`.execute(trx);
-  return r.rows[0] ?? null;
+  return impactSource.lockedPeriodAt ? impactSource.lockedPeriodAt(trx, tenantId, date, branchId) : null;
 }
 
 export interface SettingImpact {
@@ -393,12 +402,11 @@ export async function settingImpact(
     SELECT version, to_char(valid_from, 'YYYY-MM-DD') AS valid_from FROM setting_values
     WHERE tenant_id = ${tenantId} AND key = ${key} AND scope_type = ${scope} AND scope_id = ${scopeId} AND valid_from > ${validFrom}::date
     ORDER BY valid_from, version`.execute(trx);
-  const pending = await sql<{ n: number }>`SELECT count(*)::int AS n FROM intake_inbox WHERE tenant_id = ${tenantId} AND status IN ('open', 'trial')`.execute(trx);
   return {
     key, class: entry.class ?? null, scope, scopeId, validFrom, today, retroactive: validFrom < today,
     periodLocked: await lockedPeriodAt(trx, tenantId, validFrom, scope === 'branch' ? scopeId : null),
     laterVersions: later.rows.map((x) => ({ version: x.version, validFrom: x.valid_from })),
-    pendingIntake: pending.rows[0]?.n ?? 0,
+    pendingIntake: impactSource.pendingIntake ? await impactSource.pendingIntake(trx, tenantId) : 0,
     missingBasis: entry.class === 'A' && !entry.basis,
   };
 }
@@ -411,8 +419,13 @@ async function assertScopeExists(trx: Db, tenantId: string, scope: SettingScopeT
   const def = extraScopes.get(scope);
   if (def) { if (!(await def.exists(trx, tenantId, id))) throw Errors.notFound(`${scope} ${id} của đơn vị`); return; }
   if (scope !== 'user' && scope !== 'branch') throw Errors.validation(`Bậc cài đặt "${scope}" chưa đăng ký (registerSettingScopes)`);
-  const table = scope === 'user' ? sql`users` : sql`branches`;
-  const r = await sql<{ n: number }>`SELECT count(*)::int AS n FROM ${table} WHERE tenant_id = ${tenantId} AND id = ${id}::bigint`.execute(trx);
+  if (scope === 'branch') {
+    // [2026-11-29 01:09 AM Johnny Chu - Chu Hoàng Anh] S004-W2-10 (B-15) — chi nhánh là danh mục của CHỦ (ADR-0001): hỏi cổng MASTERDATA; chưa có nhà cấp ⇒ không xác nhận được ⇒ từ chối
+    const info = await masterdataFor(trx, tenantId, 'core.settings.scope')?.orgScopes({ branch: [id], warehouse: [], orgUnit: [] });
+    if (!info?.branch[id]) throw Errors.notFound(`${scope} ${id} của đơn vị`);
+    return;
+  }
+  const r = await sql<{ n: number }>`SELECT count(*)::int AS n FROM users WHERE tenant_id = ${tenantId} AND id = ${id}::bigint`.execute(trx);
   if (!r.rows[0]?.n) throw Errors.notFound(`${scope} ${id} của đơn vị`);
 }
 

@@ -10,6 +10,8 @@ import { INSTALLATION_KEY_PREFIX, registerApiKeyResolver } from '../core/auth.js
 import { ketoanAuthzPreset } from '../core/authz-ketoan-legacy.js';
 import { providePort } from '../core/ports.js';
 import { MASTERDATA, type MasterdataPort, type OrgScopeInfo } from '../core/masterdata-port.js';
+import { registerSettingImpactSource } from '../core/settings.js';
+import { registerBackupRequiredTables } from '../db/site-backup.js';
 import { resolveInstallation } from './pos-installation-auth.js';
 
 /**
@@ -32,10 +34,25 @@ export const ketoanMasterdata = (tx: import('../db/client.js').Db, tenantId: str
   },
 });
 
+/** [2026-11-29 01:09 AM Johnny Chu - Chu Hoàng Anh] S004-W2-10 (B-15) — kỳ khoá + bể chờ nạp của open-ketoan cho xem trước / chặn đổi cài đặt: ĐÚNG câu SQL lõi dùng trước đây. */
+export const ketoanSettingImpact = {
+  async lockedPeriodAt(trx: import('../db/client.js').Db, tenantId: string, date: string, branchId: string | null) {
+    const r = await sql<{ year: number; month: number }>`
+      SELECT p.year::int AS year, p.month::int AS month FROM fiscal_periods p
+      JOIN period_locks l ON l.period_id = p.id AND l.tenant_id = p.tenant_id AND l.doc_type = '*'
+      WHERE p.tenant_id = ${tenantId} AND ${date}::date BETWEEN p.start_date AND p.end_date
+        AND (l.branch_id IS NULL OR l.branch_id = ${branchId}::bigint) LIMIT 1`.execute(trx);
+    return r.rows[0] ?? null;
+  },
+  async pendingIntake(trx: import('../db/client.js').Db, tenantId: string) {
+    return (await sql<{ n: number }>`SELECT count(*)::int AS n FROM intake_inbox WHERE tenant_id = ${tenantId} AND status IN ('open', 'trial')`.execute(trx)).rows[0]?.n ?? 0;
+  },
+};
+
 let installed = false;
 /**
  * open-ketoan gọi một lần lúc khởi động, TRƯỚC buildApp (sau khi đổi nguồn sang lõi 0.7): đăng ký mọi móc của phần chuyển tiếp —
- * vai / quyền (ketoanAuthzPreset, R-1), khoá cài đặt open-pos `okti_` (B-13), cổng MASTERDATA (B-15).
+ * vai / quyền (ketoanAuthzPreset, R-1), khoá cài đặt open-pos `okti_` (B-13), cổng MASTERDATA, kỳ khoá + bể chờ cho cài đặt, bảng bắt buộc của bản sao lưu (B-15).
  */
 export function installKetoanLegacy(): void {
   if (installed) return;
@@ -43,6 +60,8 @@ export function installKetoanLegacy(): void {
   ketoanAuthzPreset();
   registerApiKeyResolver({ prefix: INSTALLATION_KEY_PREFIX, resolve: resolveInstallation });
   providePort(MASTERDATA, (c) => ketoanMasterdata(c.tx, c.tenantId));
+  registerSettingImpactSource(ketoanSettingImpact);
+  registerBackupRequiredTables([{ table: 'ledger_entries', label: 'sổ cái' }]);
 }
 // [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a (E-7) — danh sách vai TĨNH của kế toán như core/authz/legacy cũ (lõi nay đọc sổ vai lúc chạy: systemRoleKeys()).
 //   Lõi không giữ danh sách vai cứng (R-VAI) — lõi dùng systemRoleKeys() đọc sổ vai; codemod đổi nguồn trỏ import cũ về đây. 0.8: về open-ketoan.
