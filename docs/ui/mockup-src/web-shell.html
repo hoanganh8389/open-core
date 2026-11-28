@@ -1,0 +1,258 @@
+<!doctype html>
+<!-- [2026-11-28 06:51 PM Johnny Chu - Chu Hoàng Anh] bizcity_ux@1 — mockup web-shell (khung app + màn mẫu) chờ chủ duyệt; khung 1800 × 1100; mở #f1…#f6 để chụp từng khung. Dữ liệu nghiệp vụ là MINH HOẠ (có nhãn); bảng Tình trạng nền tảng lấy từ docs/scoreboard/scoreboard.json (chép vào thẻ #sb). -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>web-shell — mockup bizcity_ux@1</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { background: #c9ced8; margin: 0; }
+  .frame { width: 1800px; height: 1100px; margin: 24px auto; background: var(--background); display: grid; grid-template-rows: 56px 1fr; overflow: hidden; position: relative; font-family: Manrope, "Segoe UI", sans-serif; }
+  .frame:target, body.one .frame { margin: 0; }
+  body.one .frame:not(:target) { display: none; }
+  .top { display: flex; align-items: center; gap: 16px; padding: 0 20px; background: var(--card); border-bottom: 1px solid var(--border); }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; }
+  .logo i { width: 28px; height: 28px; border-radius: 8px; background: #d0021b; display: inline-block; }
+  .pick { height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; gap: 8px; color: var(--foreground); background: var(--card); }
+  .pick small { color: var(--muted-foreground); }
+  .search { flex: 1; max-width: 560px; margin: 0 auto; height: 38px; border: 1px solid var(--input); border-radius: 8px; display: flex; align-items: center; padding: 0 12px; color: var(--subtle-foreground); gap: 8px; }
+  .kbd { margin-left: auto; font: 12px "IBM Plex Mono", monospace; border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+  .ico { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; color: var(--muted-foreground); border: 1px solid transparent; position: relative; }
+  .ico b { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--destructive); color: #fff; font-size: 11px; display: grid; place-items: center; }
+  .me { display: flex; align-items: center; gap: 8px; } .me .av { width: 32px; height: 32px; border-radius: 16px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-weight: 700; }
+  .body { display: grid; grid-template-columns: 248px 1fr; min-height: 0; }
+  .nav { background: var(--sidebar); border-right: 1px solid var(--border); padding: 14px 10px; overflow: hidden; }
+  .nav h6 { margin: 14px 10px 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--subtle-foreground); }
+  .nav a { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 10px; border-radius: 8px; color: var(--sidebar-foreground); font-size: 15px; }
+  .nav a.on { background: var(--card); color: var(--primary); font-weight: 700; border: 1px solid var(--border); }
+  .nav a em { margin-left: auto; font-style: normal; font-size: 12px; color: var(--muted-foreground); }
+  .main { padding: 18px 28px; overflow: hidden; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .crumb { font-size: 14px; color: var(--muted-foreground); } .crumb b { color: var(--foreground); }
+  .head { display: flex; align-items: center; gap: 12px; } .head h1 { margin: 0; font-size: 26px; } .head .sp { flex: 1; }
+  .btn { height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .btn.pri { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+  .btn.ghost { background: transparent; }
+  .demo { position: absolute; right: 16px; bottom: 12px; font-size: 12px; color: var(--warning); background: var(--warning-soft); border: 1px solid #ecd9a3; border-radius: 6px; padding: 2px 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+  .filters { display: flex; gap: 8px; align-items: center; padding: 12px; flex-wrap: wrap; }
+  .chip { height: 34px; padding: 0 12px; border: 1px solid var(--border); border-radius: 17px; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; background: var(--card); }
+  .chip.on { background: var(--primary-soft); border-color: #c5dcfa; color: var(--primary); font-weight: 600; }
+  .chip.add { border-style: dashed; color: var(--muted-foreground); }
+  .views { margin-left: auto; display: flex; gap: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; } th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { font-size: 13px; color: var(--muted-foreground); font-weight: 600; background: var(--muted); } th.s::after { content: " ↓"; color: var(--primary); }
+  td.num, th.num { text-align: right; font-family: "IBM Plex Mono", monospace; } td.mono { font-family: "IBM Plex Mono", monospace; }
+  tr.sel td { background: var(--primary-soft); }
+  .st { display: inline-flex; height: 24px; align-items: center; padding: 0 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+  .st.draft { background: var(--muted); color: var(--muted-foreground); } .st.pending { background: var(--warning-soft); color: var(--warning); } .st.approved, .st.done { background: var(--success-soft); color: var(--success); } .st.cancelled { background: var(--destructive-soft); color: var(--destructive); }
+  .foot { display: flex; align-items: center; gap: 12px; padding: 10px 14px; font-size: 14px; color: var(--muted-foreground); }
+  .foot .sum { margin-left: auto; font-family: "IBM Plex Mono", monospace; color: var(--foreground); }
+  .bulk { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--primary-soft); border-bottom: 1px solid #c5dcfa; font-size: 14px; }
+  .menu { position: absolute; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); padding: 6px; width: 250px; font-size: 14px; }
+  .menu div { padding: 8px 10px; border-radius: 6px; } .menu div:hover, .menu .hv { background: var(--muted); } .menu small { display: block; color: var(--muted-foreground); }
+  .two { display: grid; grid-template-columns: 1fr 420px; gap: 16px; min-height: 0; flex: 1; }
+  .sect { padding: 16px 18px; } .sect h3 { margin: 0 0 10px; font-size: 16px; }
+  .kv { display: grid; grid-template-columns: 160px 1fr 160px 1fr; gap: 10px 16px; font-size: 15px; } .kv span { color: var(--muted-foreground); }
+  .flow { display: flex; gap: 6px; align-items: center; font-size: 13px; } .flow i { font-style: normal; color: var(--subtle-foreground); }
+  .act { display: flex; flex-direction: column; } .act .tabs { display: flex; gap: 4px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .act .tabs span { padding: 6px 10px; border-radius: 6px; font-size: 14px; } .act .tabs span.on { background: var(--muted); font-weight: 700; }
+  .act .box { margin: 12px; border: 1px solid var(--input); border-radius: 8px; padding: 10px 12px; color: var(--subtle-foreground); font-size: 14px; }
+  .ev { display: grid; grid-template-columns: 32px 1fr; gap: 10px; padding: 10px 14px; font-size: 14px; } .ev .d { width: 32px; height: 32px; border-radius: 16px; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  .ev .d.n { background: var(--primary-soft); color: var(--primary); } .ev .d.c { background: var(--muted); color: var(--muted-foreground); } .ev .d.t { background: var(--warning-soft); color: var(--warning); }
+  .ev small { color: var(--muted-foreground); } .ev .chg { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--muted-foreground); }
+  .sheet { position: absolute; top: 56px; right: 0; bottom: 0; width: 620px; background: var(--card); border-left: 1px solid var(--border); box-shadow: -12px 0 32px rgba(15,31,61,.12); display: flex; flex-direction: column; }
+  .sheet .hd { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; } .sheet .hd h2 { margin: 0; font-size: 20px; } .sheet .hd span { margin-left: auto; color: var(--muted-foreground); }
+  .sheet .bd { padding: 18px 22px; display: grid; gap: 14px; flex: 1; } .sheet .ft { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+  label { display: grid; gap: 6px; font-size: 14px; color: var(--muted-foreground); } .in { height: 44px; border: 1px solid var(--input); border-radius: 8px; padding: 0 12px; display: flex; align-items: center; color: var(--foreground); }
+  .in.err { border-color: var(--destructive); background: var(--destructive-soft); } .errt { color: var(--destructive); font-size: 13px; }
+  .scrim { position: absolute; inset: 56px 620px 0 0; background: rgba(15,31,61,.18); }
+  .steps { display: flex; gap: 0; } .steps div { flex: 1; padding: 12px 14px; border-bottom: 3px solid var(--border); font-size: 14px; color: var(--muted-foreground); } .steps div.on { border-color: var(--primary); color: var(--foreground); font-weight: 700; } .steps div.ok { border-color: var(--success); }
+  .grid3 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; } .stat { padding: 14px 16px; } .stat b { display: block; font-size: 26px; font-family: "IBM Plex Mono", monospace; } .stat span { color: var(--muted-foreground); font-size: 14px; }
+  .lv { display: inline-grid; place-items: center; width: 34px; height: 26px; border-radius: 6px; font: 700 13px "IBM Plex Mono", monospace; }
+  .lv0 { background: var(--destructive-soft); color: var(--destructive); } .lv1 { background: var(--warning-soft); color: var(--warning); } .lv2 { background: #fff4cc; color: #6b5300; } .lv3 { background: var(--primary-soft); color: var(--primary); } .lv4 { background: var(--success-soft); color: var(--success); }
+  .links { display: flex; gap: 10px; } .links a { display: inline-flex; gap: 8px; align-items: center; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--foreground); background: var(--card); font-size: 14px; }
+  .s4 { display: grid; gap: 12px; max-width: 920px; } .s4 .row { display: grid; grid-template-columns: 40px 1fr auto; gap: 14px; align-items: center; padding: 16px 18px; }
+  .s4 .n { width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; font-weight: 800; } .s4 .ok .n { background: var(--success-soft); color: var(--success); } .s4 .fail .n { background: var(--destructive-soft); color: var(--destructive); } .s4 .lock .n { background: var(--muted); color: var(--subtle-foreground); }
+  .s4 .hint { color: var(--destructive); font-size: 14px; margin-top: 4px; } .s4 small { color: var(--muted-foreground); }
+  .banner { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 8px; background: var(--warning-soft); color: var(--warning); font-size: 14px; border: 1px solid #ecd9a3; }
+</style>
+</head>
+<body>
+<script>if (location.hash) document.body.classList.add('one');</script>
+
+<template id="shell-top">
+  <div class="top">
+    <div class="logo"><i></i>Open Cake</div>
+    <div class="pick">Chuỗi Hoa Mai <small>▾</small></div>
+    <div class="pick">Cửa hàng Quận 1 <small>▾</small></div>
+    <div class="search">🔍 Tìm màn, bản ghi, số chứng từ, khách… <span class="kbd">Ctrl K</span></div>
+    <div class="ico">🔔<b>3</b></div><div class="ico">?</div>
+    <div class="me"><div class="av">L</div>Lan <small>▾</small></div>
+  </div>
+</template>
+<template id="shell-nav">
+  <nav class="nav">
+    <h6>Bán hàng</h6>
+    <a>💬 Hộp thư <em>12</em></a><a>👥 Khách hàng</a><a class="on">🧾 Đơn bán hàng</a><a>📦 Mặt hàng</a>
+    <h6>Kho</h6><a>📥 Nhập kho</a><a>📤 Xuất kho</a>
+    <h6>Việc</h6><a>✅ Việc của tôi <em>4</em></a>
+    <h6>Hệ thống</h6><a data-k="cai-dat">⚙️ Cài đặt hệ thống</a>
+  </nav>
+</template>
+
+<!-- F1 — khung + ListScreen -->
+<section class="frame" id="f1">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav"></div>
+    <main class="main">
+      <div class="crumb">Bán hàng › <b>Đơn bán hàng</b></div>
+      <div class="head"><h1>Đơn bán hàng</h1><span class="sp"></span><button class="btn">⬆ Nhập</button><button class="btn">⬇ Xuất ▾</button><button class="btn pri">＋ Tạo đơn <span class="kbd" style="border-color:#ffffff66">N</span></button></div>
+      <div class="card">
+        <div class="filters">
+          <div class="chip on">Cửa hàng: Quận 1, Quận 3 ✕</div><div class="chip on">Ngày: 01/11 – 30/11/2026 ✕</div><div class="chip on">Trạng thái: Chờ duyệt, Đã duyệt ✕</div><div class="chip add">＋ Thêm lọc</div>
+          <div class="views"><div class="chip">★ Bộ lọc của tôi: Đơn tháng này ▾</div><div class="chip">☰ Cột</div></div>
+        </div>
+        <div class="bulk"><b>2 đơn đã chọn</b> · <button class="btn ghost">Duyệt</button><button class="btn ghost">In</button><button class="btn ghost">Xuất dòng đã chọn</button></div>
+        <table>
+          <thead><tr><th style="width:36px">☐</th><th>Số đơn</th><th class="s">Ngày</th><th>Khách</th><th>Cửa hàng</th><th>Trạng thái</th><th class="num">Tổng tiền</th><th>Người lập</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td>☑</td><td class="mono">DB-2026-0142</td><td>28/11/2026</td><td>Chị Thu · 0909•••567</td><td>Quận 1</td><td><span class="st pending">Chờ duyệt</span></td><td class="num">1.250.000 ₫</td><td>Lan</td></tr>
+            <tr class="sel"><td>☑</td><td class="mono">DB-2026-0141</td><td>28/11/2026</td><td>Anh Minh · 0912•••221</td><td>Quận 3</td><td><span class="st pending">Chờ duyệt</span></td><td class="num">3.480.000 ₫</td><td>Hùng</td></tr>
+            <tr><td>☐</td><td class="mono">DB-2026-0139</td><td>27/11/2026</td><td>Cty Sen Vàng</td><td>Quận 1</td><td><span class="st approved">Đã duyệt</span></td><td class="num">12.600.000 ₫</td><td>Lan</td></tr>
+            <tr><td>☐</td><td class="mono">DB-2026-0137</td><td>27/11/2026</td><td>Khách lẻ</td><td>Quận 3</td><td><span class="st approved">Đã duyệt</span></td><td class="num">420.000 ₫</td><td>Hùng</td></tr>
+            <tr><td>☐</td><td class="mono">DB-2026-0136</td><td>26/11/2026</td><td>Chị Hoa · 0938•••090</td><td>Quận 1</td><td><span class="st approved">Đã duyệt</span></td><td class="num">980.000 ₫</td><td>Lan</td></tr>
+            <tr><td>☐</td><td class="mono">DB-2026-0133</td><td>25/11/2026</td><td>Anh Tuấn · 0903•••778</td><td>Quận 1</td><td><span class="st approved">Đã duyệt</span></td><td class="num">2.150.000 ₫</td><td>Mai</td></tr>
+          </tbody>
+        </table>
+        <div class="foot">Hiện 50 dòng · cuộn để tải thêm (con trỏ) <span class="sum">Tổng theo bộ lọc: 128.430.000 ₫ · 214 đơn</span></div>
+      </div>
+      <div class="crumb">URL: <code>/app/ban-hang/don?f.store.in=Q1,Q3&amp;f.issued_at.between=2026-11-01..2026-11-30&amp;f.status.in=pending,approved&amp;sort=-issued_at</code> — F5 về đúng chỗ, gửi link được</div>
+    </main>
+  </div>
+  <div class="menu" style="top:132px;right:186px"><div class="hv">CSV <small>Excel mở thẳng tiếng Việt</small></div><div>XLSX</div><div>JSON <small>bizcity_list_export@1</small></div><div>NDJSON <small>tệp lớn — chạy nền, báo ở chuông</small></div><div style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px"><small>Cùng bộ lọc đang xem · cần quyền Xuất · ghi nhật ký</small></div></div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F2 — DetailScreen + Hoạt động -->
+<section class="frame" id="f2">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav"></div>
+    <main class="main">
+      <div class="crumb">Bán hàng › Đơn bán hàng › <b>DB-2026-0142</b></div>
+      <div class="head"><h1>DB-2026-0142</h1><span class="st pending">Chờ duyệt</span><span class="sp"></span><button class="btn">In</button><button class="btn">Trả lại người lập</button><button class="btn pri">Duyệt</button></div>
+      <div class="two">
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="card sect"><h3>Thông tin</h3><div class="kv"><span>Khách</span><b>Chị Thu · 0909•••567</b><span>Cửa hàng</span><b>Quận 1</b><span>Ngày</span><b>28/11/2026</b><span>Người lập</span><b>Lan</b><span>Phiên bản</span><b>@2</b><span>Nguồn</span><b class="mono">cake.order_request:01JD…</b></div></div>
+          <div class="card"><table><thead><tr><th>Mặt hàng</th><th class="num">SL (Cái)</th><th>ĐVT bán</th><th class="num">Đơn giá</th><th class="num">Thành tiền</th></tr></thead><tbody>
+            <tr><td>Áo thun basic trắng · SP-0042</td><td class="num">48</td><td>2 Thùng × 24</td><td class="num">25.000 ₫</td><td class="num">1.200.000 ₫</td></tr>
+            <tr><td>Túi giấy · SP-0101</td><td class="num">10</td><td>10 Cái</td><td class="num">5.000 ₫</td><td class="num">50.000 ₫</td></tr></tbody></table>
+            <div class="foot">Số lượng lưu theo đơn vị nhỏ nhất (Cái) <span class="sum">1.250.000 ₫</span></div></div>
+          <div class="card sect"><h3>Chuỗi chứng từ</h3><div class="flow"><span class="chip">cake.order_request@1</span><i>source →</i><span class="chip on">ban-hang.don:DB-2026-0142@2</span><i>source →</i><span class="chip">kho.xuat (chưa lập)</span><i>ledger →</i><span class="chip">ke-toan (chưa ghi sổ)</span></div></div>
+        </div>
+        <div class="card act">
+          <div class="tabs"><span class="on">Hoạt động</span><span>Việc (1)</span><span>Tệp (2)</span><span>Lịch sử</span></div>
+          <div class="box">Viết ghi chú, @nhắc người, đính kèm tệp…</div>
+          <div class="ev"><div class="d t">!</div><div><b>Việc: Gọi xác nhận địa chỉ giao</b> — giao Hùng · hạn 29/11<br><small>Lan · 10:02</small></div></div>
+          <div class="ev"><div class="d n">L</div><div>Khách hẹn nhận chiều mai, xuất kho trước 12h.<br><small>Lan · 09:58 · 📎 anh-chuyen-khoan.jpg</small></div></div>
+          <div class="ev"><div class="d c">⟲</div><div>Lan sửa đơn ⇒ phiên bản @2<div class="chg">Túi giấy: 5 → 10 · Tổng: 1.225.000 → 1.250.000</div><small>09:41 · tự ghi từ nhật ký thao tác</small></div></div>
+          <div class="ev"><div class="d c">＋</div><div>Tạo từ yêu cầu Fanpage <span class="mono">cake.order_request:01JD…</span><br><small>Hệ thống · 09:30</small></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F3 — FormSheet -->
+<section class="frame" id="f3">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav"></div>
+    <main class="main"><div class="crumb">Bán hàng › <b>Khách hàng</b></div><div class="head"><h1>Khách hàng</h1></div><div class="card" style="height:600px"></div></main>
+  </div>
+  <div class="scrim"></div>
+  <aside class="sheet">
+    <div class="hd"><h2>Thêm khách hàng</h2><span>Esc để đóng</span></div>
+    <div class="bd">
+      <label>Tên khách<div class="in">Chị Thu</div></label>
+      <label>Số điện thoại<div class="in err">0909 123</div><span class="errt">Số điện thoại chưa đủ 10 số — Cách sửa: nhập đủ 10 số, bắt đầu bằng 0</span></label>
+      <label>Cửa hàng<div class="in">Quận 1 ▾</div></label>
+      <label>Nhãn<div class="in"><span class="chip">VIP ✕</span>&nbsp;<span class="chip add">＋</span></div></label>
+      <div class="banner">ⓘ Trùng số với khách "Thu Nguyễn" — chỉ ghép khi có bằng chứng (OTP / Zalo), không ghép theo tên.</div>
+    </div>
+    <div class="ft"><button class="btn">Huỷ</button><button class="btn pri">Thêm khách hàng</button></div>
+  </aside>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F4 — ImportScreen -->
+<section class="frame" id="f4">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav"></div>
+    <main class="main">
+      <div class="crumb">Bán hàng › Mặt hàng › <b>Nhập tệp</b></div>
+      <div class="head"><h1>Nhập mặt hàng từ tệp</h1><span class="sp"></span><button class="btn">Tải tệp mẫu (cột của danh sách)</button></div>
+      <div class="card"><div class="steps"><div class="ok">① Tải tệp · mat-hang-thang-11.xlsx</div><div class="ok">② Ghép cột · 6 / 6</div><div class="on">③ Chạy thử</div><div>④ Chạy thật</div></div>
+        <div class="grid3" style="padding:16px"><div class="card stat"><b>182</b><span>tạo mới</span></div><div class="card stat"><b>37</b><span>cập nhật (khớp theo mã)</span></div><div class="card stat"><b>4</b><span>bỏ qua — không đổi</span></div><div class="card stat" style="border-color:var(--destructive)"><b style="color:var(--destructive)">3</b><span>lỗi — sửa rồi chạy thử lại</span></div></div>
+        <table><thead><tr><th>Dòng</th><th>Mã</th><th>Tên</th><th>Kết quả</th><th>Lý do</th></tr></thead><tbody>
+          <tr><td class="mono">12</td><td class="mono">SP-0042</td><td>Áo thun basic trắng</td><td><span class="st approved">Cập nhật</span></td><td>Giá bán 25.000 → 27.000</td></tr>
+          <tr><td class="mono">57</td><td class="mono">SP-01A</td><td>Quần jean</td><td><span class="st cancelled">Lỗi</span></td><td>Mã chỉ gồm chữ hoa, số — Cách sửa: bỏ ký tự lạ</td></tr>
+          <tr><td class="mono">88</td><td class="mono">SP-0300</td><td>Mũ lưỡi trai</td><td><span class="st cancelled">Lỗi</span></td><td>ĐVT "Chiếc" chưa có — Cách sửa: chọn một trong 40 ĐVT chuẩn</td></tr>
+          <tr><td class="mono">91</td><td class="mono">SP-0301</td><td>Khăn quàng</td><td><span class="st draft">Tạo mới</span></td><td></td></tr></tbody></table>
+        <div class="foot">Mỗi dòng đi qua cùng action như nhập tay (quyền, kiểm, nhật ký) · chạy lại không nhân đôi <span class="sp" style="flex:1"></span><button class="btn">⬇ Tải kết quả chạy thử</button><button class="btn pri" disabled style="opacity:.55">Chạy thật — sửa 3 lỗi trước</button></div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F5 — Cài đặt hệ thống › Tình trạng nền tảng -->
+<section class="frame" id="f5">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Tình trạng nền tảng</b></div>
+      <div class="head"><h1>Tình trạng nền tảng</h1><span class="sp"></span><div class="links"><a>📘 README</a><a>🧭 Kiến trúc</a><a>🎨 Mockup giao diện</a><a>📋 Bảng việc phase</a></div></div>
+      <div class="grid3" id="sb-stats"></div>
+      <div class="card" style="overflow:hidden"><table id="sb-table"></table>
+        <div class="foot">Mức: <span class="lv lv0">0</span> chưa có <span class="lv lv1">1</span> mới tài liệu <span class="lv lv2">2</span> có một phần <span class="lv lv3">3</span> có mã + test ở app <span class="lv lv4">4</span> ở open-core, có test, app đang dùng <span class="sum" id="sb-src"></span></div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- F6 — SetupScreen bốn bước -->
+<section class="frame" id="f6">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Kết nối BizCity</b></div>
+      <div class="head"><h1>Kết nối BizCity — 4 bước</h1></div>
+      <div class="s4">
+        <div class="card row ok"><div class="n">✓</div><div><b>① Kết nối tài khoản BizCity</b><br><small>Khoá biz-1a2b…9z8y · gói Doanh nghiệp · hết hạn 31/12/2026 · kiểm lúc 18:40</small></div><button class="btn">Đổi khoá</button></div>
+        <div class="card row ok"><div class="n">✓</div><div><b>② Kết nối máy chủ kênh</b><br><small>BizCity Hub · hai chiều thông</small></div><button class="btn">Chọn cách khác…</button></div>
+        <div class="card row fail"><div class="n">!</div><div><b>③ Đăng nhập tài khoản kênh</b><br><small>Số Zalo 0909•••567</small><div class="hint">Phiên Zalo đã hết — Cách sửa: bấm "Quét lại QR" và quét bằng app Zalo trên điện thoại</div></div><button class="btn pri">Quét lại QR</button></div>
+        <div class="card row lock"><div class="n">4</div><div><b>④ Chọn Agent Guru + phạm vi</b><br><small>Mở khi bước ③ Đạt · phạm vi của app này: tài khoản kênh / hộp thư</small></div><button class="btn" disabled style="opacity:.5">Chọn</button></div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<script id="sb" type="application/json">{"$comment":"[2026-11-28 06:58 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 — scoreboard mã ↔ tài liệu (ERP-12 của NC-005, chi tiết 20 mục). Mức 0 chưa có · 1 mới tài liệu · 2 có một phần · 3 có mã + test ở app đó · 4 ở open-core, có test, app đang dùng. Đo lần đầu bằng rà soát chỉ đọc (open-core main 9be302f + nhánh 0.4.0, open-cake 7436d28, open-ketoan dev 0237a4d). Sửa tay khi có bằng chứng mới rồi chạy node tools/scoreboard.mjs.","version":"0.4.0 (chờ phát hành)","measuredAt":"2026-11-28","apps":["open-core","open-cake","open-ketoan"],"primitives":[{"id":"P1","erp":"E-1","name":"Người dùng · danh tính (sub = wp:<id>, SSO, external_sub)","levels":{"open-core":2,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"packages/platform/src/core/auth.ts, security/tokens.ts, db/migrations/0003_platform_external_sub.sql — open-cake đang dùng; chưa test SSO ở lõi","open-cake":"apps/api/src/auth/routes.ts (/api/v1/auth/wp-sso), test/auth.http.test.ts — chưa dùng external_sub","open-ketoan":"apps/api/src/modules/auth/wp-sso.ts, 0183_nguoi_dung_external_sub.sql, test/wp-sso-sub-aud.test.ts"},"gap":"test SSO ở lõi; open-cake ghép theo external_sub"},{"id":"P2","erp":"E-2","name":"Vai · quyền · phạm vi · màn × thao tác","levels":{"open-core":3,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"core/authz/*, roles.ts, 0002_platform_vai_theo_app.sql, test/roles.test.mjs, open-cake dùng (vai: mức 4) — màn × thao tác chưa có ở lõi (mức 1, S003-3 ⛔)","open-cake":"apps/api/src/auth/authz.ts, staff.ts, care/scope.ts, test/scope.http.test.ts","open-ketoan":"modules/access/man-hinh.ts, man-hinh-module.ts, test/phan-quyen-man-hinh.test.ts"},"gap":"màn × thao tác lên lõi (S003-3, chờ NT-HT-003)"},{"id":"P3","erp":"E-3","name":"Cài đặt + thang phạm vi","levels":{"open-core":2,"open-cake":1,"open-ketoan":3},"evidence":{"open-core":"core/settings.ts, setting_values ở 0001 — chưa test, thang còn cứng accounting_unit","open-cake":"db/migrations/0103_flex.sql (chỉ ghi chú dùng setting_values)","open-ketoan":"0074_gia_tri_cau_hinh.sql, test/cau-hinh-gia-tri.test.ts"},"gap":"registerSettingScopes (Q-PIL-6), test ở lõi"},{"id":"P4","erp":"E-3","name":"user_meta + lớp mềm (entity_meta, record_types, records)","levels":{"open-core":1,"open-cake":3,"open-ketoan":2},"evidence":{"open-core":"chỉ nhắc ở core/authz-manifest.ts; S003-2 ☐","open-cake":"0103_flex.sql, apps/api/src/records.ts, test/records.http.test.ts","open-ketoan":"entity_attributes theo ngày (0087, 0168), chưa có lớp mềm"},"gap":"dời lên lõi (S003-2)"},{"id":"P5","erp":"E-4","name":"Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML","levels":{"open-core":2,"open-cake":0,"open-ketoan":3},"evidence":{"open-core":"core/documents.ts, workflow.ts, bảng ở 0001 (kiem-luoc-do khớp open-ketoan) — chưa test ở lõi, open-cake chưa dùng","open-cake":"—","open-ketoan":"test/documents-common.test.ts, workflow.test.ts, dinh-kem-chung-tu.test.ts"},"gap":"test ở lõi; open-cake dùng chứng từ chung thay order_requests riêng"},{"id":"P6","erp":"E-5","name":"Danh sách · lọc · con trỏ · xuất (bizcity_list@1)","levels":{"open-core":1,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"chuẩn bizcity_list@1 0.2 (bizcity-platform #39), S003-4 ☐","open-cake":"con trỏ ở care/inbox.ts, screens/Contacts.tsx — chưa xuất","open-ketoan":"apps/web/src/components/DataGrid.tsx (xuất xlsx), test/excel-export-all.test.ts — khuôn riêng, chưa theo bizcity_list@1"},"gap":"defineListAction + ListScreen + xuất chung (S003-4, S003-6)"},{"id":"P7","erp":"E-5","name":"Nhập chung (ghép cột + chạy thử)","levels":{"open-core":0,"open-cake":0,"open-ketoan":3},"evidence":{"open-core":"","open-cake":"","open-ketoan":"modules/catalog/catalog-import.ts (dryRun), NhapExcelWizard.tsx, test/catalog-import.test.ts — riêng danh mục"},"gap":"nhập chung ở lõi (S003-10)"},{"id":"P8","erp":"E-6","name":"Hoạt động (chatter) trên doc_ref","levels":{"open-core":1,"open-cake":0,"open-ketoan":1},"evidence":{"open-core":"NC-005 §2.1, bizcity_ux@1 — chưa mã","open-cake":"","open-ketoan":"chỉ notifications + document_attachments, chưa ghi chú / việc"},"gap":"bảng activities + khối Hoạt động (S003-9)"},{"id":"P9","erp":"E-7","name":"Tệp / Storage (đường dẫn ký)","levels":{"open-core":2,"open-cake":3,"open-ketoan":2},"evidence":{"open-core":"documents.ts lưu đĩa DATA_DIR — chưa đường dẫn ký","open-cake":"apps/api/src/storage/{local,s3,routes,sniff}.ts, 0109_files.sql, test/storage.test.ts, files.http.test.ts","open-ketoan":"đính kèm có test, chưa lớp storage / đường dẫn ký"},"gap":"Storage của open-cake lên lõi (C5)"},{"id":"P10","erp":"E-8","name":"Việc nền + định kỳ","levels":{"open-core":2,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"core/events.ts (tickClock, thử lại, dead) — chưa API việc / lịch, chưa test","open-cake":"3 vòng setInterval ở apps/api/src/server.ts:87-91 (trái luật 'chỉ một đồng hồ')","open-ketoan":"test/events.test.ts, modules/system/loi-he-thong.ts"},"gap":"registerJob / registerSchedule (S003-11); open-cake bỏ setInterval"},{"id":"P11","erp":"E-9","name":"Đệm (Redis tuỳ chọn)","levels":{"open-core":1,"open-cake":2,"open-ketoan":2},"evidence":{"open-core":"BIZCITY-CACHE-v1; chỉ đệm lẻ (module-registry 30 s, authz)","open-cake":"đệm lẻ ở orders/link.ts, partner.ts","open-ketoan":"đệm lẻ, test/site-cache.test.ts"},"gap":"module đệm chung (C5)"},{"id":"P12","erp":"E-10","name":"Bí mật (platform.secrets)","levels":{"open-core":2,"open-cake":0,"open-ketoan":3},"evidence":{"open-core":"core/secrets.ts, 0004_platform_secrets.sql — chưa test ở lõi","open-cake":"","open-ketoan":"0184_tenant_secrets.sql, test/secrets.test.ts"},"gap":"test ở lõi; khoá Hub lưu bằng secrets"},{"id":"P13","erp":"E-11","name":"Sự kiện / outbox / gửi xuyên app / changefeed","levels":{"open-core":2,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"core/events.ts (outbox, SKIP LOCKED) — chưa test, chưa registerSyncFeed","open-cake":"outbox riêng channel_commands (0106), chưa /api/v1/sync","open-ketoan":"modules/sync/sync.routes.ts, test/spine-changefeed.test.ts"},"gap":"changefeed + gửi / nhận chứng từ chung (S002-3, S002-4)"},{"id":"P14","erp":"E-11","name":"Bằng chứng · audit chuỗi băm · trace","levels":{"open-core":4,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"chuỗi băm ở 0001, test/nen-tang.test.mjs; core/tracing.ts, audit.ts — open-cake dùng tracing","open-cake":"apps/api/src/runtime.ts ghi audit_logs, test/evidence.http.test.ts","open-ketoan":"test/evidence.test.ts, evidence-seal.test.ts, truy-vet.test.ts"},"gap":"core.trace.lookup xuyên app (S002-5)"},{"id":"P15","erp":"E-12","name":"Menu · màn · khung app (web-shell)","levels":{"open-core":1,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"mockup docs/ui/mockup-src/web-shell.html (chờ duyệt); S003-3 ⛔, S003-6 ☐","open-cake":"apps/web/src/app/Shell.tsx, route.ts, permissions.tsx","open-ketoan":"apps/web/src/layout/menu.ts, SideNav.tsx, API man-hinh có test — khuôn riêng"},"gap":"@bizcity/web-shell + registerMenu"},{"id":"P16","erp":"E-12","name":"Hook danh sách đóng + registry module, bật theo tenant","levels":{"open-core":2,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"core/hooks.ts (1 hook), module-registry.ts — chưa test, open-cake chưa dùng","open-cake":"bizcity.app.json, bizcity.authz.json, test/authz-manifest.test.ts — chưa hook / bật module","open-ketoan":"test/module-lifecycle.test.ts, sdk-module-host.test.ts, packages/module-sdk"},"gap":"module-sdk lõi; hook chung mới (S003-5)"},{"id":"P17","erp":"—","name":"Nhiều site: registry, /_sites/v1, migration theo nguồn","levels":{"open-core":3,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"db/migrate.ts (source, coveredBy), test/migrate.test.mjs 8 ca, open-cake dùng (migration: mức 4) — route /_sites/v1 còn ở app (mức 2)","open-cake":"dùng migrate / site của lõi, chưa cấp site","open-ketoan":"modules/sites/provisioning.routes.ts, test/site-provisioner.test.ts, site-migrate.test.ts"},"gap":"/_sites/v1 khung vào @bizcity/server (NC-003 C7)"},{"id":"P18","erp":"—","name":"API: defineAction → REST + MCP, Idempotency-Key, danh mục lỗi","levels":{"open-core":2,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"core/actions.ts, errors.ts, http.ts — chưa test ở lõi; open-cake chỉ dùng errors / http","open-cake":"runtime.ts riêng (spec → REST, action_requests), packages/action-client test — chưa MCP","open-ketoan":"test/actions.test.ts, action-meta.test.ts, mcp.test.ts"},"gap":"test lõi; open-cake chuyển sang defineAction của lõi (C5)"},{"id":"P19","erp":"E-12","name":"Bốn bước kết nối open-hub (bizcity_hub_setup@1)","levels":{"open-core":1,"open-cake":2,"open-ketoan":1},"evidence":{"open-core":"chuẩn HUB-SETUP 0.1; chưa @bizcity/server, chưa /api/v1/setup/*","open-cake":"apps/web/src/screens/channel-setup/SetupSteps.tsx (4 bước Zalo) — chưa API chuẩn","open-ketoan":"chỉ thiết kế (CELL-CONNECT)"},"gap":"/api/v1/setup/* + SetupScreen"},{"id":"P20","erp":"E-12","name":"Hệ thiết kế giao diện: token, ui-kit, bốn trạng thái, i18n","levels":{"open-core":1,"open-cake":3,"open-ketoan":2},"evidence":{"open-core":"bizcity_ux@1 0.1 + mockup chờ duyệt; chưa gói ui-kit","open-cake":"packages/ui-kit/src/tokens.css, i18n/vi/*, test/i18n.test.ts, sc-cake-web.test.ts","open-ketoan":"packages/ui-kit/src/{grid,steps,doc-sheet}.tsx — chưa i18n"},"gap":"@bizcity/ui-kit + token một nguồn (S003-12)"}],"topGaps":["Mã chạy của lõi chưa có test ở open-core (actions, events, documents, workflow, settings, secrets, hooks) — chỉ được kiểm ở bản chép của open-ketoan ⇒ phát hành lõi có thể gãy âm thầm","open-cake chưa dùng runtime action / sự kiện / chứng từ của lõi (runtime.ts, outbox channel_commands, 3 setInterval riêng) ⇒ chuỗi cake → POS → kế toán chưa có đường chung","Chưa có khung changefeed ở lõi (registerSyncFeed) — /api/v1/sync chỉ ở open-ketoan","Danh sách chung (defineListAction, ListScreen, xuất CSV / XLSX / JSON) chưa có ở đâu theo bizcity_list@1","Chưa có web-shell / registry menu / màn ở lõi — khung và ui-kit của open-ketoan và open-cake đã tách nhau","Màn × thao tác chỉ có ở open-ketoan","Bốn bước kết nối open-hub chưa có API ở đâu","Lớp mềm (user_meta …) và Storage chỉ ở open-cake, chưa vào migration lõi","Nhập chung chỉ ở danh mục open-ketoan; chatter chưa có ở đâu","Hạ tầng chéo chưa đủ: đệm chung, API việc nền / lịch, thang phạm vi cài đặt cứng accounting_unit, /_sites/v1 còn ở app"]}</script>
+<script>
+  const topHtml = document.getElementById('shell-top').innerHTML, navHtml = document.getElementById('shell-nav').innerHTML; // không đặt tên "top": trùng window.top
+  document.querySelectorAll('[data-slot="top"]').forEach((e) => (e.outerHTML = topHtml));
+  document.querySelectorAll('[data-slot="nav"]').forEach((e) => { const on = e.dataset.on; e.outerHTML = on ? navHtml.replace('class="on"', '').replace(`data-k="${on}"`, 'class="on"') : navHtml; });
+  const sb = JSON.parse(document.getElementById('sb').textContent);
+  const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const t = document.getElementById('sb-table');
+  if (t && sb.primitives.length) {
+    t.innerHTML = `<thead><tr><th>Thứ dùng chung (ERP-12 / NC-004)</th>${sb.apps.map((a) => `<th style="text-align:center">${a}</th>`).join('')}<th>Còn thiếu chính</th></tr></thead><tbody>` +
+      sb.primitives.map((p) => `<tr><td><b>${p.id}</b> ${esc(p.name)}</td>${sb.apps.map((a) => `<td style="text-align:center"><span class="lv lv${p.levels[a]}">${p.levels[a]}</span></td>`).join('')}<td style="white-space:normal;color:var(--muted-foreground);font-size:14px">${esc(p.gap)}</td></tr>`).join('') + '</tbody>';
+    const avg = (a) => (sb.primitives.reduce((s, p) => s + p.levels[a], 0) / (sb.primitives.length * 4) * 100).toFixed(0);
+    document.getElementById('sb-stats').innerHTML = sb.apps.map((a) => `<div class="card stat"><b>${avg(a)}%</b><span>${a} — mức trung bình / 4</span></div>`).join('') + `<div class="card stat"><b>${sb.version ?? ''}</b><span>open-core · đo lúc ${sb.measuredAt ?? ''}</span></div>`;
+    document.getElementById('sb-src').textContent = 'nguồn: docs/scoreboard/scoreboard.json';
+  }
+</script>
+</body>
+</html>

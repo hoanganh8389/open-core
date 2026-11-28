@@ -31,6 +31,11 @@
 | S003-6 | `@bizcity/web-shell` (gói mới) | `ListScreen` · `FilterBar` (dựng từ cột) · `SavedViews` (`user_meta`) · nút Xuất · menu chung · màn bốn bước (`bizcity_hub_setup@1`) — tách view / model theo WEB |
 | S003-7 | open-cake | danh sách Khách / Hội thoại / Đơn yêu cầu chuyển sang `defineListAction` + `ListScreen`; `user_meta` của lõi thay bản `0103` (baseline bằng `coveredBy`); ma trận xanh |
 | S003-8 | open-ketoan (sau PHASE-001) | `DataGrid` / `FilterLayout` / `excel-export` ⇒ `ListScreen` / xuất chung theo từng màn, qua R-FLOW |
+| S003-9 | `@bizcity/platform` + web-shell | **Hoạt động (chatter)** — bảng lõi `activities` gắn `doc_ref` (ghi chú, việc có hạn + người nhận, thay đổi tự sinh từ `audit_logs`, tệp), chỉ thêm; khối `<Activity>` ở `DetailScreen`; "Việc của tôi" là một `ListScreen` ([NC-005](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/research/NC-005-LOI-ERP-HOC-WP-ODOO.md) §2.1) | <!-- [2026-11-28 06:54 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 — chủ đồng ý NC-005 (2026-11-28): thêm chatter, nhập chung, việc nền, bizcity_ux@1, scoreboard -->
+| S003-10 | `@bizcity/platform` + web-shell | **Nhập chung** — `POST …/import` cùng cột `ListDef`; **chạy thử bắt buộc** (từng dòng: tạo / sửa / bỏ / lỗi + `field`), chạy thật cùng `Idempotency-Key`; mỗi dòng qua action ghi của module; lớn ⇒ việc nền; `ImportScreen` (NC-005 §2.2) |
+| S003-11 | `@bizcity/platform` | **Việc nền + định kỳ** — bảng `jobs`, lấy việc `FOR UPDATE SKIP LOCKED`, thử lại giãn dần, `registerJob` / `registerSchedule`, chạy trong ngữ cảnh tenant + `traceparent`; dùng cho xuất / nhập lớn, gửi lại chứng từ, nhắc việc (NC-005 §2.3) |
+| S003-12 | `@bizcity/ui-kit` + web-shell | **`bizcity_ux@1`** — token một nguồn (bản mẫu open-cake), khung app, tám màn mẫu; **mockup chờ chủ duyệt**: [`docs/ui/mockup-src/web-shell.html`](../../ui/mockup-src/web-shell.html), ảnh ở [`docs/ui/mockup-shots/`](../../ui/mockup-shots/) |
+| S003-13 | open-core | **Scoreboard** ERP-12 × app (mức 0–4 + bằng chứng): [`docs/scoreboard/`](../../scoreboard/SCOREBOARD.md) (`scoreboard.json` máy đọc, `tools/scoreboard.mjs` sinh bảng); hiện trong app ở **Cài đặt hệ thống › Tình trạng nền tảng** (màn `PlatformStatus`) |
 
 ## 3. Nguyên tắc (đã chốt cùng NC-004 / Q-DD)
 
@@ -46,3 +51,4 @@ open-cake có ít nhất ba danh sách chạy bằng `defineListAction` + `ListS
 ## Nhật ký
 
 - 2026-11-28: mở phase (kế hoạch) — chủ đồng ý chuẩn hoá về open-core.
+- 2026-11-28: <!-- [2026-11-28 06:54 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 — chủ đồng ý NC-005 (2026-11-28): thêm chatter, nhập chung, việc nền, bizcity_ux@1, scoreboard --> thêm S003-9…13; mockup web-shell 6 khung (danh sách, chi tiết + hoạt động, sheet, nhập chạy thử, tình trạng nền tảng, bốn bước) chờ duyệt.

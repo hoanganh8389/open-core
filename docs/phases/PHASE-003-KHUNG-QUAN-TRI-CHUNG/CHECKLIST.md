@@ -14,3 +14,8 @@
 | S003-6 | `@bizcity/web-shell`: ListScreen, FilterBar, SavedViews, menu, màn bốn bước | ☐ |
 | S003-7 | open-cake dùng khung chung | ☐ |
 | S003-8 | open-ketoan dùng khung chung | ☐ |
+| S003-9 | hoạt động (chatter) | ☐ |
+| S003-10 | nhập chung có chạy thử | ☐ |
+| S003-11 | việc nền + định kỳ | ☐ |
+| S003-12 | `bizcity_ux@1` — token, khung, màn mẫu (mockup chờ duyệt) | ◐ |
+| S003-13 | scoreboard + màn Tình trạng nền tảng | ◐ |

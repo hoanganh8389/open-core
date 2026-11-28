@@ -2,7 +2,15 @@
 
 <!-- [2026-11-27 11:20 PM Johnny Chu - Chu Hoàng Anh] C1 — chủ chốt Q-CORE-1…7 (bizcity-platform NC-003): repo mã lõi riêng, mọi gói @bizcity/* chung một số phiên bản. -->
 
-> **Trạng thái:** 🟡 **C2 — mã đã dời** (2026-11-27): `@bizcity/platform` và `@bizcity/contracts` chuyển từ [bizcity-platform](https://github.com/hoanganh8389/bizcity-platform) sang đây bằng `git subtree` (giữ lịch sử), **0.3.0** = nội dung HEAD của bizcity-platform, không đổi hành vi. Schema chuẩn máy đọc ở lại open-platform. Bước kế: C3 gom bản nền mới của open-ketoan. Kế hoạch: [NC-003](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/research/NC-003-TACH-OPEN-CORE.md). <!-- [2026-11-27 11:31 PM Johnny Chu - Chu Hoàng Anh] C2 -->
+> **Trạng thái:** 🟡 **0.4.0** (chờ phát hành) — PHASE-001 phía lõi xong (S001-1…5); PHASE-002 S002-1 / 2 xong; PHASE-003 đang mở. **Mức đáp ứng tài liệu:** open-core 44 % · open-cake 48 % · open-ketoan 65 % ([scoreboard](docs/scoreboard/SCOREBOARD.md), đo 2026-11-28). <!-- [2026-11-28 06:57 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 -->
+
+| Theo dõi | Ở đâu |
+|---|---|
+| **Scoreboard** ERP-12 × app (mức 0–4, bằng chứng) | [docs/scoreboard/SCOREBOARD.md](docs/scoreboard/SCOREBOARD.md) · máy đọc [scoreboard.json](docs/scoreboard/scoreboard.json) |
+| **Kiến trúc** | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| **Mockup giao diện** (`bizcity_ux@1`, chờ duyệt) | [docs/ui/mockup-shots/](docs/ui/mockup-shots/) · nguồn [web-shell.html](docs/ui/mockup-src/web-shell.html) |
+| **Phase** | [docs/phases/](docs/phases/README.md) |
+| Trong app | **Cài đặt hệ thống › Tình trạng nền tảng** (màn `PlatformStatus` của web-shell — [mockup](docs/ui/mockup-shots/f5-tinh-trang-nen-tang.png)) |
 
 **open-core là "WordPress core" của Bizcity Open viết bằng TypeScript.** Mỗi app nghiệp vụ = open-core + module: open-cake (+crm, +catalog), open-ketoan (+ketoan), open-pos, open-hrm, open-mrp…
 
