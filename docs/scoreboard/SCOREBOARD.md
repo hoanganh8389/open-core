@@ -7,8 +7,8 @@
 
 | App | Mức trung bình |
 |---|---|
-| open-core | **53 %** |
-| open-cake | **48 %** |
+| open-core | **54 %** |
+| open-cake | **51 %** |
 | open-ketoan | **65 %** |
 
 | # | Thứ dùng chung | open-core | open-cake | open-ketoan | Còn thiếu chính |
@@ -17,7 +17,7 @@
 | P2 | Vai · quyền · phạm vi · màn × thao tác | **3** | **3** | **3** | màn × thao tác lên lõi (S003-3, chờ NT-HT-003) |
 | P3 | Cài đặt + thang phạm vi | **2** | **1** | **3** | registerSettingScopes (Q-PIL-6), test ở lõi |
 | P4 | user_meta + lớp mềm (entity_meta, record_types, records) | **1** | **3** | **2** | dời lên lõi (S003-2) |
-| P5 | Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML | **3** | **0** | **3** | open-cake dùng trục chứng từ thay order_requests riêng; open-ketoan lên 0005 qua R-FLOW |
+| P5 | Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML | **4** | **3** | **3** | open-ketoan lên 0005 qua R-FLOW; màn tìm chứng từ (core.document.list) |
 | P6 | Danh sách · lọc · con trỏ · xuất (bizcity_list@1) | **2** | **2** | **3** | defineListAction + ListScreen + xuất chung (S003-4, S003-6) |
 | P7 | Nhập chung (ghép cột + chạy thử) | **0** | **0** | **3** | nhập chung ở lõi (S003-10) |
 | P8 | Hoạt động (chatter) trên doc_ref | **3** | **0** | **1** | bảng activities + khối Hoạt động (S003-9) |
@@ -57,8 +57,8 @@
 - **open-ketoan** (2): entity_attributes theo ngày (0087, 0168), chưa có lớp mềm
 
 ### P5 Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML
-- **open-core** (3): core/documents.ts, document-spine.ts (defineDocumentType, tạo / sửa nháp / chuyển / lưu trữ, tiền tệ + tỷ giá), workflow.ts, 0005 — test/document-spine.test.mjs, test/workflow.test.mjs, test/documents-events.test.mjs (cấp số, phiên bản, DocLink, RLS) chạy thật trên Postgres; open-cake chưa dùng
-- **open-cake** (0): —
+- **open-core** (4): core/documents.ts, document-spine.ts (defineDocumentType, tạo / sửa nháp / chuyển / lưu trữ, tiền tệ + tỷ giá), workflow.ts, 0005 — test/document-spine.test.mjs, test/workflow.test.mjs, test/documents-events.test.mjs (cấp số, phiên bản, DocLink, RLS) chạy thật trên Postgres; open-cake chưa dùng
+- **open-cake** (3): apps/api/src/orders/document.ts — yêu cầu đặt hàng phản chiếu lên trục chứng từ (đầu phiếu + hoạt động), test/orders.http.test.ts; chưa dùng cấp số / workflow của lõi (trạng thái do cửa hàng gửi về)
 - **open-ketoan** (3): test/documents-common.test.ts, workflow.test.ts, dinh-kem-chung-tu.test.ts
 
 ### P6 Danh sách · lọc · con trỏ · xuất (bizcity_list@1)
