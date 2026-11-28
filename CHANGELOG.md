@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S005-BX-3 — Lõi trước, bánh xe đóng góp)
+- 2026-11-29 — <!-- [2026-11-29 01:19 AM Johnny Chu - Chu Hoàng Anh] S005-BX-3 --> **R-CORE-10** trong AGENTS.md + khối chung "Lõi trước" (`bizcity:loi-truoc@1`, `bizcity_core_first@1` của bizcity-platform) + `.github/pull_request_template.md` có ô "Lõi hay app?". `standard-check --repo` SC-STD-4 đạt.
+
 ### Thêm (S005-F0 — mốc đo Scoreboard DX, lane T)
 - 2026-11-29 — <!-- [2026-11-29 01:14 AM Johnny Chu - Chu Hoàng Anh] S005-F0 — số đo thật -->
   - **`tools/scoreboard-dx.mjs`** + `docs/scoreboard/dx.json` → `DX.md`: 30 thao tác phổ thông × 3 app, mức D0–D3 có bằng chứng.
