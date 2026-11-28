@@ -14,7 +14,8 @@
     "typecheck": "pnpm run build && pnpm --filter @bizcity/platform run typecheck",
     "test": "node tools/kiem-khung.mjs && pnpm run build && tsc -p packages/platform/test/types && node --test --test-concurrency=1 \"packages/platform/test/*.test.mjs\"",
     "kiem": "node tools/kiem-khung.mjs",
-    "dong-goi": "node tools/dong-goi.mjs"
+    "dong-goi": "node tools/dong-goi.mjs",
+    "ma-tran": "node tools/ma-tran-app.mjs"
   },
   "devDependencies": {
     "@types/node": "20.17.6",

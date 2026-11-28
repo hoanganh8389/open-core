@@ -88,3 +88,4 @@ open-ketoan `dev` không còn `packages/{platform,contracts}`, cài lõi từ re
 ## Nhật ký
 
 - 2026-11-28: mở phase; đo khớp tên 646 / 646, khớp kiểu 7 lỗi mới (đều do P2b), liệt kê R-1…R-11; chọn phương án B.
+- 2026-11-28: <!-- [2026-11-28 04:52 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-1 --> **S001-1 ☑** — `pnpm run ma-tran`: open-ketoan @ `0237a4d` 646 / 646 tên, mốc 3 → 10 lỗi kiểu (đúng 7 lỗi §1.1); open-cake @ `d9708d8` 65 / 65 tên, 0 lỗi. Khoảng 4 phút (lần đầu, có cài phụ thuộc); lần sau dùng lại bản tạm theo commit.
