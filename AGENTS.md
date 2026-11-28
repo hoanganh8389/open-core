@@ -18,7 +18,9 @@
 - Chứng từ: `doc_ref` `<module>.<type>:<id>` + `version` + `content_hash`, bốn bảng, `document_links`, workflow YAML `<module>.<type>.workflow.yaml`; gửi đi với `Idempotency-Key = <doc_ref>@<version>` + `traceparent`.
 - Vai quyền, cài đặt, meta / bản ghi mềm, tệp, API, MCP, **bốn bước kết nối open-hub** (`bizcity_hub_setup@1`), đệm, kiểm, bàn điều tra: dùng của lõi.
 - **R-CORE-4** trụ nào app cần mà lõi chưa có ⇒ thêm ở lõi (bảng ở `migrations` lõi, kiểu ở `@bizcity/contracts`, action / `register*` ở `@bizcity/platform`) theo NC-004 §7; không để app tự dựng bản riêng.
-- **R-CORE-5** đường `/api/v1/setup/*` (bốn bước, `bizcity_hub_setup@1`) là của lõi; app chỉ khai bước ② ③ ④ của mình.
+- **R-CORE-5** đường `/api/v1/setup/*` và màn bốn bước (`@bizcity/web-shell`, `bizcity_hub_setup@1`) là của lõi — kế toán, HRM, cake, POS dùng chung, không app nào vẽ lại; app chỉ khai bước ② ③ ④ của mình. **Sẵn sàng = cả bốn bước Đạt.** <!-- [2026-11-28 02:36 PM Johnny Chu - Chu Hoàng Anh] NC-004 Q-PIL-8 — ready = bốn bước; bước ④ = lớp phân quyền khoanh phạm vi -->
+- **R-CORE-6** bước ④ Guru = **lớp phân quyền ở giữa**: app khai chiều phạm vi (`registerAgentScope`: twin-brain `vault`, open-ketoan `module[]` + vai / chi nhánh / kho, open-cake tài khoản kênh, POS cửa hàng); lõi lưu phạm vi đã chọn và MCP chỉ mở tool trong phạm vi đó, giao với quyền vai của người dùng.
+- Thang phạm vi cài đặt: `install → site → tenant → branch → user` + bậc app khai (`registerSettingScopes`); `doc_ref` theo spine 1.2; nhân viên tạm ở `user_meta` (trục `employee` ghi nợ).
 
 ## Luật
 
