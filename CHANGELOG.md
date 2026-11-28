@@ -2,6 +2,12 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S001-T — test lõi chạy thật)
+- 2026-11-28 — **Test runtime lõi trên Postgres** (<!-- [2026-11-28 07:41 PM Johnny Chu - Chu Hoàng Anh] S001-T -->): `test/_csdl.mjs` (CSDL mới mỗi tệp, migration lõi, vai `oc_app` để RLS có hiệu lực), `workflow.test.mjs` (chép từ open-ketoan), `actions-runtime.test.mjs` (quyền, khuôn input, Idempotency-Key gửi lặp / xung đột, bằng chứng thành công + thất bại, huỷ giao dịch, chạy thử, vùng tên sự kiện), `documents-events.test.mjs` (cấp số, phiên bản, DocLink, RLS, outbox → subscriber, thử lại → dead). `pnpm test` có CSDL: 38 / 38.
+
+### Sửa
+- 2026-11-28 — **Bộ đếm số chứng từ mặc định ở lõi** (S001-T): `documents.nextNumber` trước đây ném lỗi nếu app chưa `registerDocumentNumberer` (open-cake chưa có) dù bảng `document_sequences` là bảng lõi; nay lõi có `defaultNumberer` (chép cách của open-ketoan Kernel — cùng bảng, cùng khoá), open-ketoan vẫn đăng ký bộ đếm của mình như cũ.
+
 ### Thêm (S003-12, S003-13)
 - 2026-11-28 — **Scoreboard + kiến trúc + mockup** (<!-- [2026-11-28 06:57 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 -->): `docs/scoreboard/scoreboard.json` (20 mục × open-core / open-cake / open-ketoan, mức 0–4 có bằng chứng, 10 khoảng trống lớn) + `tools/scoreboard.mjs` (kiểm + sinh `SCOREBOARD.md` + dữ liệu màn Tình trạng nền tảng; `--check` trong `pnpm test`); `docs/ARCHITECTURE.md`; mockup web-shell 6 khung (`docs/ui/mockup-src/web-shell.html`, ảnh `docs/ui/mockup-shots/`) chờ chủ duyệt. Đo lần đầu: open-core 44 %, open-cake 48 %, open-ketoan 65 %.
 
