@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { doiNguon, traLai } from './doi-nguon/ketoan-0.7.mjs';
 
 const CORE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
@@ -75,7 +76,6 @@ function ketoan() {
   const repo = path.resolve(arg('ketoan', path.join(CORE, '..', 'open-ketoan')));
   const dir = prepare('open-ketoan', repo, arg('ketoan-ref', 'origin/dev'), 'npm ci --ignore-scripts --no-audit --no-fund');
   const build = 'npm run build -w @ketoan/contracts -w @bizcity/mua-hang-domain -w @bizcity/platform -w @bizcity/kernel -w @bizcity/module-sdk';
-  const names = nameCheck(dir, ['apps/api/src', 'packages/kernel/src', 'packages/module-sdk/src', 'modules']);
   // mốc: bản lõi riêng của app
   for (const p of ['platform', 'contracts']) { const keep = path.join(dir, 'packages', p, 'src.app'); if (existsSync(keep)) { rmSync(path.join(dir, 'packages', p, 'src'), { recursive: true, force: true }); cpSync(keep, path.join(dir, 'packages', p, 'src'), { recursive: true }); } else cpSync(path.join(dir, 'packages', p, 'src'), keep, { recursive: true }); }
   rmSync(path.join(dir, 'node_modules/@bizcity/contracts'), { recursive: true, force: true });
@@ -83,9 +83,15 @@ function ketoan() {
   // lõi đang sửa
   for (const p of ['platform', 'contracts']) { rmSync(path.join(dir, 'packages', p, 'src'), { recursive: true, force: true }); cpSync(path.join(CORE, 'packages', p, 'src'), path.join(dir, 'packages', p, 'src'), { recursive: true }); }
   link(path.join(dir, 'packages/contracts'), path.join(dir, 'node_modules/@bizcity/contracts')); // lõi import @bizcity/contracts, app import @ketoan/contracts — cùng một gói
-  const pkgBuild = sh(build, dir, true); const pkgErr = tscErrors(pkgBuild);
-  const now = tscErrors(sh('npx tsc -p apps/api --noEmit', dir, true));
-  return { names, base, now, pkgErr };
+  // [2026-11-29 12:10 AM Johnny Chu - Chu Hoàng Anh] S004-W2-2 — đo như sau ĐỔI NGUỒN: chạy codemod tools/doi-nguon/ketoan-0.7.mjs trên bản tạm (bước bắt buộc khi kế toán sang lõi 0.7), đo xong trả tệp gốc
+  const dn = doiNguon(dir);
+  log(`  open-ketoan: codemod đổi nguồn 0.7 — sửa ${dn.changed.size} tệp · thêm ${dn.created.length} tệp (trả lại sau khi đo)`);
+  try {
+    const names = nameCheck(dir, ['apps/api/src', 'packages/kernel/src', 'packages/module-sdk/src', 'modules']);
+    const pkgBuild = sh(build, dir, true); const pkgErr = tscErrors(pkgBuild);
+    const now = tscErrors(sh('npx tsc -p apps/api --noEmit', dir, true));
+    return { names, base, now, pkgErr };
+  } finally { traLai(dn); }
 }
 
 function cake() {

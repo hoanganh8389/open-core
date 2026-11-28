@@ -275,7 +275,8 @@ async function resolveAuth(req: FastifyRequest): Promise<AuthContext | null> {
   const apiKey = req.headers['x-api-key'];
   if (typeof apiKey === 'string' && apiKey.length > 10) {
     // [2026-11-23 09:10 AM Johnny Chu - Chu Hoàng Anh] OKT-SET-1 — ADR-0037: khoá cài đặt open-pos (okti_) — (khoá, X-OKT-Blog đã nối) → đúng một tenant; không có blog → chỉ route của bản cài
-    if (apiKey.startsWith(INSTALLATION_KEY_PREFIX)) return resolveInstallation(req, apiKey);
+    const custom = apiKeyResolvers.find((r) => apiKey.startsWith(r.prefix)); // [2026-11-28 11:54 PM Johnny Chu - Chu Hoàng Anh] S004-W2-2 — móc của app (trước: resolveInstallation cứng)
+    if (custom) return custom.resolve(req, apiKey);
     const row = await db
       .selectFrom('api_keys as k')
       .leftJoin('app_installations as i', (j) => j.onRef('i.tenant_id', '=', 'k.tenant_id').onRef('i.app_key', '=', 'k.app_key'))
@@ -361,36 +362,22 @@ export const INSTALLATION_ROUTES: ReadonlySet<string> = new Set([
   'POST /api/v1/pos-installation/blogs',
   'POST /api/v1/pos-installation/ping',
 ]);
-const BLOG_RE = /^[1-9][0-9]{0,8}$/;
 
-/** Khoá cài đặt → AuthContext. Blog chờ / thu hồi / lạ → 403 có `details.reason` (bridge xếp hàng, không mất đơn — R-OKT-CONN-11). */
-async function resolveInstallation(req: FastifyRequest, apiKey: string): Promise<AuthContext | null> {
-  const inst = await db.selectFrom('pos_installations')
-    .select(['id', 'code', 'name', 'tenant_id', 'scopes'])
-    .where('key_hash', '=', hashApiKey(apiKey)).where('status', '=', 'active')
-    .executeTakeFirst();
-  if (!inst) return null;
-  const claimed = req.headers['x-okt-install'];
-  if (typeof claimed === 'string' && claimed !== '' && claimed !== inst.code) return null;
-  void db.updateTable('pos_installations').set({ last_seen_at: new Date() }).where('id', '=', inst.id).execute();
-  const rawBlog = req.headers['x-okt-blog'];
-  if (rawBlog === undefined || rawBlog === '') {
-    return { tenantId: inst.tenant_id, actor: `install:${inst.code}`, actorName: inst.name, kind: 'apikey', role: null, permissions: new Set<Permission>(),
-      installation: { id: String(inst.id), code: inst.code, blogId: null } };
-  }
-  if (typeof rawBlog !== 'string' || !BLOG_RE.test(rawBlog)) throw Errors.validation('X-OKT-Blog phải là số blog WordPress (số nguyên dương)');
-  const blogId = Number(rawBlog);
-  const blog = await db.selectFrom('pos_installation_blogs').select(['status', 'tenant_id'])
-    .where('installation_id', '=', inst.id).where('blog_id', '=', blogId).executeTakeFirst();
-  if (!blog) throw new AppError(ERROR_CODES.FORBIDDEN, `Blog ${blogId} chưa đăng ký với khoá cài đặt này — gọi POST /api/v1/pos-installation/blogs trước`, 403, { reason: 'BLOG_UNKNOWN', blogId });
-  if (blog.status !== 'active' || blog.tenant_id === null) {
-    throw new AppError(ERROR_CODES.FORBIDDEN, `Blog ${blogId} chưa được nối vào sổ nào — kế toán nhập mã nối ở Hệ thống → Kết nối open-pos`, 403, { reason: 'BLOG_NOT_LINKED', blogId, status: blog.status });
-  }
-  return {
-    tenantId: blog.tenant_id, actor: `install:${inst.code}:blog:${blogId}`, actorName: `${inst.name} · blog ${blogId}`, kind: 'apikey', role: null,
-    permissions: scopePermissions(inst.scopes), installation: { id: String(inst.id), code: inst.code, blogId },
-  };
+// [2026-11-28 11:54 PM Johnny Chu - Chu Hoàng Anh] S004-W2-2 — S004-W2-2 (R-CORE-8): khoá có tiền tố riêng do APP giải (vd open-ketoan: khoá cài đặt open-pos `okti_` → bảng pos_installations của kế toán).
+//   Lõi không đọc bảng của app; chưa đăng ký ⇒ khoá đó đi đường khoá API thường (không khớp ⇒ 401), không mở thêm quyền nào.
+export interface ApiKeyResolver {
+  /** Tiền tố khoá, vd `okti_` (chữ thường + gạch dưới cuối). */
+  prefix: string;
+  resolve(req: FastifyRequest, apiKey: string): Promise<AuthContext | null>;
 }
+const apiKeyResolvers: ApiKeyResolver[] = [];
+export function registerApiKeyResolver(r: ApiKeyResolver): void {
+  if (!/^[a-z][a-z0-9]{1,15}_$/.test(r.prefix)) throw new Error(`registerApiKeyResolver: tiền tố "${r.prefix}" sai khuôn (vd okti_)`);
+  if (apiKeyResolvers.some((x) => x.prefix.startsWith(r.prefix) || r.prefix.startsWith(x.prefix))) throw new Error(`registerApiKeyResolver: tiền tố "${r.prefix}" trùng / chồng tiền tố đã đăng ký`);
+  apiKeyResolvers.push(r);
+}
+/** Chỉ cho test. */
+export function resetApiKeyResolvers(): void { apiKeyResolvers.length = 0; }
 
 /** Khoá cài đặt không mang blog chỉ gọi INSTALLATION_ROUTES (không lộ route có hay không). */
 export function assertInstallationRoute(method: string, routeUrl: string | undefined): void {

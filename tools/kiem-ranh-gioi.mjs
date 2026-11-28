@@ -62,6 +62,11 @@ for (const pkg of readdirSync(pkgRoot)) {
   for (const f of walk(src)) {
     const rel = path.relative(root, f).split(path.sep).join('/');
     const code = stripComments(readFileSync(f, 'utf8'));
+    // [2026-11-28 11:54 PM Johnny Chu - Chu Hoàng Anh] S004-W2-2 — khu cách ly src/ketoan-legacy (mã + kiểu bảng chỉ open-ketoan dùng, xoá ở 0.8): mỗi tệp tính 1 R-CACH-LY, không đo luật khác;
+    //   tệp lõi ngoài khu mà import vào khu (tệp trỏ ở đường cũ cũng vậy) ⇒ R-CACH-LY = số chỗ import. Sổ chỉ được giảm như mọi luật.
+    if (rel.startsWith('packages/platform/src/ketoan-legacy/')) { (measured[rel] ??= {})['R-CACH-LY'] = 1; continue; }
+    const intoQuarantine = (code.match(/from\s+['"][^'"]*ketoan-legacy\/[^'"]*['"]/g) ?? []).length;
+    if (intoQuarantine) (measured[rel] ??= {})['R-CACH-LY'] = intoQuarantine;
     for (const [id, r] of Object.entries(RULES)) {
       const k = r.count(code);
       if (k) (measured[rel] ??= {})[id] = k;
@@ -70,6 +75,7 @@ for (const pkg of readdirSync(pkgRoot)) {
   }
 }
 RULES['R-TEP'] = { label: 'tệp chuyển tiếp *-ketoan-* (xoá sau B4)' };
+RULES['R-CACH-LY'] = { label: 'khu cách ly ketoan-legacy / import vào khu (xoá ở 0.8)' };
 
 const debt = existsSync(NO) ? JSON.parse(readFileSync(NO, 'utf8')) : { files: {} };
 const base = debt.files ?? {};
