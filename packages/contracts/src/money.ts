@@ -111,3 +111,37 @@ export function schedule(
   }
   return out;
 }
+
+// ── Đa tiền tệ (S003-19, NC-007 §8, R-FX-1..6) ────────────────────────────────────────────────────────────────────────────
+// [2026-11-28 07:52 PM Johnny Chu - Chu Hoàng Anh] S003-19 — chủ chốt Q-ERP-1 (có đa tiền tệ): mã ISO 4217, số chữ số lẻ theo tiền, quy đổi về tiền hạch toán.
+// Số tiền vẫn là number theo quy ước trên (R-MONEY); mỗi số tiền đi kèm mã tiền tệ ở API / sự kiện / xuất JSON (R-FX-1).
+
+/** Mã tiền tệ ISO 4217 (ba chữ hoa). */
+export const CURRENCY_RE = /^[A-Z]{3}$/;
+/** Tiền hạch toán mặc định của sổ. */
+export const BASE_CURRENCY = 'VND';
+/** Số tiền kèm tiền tệ. */
+export interface Money { amount: number; currency: string }
+
+const ZERO_DIGIT = new Set(['VND', 'JPY', 'KRW', 'CLP', 'ISK', 'PYG', 'UGX', 'XAF', 'XOF']);
+const THREE_DIGIT = new Set(['BHD', 'JOD', 'KWD', 'OMR', 'TND', 'LYD', 'IQD']);
+/** Số chữ số lẻ của tiền (ISO 4217 minor unit): VND 0, USD 2, KWD 3; mã lạ → 2. */
+export function currencyDigits(code: string): number {
+  if (!CURRENCY_RE.test(code)) throw new Error(`Mã tiền tệ không hợp lệ: ${code}`);
+  return ZERO_DIGIT.has(code) ? 0 : THREE_DIGIT.has(code) ? 3 : 2;
+}
+
+/** Làm tròn số tiền theo chữ số lẻ của tiền đó (nửa xa số 0, R-MONEY-2). */
+export function roundCurrency(amount: number, currency: string): number {
+  const scale = 10 ** currencyDigits(currency);
+  return roundMoney(Number((amount * scale).toPrecision(15))) / scale;
+}
+
+/**
+ * Quy nguyên tệ về tiền hạch toán: `amountFc × fxRate`, làm tròn theo tiền hạch toán (R-FX-2: không cộng hai tiền tệ trước khi quy đổi).
+ * `fxRate` > 0 (R-FX-3). Cùng tiền thì trả lại số tiền đã làm tròn.
+ */
+export function toBaseAmount(amountFc: number, fxRate: number, baseCurrency: string = BASE_CURRENCY): number {
+  if (!(fxRate > 0)) throw new Error(`Tỷ giá phải > 0: ${fxRate}`);
+  return roundCurrency(amountFc * fxRate, baseCurrency);
+}

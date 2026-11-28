@@ -2,6 +2,12 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S003-14, S003-19 — trục chứng từ + đa tiền tệ)
+- 2026-11-28 — **Trục chứng từ chung** (<!-- [2026-11-28 08:12 PM Johnny Chu - Chu Hoàng Anh] S003-14 -->, NC-007 §3): migration lõi `0005_platform_truc_chung_tu.sql` (đầu phiếu thêm `currency`, `fx_rate`, `total_fc`, `org_unit_code`, `archived_at`; bảng `document_activities` chỉ thêm + RLS; `doc_type` nhận gạch nối); `core/document-spine.ts` — `defineDocumentType` (loại + dãy số + workflow YAML + khoá meta zod), `create` / `get` / `update` (chỉ nháp) / `transition` (workflow.plan) / `note` / `archive` (chỉ khi đã kết thúc, cần lý do) / `restore` / `activities`; `ctx.documents.*` trong action (chỉ loại của module mình). Không chạy 0005 trên CSDL open-ketoan lúc này (`CORE_COVERED_BY_KETOAN`, PHASE-001 R-4): `business_documents` của open-ketoan sinh ở 0156.
+- 2026-11-28 — **Đa tiền tệ** (S003-19, Q-ERP-1, NC-007 §8): contracts `CURRENCY_RE`, `BASE_CURRENCY`, `Money`, `currencyDigits`, `roundCurrency`, `toBaseAmount` (theo quy ước R-MONEY: số tiền là number); `resolveMoney` — cùng tiền ⇒ tỷ giá 1; ngoại tệ cần tỷ giá + nguyên tệ, tổng tiền hạch toán do máy chủ tính; đóng băng khi rời nháp.
+- `tools/ma-tran-app.mjs`: vitest dừng trước dòng tổng thì in đuôi lỗi thay vì NaN.
+- Kiểm: `pnpm test` có CSDL 44 / 44; ma trận `--chay-that` open-cake 199 / 199 trên lõi mới; open-ketoan 7 lỗi kiểu MỚI giống hệt trên main (lệch có sẵn của PHASE-001, không do thay đổi này).
+
 ### Thêm (S001-T — test lõi chạy thật)
 - 2026-11-28 — **Test runtime lõi trên Postgres** (<!-- [2026-11-28 07:41 PM Johnny Chu - Chu Hoàng Anh] S001-T -->): `test/_csdl.mjs` (CSDL mới mỗi tệp, migration lõi, vai `oc_app` để RLS có hiệu lực), `workflow.test.mjs` (chép từ open-ketoan), `actions-runtime.test.mjs` (quyền, khuôn input, Idempotency-Key gửi lặp / xung đột, bằng chứng thành công + thất bại, huỷ giao dịch, chạy thử, vùng tên sự kiện), `documents-events.test.mjs` (cấp số, phiên bản, DocLink, RLS, outbox → subscriber, thử lại → dead). `pnpm test` có CSDL: 38 / 38.
 

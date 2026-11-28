@@ -43,6 +43,8 @@ import { metrics } from './metrics.js';
 import { currentRequest } from './request-context.js';
 import { withSpan } from './tracing.js';
 import { documents } from './documents.js';
+import { documentSpine, type DocumentHeader, type DocumentHeaderInput } from './document-spine.js';
+import { workflowActor } from './workflow.js';
 import { readSetting } from './settings.js';
 import { moduleSecretDecls, secretsFor, type SecretsApi } from './secrets.js';
 // [2026-11-09 11:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-030 — S030-51a (B5a, 26 §4.1 ①): ctx.libraries — kiểm theo thư viện dùng chung trong action
@@ -156,6 +158,15 @@ export interface ActionContext {
     sign(docRef: DocRef, role: string): Promise<DocumentSignature>;
     signatures(docRef: DocRef): Promise<DocumentSignature[]>;
     unsign(docRef: DocRef, role: string): Promise<void>;
+    // [2026-11-28 07:52 PM Johnny Chu - Chu Hoàng Anh] S003-14 — trục chứng từ (document-spine.ts): đầu phiếu, chuyển trạng thái, ghi chú, lưu trữ; chỉ loại của module mình
+    create(type: string, input: DocumentHeaderInput): Promise<DocumentHeader>;
+    get(docRef: DocRef): Promise<DocumentHeader>;
+    update(docRef: DocRef, patch: DocumentHeaderInput): Promise<DocumentHeader>;
+    transition(docRef: DocRef, verb: string, input?: { reason?: string }): Promise<DocumentHeader & { ledger: boolean }>;
+    note(docRef: DocRef, body: string): Promise<void>;
+    archive(docRef: DocRef, reason: string): Promise<void>;
+    restore(docRef: DocRef): Promise<void>;
+    activities(docRef: DocRef): ReturnType<typeof documentSpine.activities>;
   };
   /** @deprecated Cầu nối Phase 2→3 cho service cũ cần AuthContext. Không có trong @bizcity/module-sdk. */
   readonly legacyAuth: AuthContext;
@@ -569,6 +580,18 @@ async function runActionUntraced<I extends z.AnyZodObject, O extends z.ZodTypeAn
             sign: (ref, role) => { own(ref); return documents.sign(trx, tenantId, ref, role, { actor, name: auth?.actorName ?? actor, kind: call.via ? 'ai' : auth?.kind ?? 'public' }); },
             signatures: (ref) => documents.signatures(trx, tenantId, ref),
             unsign: (ref, role) => { own(ref); return documents.unsign(trx, tenantId, ref, role, { actor, role: auth?.role ?? null }); },
+            create: (type, inp) => { if (type.split('.')[0] !== mod) throw Errors.validation(`Action ${def.id} chỉ tạo chứng từ của module ${mod} (loại ${type})`); return documentSpine.create(trx, tenantId, type, inp, actor); },
+            get: (ref) => documentSpine.get(trx, tenantId, ref),
+            update: (ref, p) => { own(ref); return documentSpine.update(trx, tenantId, ref, p, actor); },
+            transition: (ref, verb, inp) => {
+              own(ref);
+              if (!auth) throw Errors.unauthorized();
+              return documentSpine.transition(trx, tenantId, ref, verb, workflowActor(auth), inp);
+            },
+            note: (ref, body) => documentSpine.note(trx, tenantId, ref, body, actor),
+            archive: (ref, reason) => { own(ref); return documentSpine.archive(trx, tenantId, ref, actor, reason); },
+            restore: (ref) => { own(ref); return documentSpine.restore(trx, tenantId, ref, actor); },
+            activities: (ref) => documentSpine.activities(trx, tenantId, ref),
           } satisfies ActionContext['documents'];
         })(),
         trace: {

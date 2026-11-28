@@ -14,14 +14,14 @@
 | S003-6 | `@bizcity/web-shell`: ListScreen, FilterBar, SavedViews, menu, màn bốn bước | ☐ |
 | S003-7 | open-cake dùng khung chung | ☐ |
 | S003-8 | open-ketoan dùng khung chung | ☐ |
-| S003-9 | hoạt động (chatter) | ☐ |
+| S003-9 | hoạt động (chatter) — `document_activities` + `ctx.documents.note / activities` (lõi xong, chờ màn) | ◐ |
 | S003-10 | nhập chung có chạy thử | ☐ |
 | S003-11 | việc nền + định kỳ | ☐ |
 | S003-12 | `bizcity_ux@1` — token, khung, màn mẫu (f1–f20 chủ đã duyệt 2026-11-28; Q-UX-1 theo mockup) | ◐ |
 | S003-13 | scoreboard + màn Tình trạng nền tảng | ◐ |
-| S003-14 | trục chứng từ: `defineDocumentType`, `document_meta`, `document_versions`, `document_activities` (NC-007 §3) | ☐ |
+| S003-14 | trục chứng từ: `defineDocumentType`, meta đầu phiếu (`business_documents.meta`, khoá khai trong loại — không thêm bảng), `document_versions`, `document_activities` (NC-007 §3) | ◐ lõi xong: 0005, `document-spine.ts`, `ctx.documents.create / update / transition / note / archive / restore`, test 6 ca; còn màn + open-cake / open-ketoan dùng |
 | S003-15 | thanh công cụ + "Tất cả bộ lọc" + cây đơn vị trong `<ListScreen>`; `archive / restore / purge` (NC-007 §4) | ☐ |
 | S003-16 | `bizcity_issues@1` + màn Nhật ký & trace, Lỗi & sửa lỗi (NC-007 §5) | ☐ |
 | S003-17 | `media` + trình điều khiển S3-compatible (R2 / S3 / MinIO) + màn Media (NC-007 §6) | ☐ |
 | S003-18 | `ledger_ref {book, org_unit_code}` + cây đơn vị + catalog feed / đề xuất từ kế toán (NC-007 §1–2) | ☐ |
-| S003-19 | `Money` + `fx_rate` ở trục chứng từ (đa tiền tệ, Q-ERP-1 chốt có — NC-007 §8) | ☐ |
+| S003-19 | `Money` + `fx_rate` ở trục chứng từ (đa tiền tệ, Q-ERP-1 chốt có — NC-007 §8) | ◐ lõi xong: `currency` / `fx_rate` / `total_fc` (0005), contracts `currencyDigits` / `roundCurrency` / `toBaseAmount`, `resolveMoney`; còn bảng tỷ giá phía kế toán, spine 1.3 |

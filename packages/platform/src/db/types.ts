@@ -1841,7 +1841,7 @@ export interface BusinessDocumentsTable {
   status_raw: string;
   status: 'draft' | 'pending' | 'approved' | 'in_progress' | 'done' | 'cancelled';
   version: Generated<number>;
-  meta: Generated<Json<Record<string, unknown>>>;
+  meta: ColumnType<Record<string, unknown>, string | undefined, string>;
   created_by: Generated<string>;
   created_at: TimestampDefault;
   updated_at: TimestampDefault;
@@ -1851,6 +1851,27 @@ export interface BusinessDocumentsTable {
   /** 0176: chi nhánh đang làm việc của người lập (nơi lập) + item_id cn_. */
   work_branch_code: string | null;
   work_branch_uid: string | null;
+  // [2026-11-28 07:52 PM Johnny Chu - Chu Hoàng Anh] S003-14 + S003-19 — lõi 0005: tiền tệ, tỷ giá, tổng nguyên tệ, nút đơn vị, lưu trữ
+  currency: Generated<string>;
+  fx_rate: Generated<string>;
+  total_fc: string | null;
+  org_unit_code: Generated<string>;
+  archived_at: ColumnType<Date | null, string | null | undefined, string | null>;
+}
+
+/** Lõi 0005: hoạt động trên chứng từ (chỉ thêm). */
+export interface DocumentActivitiesTable {
+  id: Generated<string>;
+  tenant_id: string;
+  doc_ref: string;
+  kind: 'create' | 'transition' | 'note' | 'meta' | 'archive' | 'restore' | 'system';
+  from_status: string | null;
+  to_status: string | null;
+  reason: Generated<string>;
+  body: Generated<string>;
+  data: ColumnType<Record<string, unknown>, string | undefined, string>;
+  actor: string;
+  created_at: TimestampDefault;
 }
 
 /** 0045 (documents.links): tham chiếu giữa chứng từ. */
@@ -2101,6 +2122,7 @@ export interface Database extends AppDatabase {
   long_term_balances: LongTermBalancesTable;
   document_sequences: DocumentSequencesTable;
   business_documents: BusinessDocumentsTable;
+  document_activities: DocumentActivitiesTable;
   catalog_trash: CatalogTrashTable;
   document_versions: DocumentVersionsTable;
   document_links: DocumentLinksTable;
