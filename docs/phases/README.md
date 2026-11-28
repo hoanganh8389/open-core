@@ -6,3 +6,4 @@
 |---|---|---|
 | [PHASE-001](PHASE-001-OPEN-KETOAN-TREN-OPEN-CORE/README.md) | open-ketoan chạy trên open-core (bỏ bản `packages/platform` riêng), ma trận open-ketoan × open-cake | ◐ phân tích xong |
 | [PHASE-002](PHASE-002-DONG-DU-LIEU-XUYEN-APP/README.md) | dòng dữ liệu xuyên app: bảng chứng từ ở lõi, gửi / nhận chứng từ chung, changefeed chung, truy nguồn liên app <!-- [2026-11-28 05:18 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 --> | ☐ kế hoạch |
+| [PHASE-003](PHASE-003-KHUNG-QUAN-TRI-CHUNG/README.md) | khung quản trị chung: `user_meta`, màn × thao tác, menu, hook, danh sách / lọc / xuất (`bizcity_list@1`), web-shell <!-- [2026-11-28 06:33 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 --> | ☐ kế hoạch |

@@ -2,6 +2,12 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S003-12, S003-13)
+- 2026-11-28 — **Scoreboard + kiến trúc + mockup** (<!-- [2026-11-28 06:57 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 -->): `docs/scoreboard/scoreboard.json` (20 mục × open-core / open-cake / open-ketoan, mức 0–4 có bằng chứng, 10 khoảng trống lớn) + `tools/scoreboard.mjs` (kiểm + sinh `SCOREBOARD.md` + dữ liệu màn Tình trạng nền tảng; `--check` trong `pnpm test`); `docs/ARCHITECTURE.md`; mockup web-shell 6 khung (`docs/ui/mockup-src/web-shell.html`, ảnh `docs/ui/mockup-shots/`) chờ chủ duyệt. Đo lần đầu: open-core 44 %, open-cake 48 %, open-ketoan 65 %.
+
+### Thêm (tài liệu)
+- 2026-11-28 — **PHASE-003 khung quản trị chung** (<!-- [2026-11-28 06:33 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 -->): người dùng + `user_meta`, vai / màn × thao tác, menu, hook danh sách đóng, danh sách / lọc / xuất theo `bizcity_list@1`, web-shell; việc S003-1…8.
+
 ## [0.4.0] — 2026-11-28
 
 <!-- [2026-11-28 05:45 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-5 -->
