@@ -17,5 +17,5 @@
 | S003-9 | hoạt động (chatter) | ☐ |
 | S003-10 | nhập chung có chạy thử | ☐ |
 | S003-11 | việc nền + định kỳ | ☐ |
-| S003-12 | `bizcity_ux@1` — token, khung, màn mẫu (mockup chờ duyệt) | ◐ |
+| S003-12 | `bizcity_ux@1` — token, khung, màn mẫu (f1–f6 chủ đã duyệt 2026-11-28; f7–f13 Cài đặt hệ thống + tìm chứng từ chờ duyệt) | ◐ |
 | S003-13 | scoreboard + màn Tình trạng nền tảng | ◐ |

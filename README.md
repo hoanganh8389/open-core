@@ -8,7 +8,7 @@
 |---|---|
 | **Scoreboard** ERP-12 × app (mức 0–4, bằng chứng) | [docs/scoreboard/SCOREBOARD.md](docs/scoreboard/SCOREBOARD.md) · máy đọc [scoreboard.json](docs/scoreboard/scoreboard.json) |
 | **Kiến trúc** | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| **Mockup giao diện** (`bizcity_ux@1`, chờ duyệt) | [docs/ui/mockup-shots/](docs/ui/mockup-shots/) · nguồn [web-shell.html](docs/ui/mockup-src/web-shell.html) |
+| **Mockup giao diện** (`bizcity_ux@1` — f1–f6 đã duyệt, f7–f13 Cài đặt hệ thống chờ duyệt) | [docs/ui/mockup-shots/](docs/ui/mockup-shots/) · nguồn [web-shell.html](docs/ui/mockup-src/web-shell.html) |
 | **Phase** | [docs/phases/](docs/phases/README.md) |
 | Trong app | **Cài đặt hệ thống › Tình trạng nền tảng** (màn `PlatformStatus` của web-shell — [mockup](docs/ui/mockup-shots/f5-tinh-trang-nen-tang.png)) |
 

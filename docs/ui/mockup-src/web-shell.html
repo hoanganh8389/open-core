@@ -75,6 +75,21 @@
   .s4 .n { width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; font-weight: 800; } .s4 .ok .n { background: var(--success-soft); color: var(--success); } .s4 .fail .n { background: var(--destructive-soft); color: var(--destructive); } .s4 .lock .n { background: var(--muted); color: var(--subtle-foreground); }
   .s4 .hint { color: var(--destructive); font-size: 14px; margin-top: 4px; } .s4 small { color: var(--muted-foreground); }
   .banner { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 8px; background: var(--warning-soft); color: var(--warning); font-size: 14px; border: 1px solid #ecd9a3; }
+  /* [2026-11-28 07:06 PM Johnny Chu - Chu Hoàng Anh] NC-006 — khung Cài đặt hệ thống (f7…f13) */
+  .set { display: grid; grid-template-columns: 230px 1fr; gap: 18px; min-height: 0; flex: 1; }
+  .snav { display: flex; flex-direction: column; gap: 2px; } .snav h6 { margin: 10px 10px 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--subtle-foreground); }
+  .snav a { padding: 9px 12px; border-radius: 8px; color: var(--foreground); font-size: 15px; } .snav a.on { background: var(--card); border: 1px solid var(--border); color: var(--primary); font-weight: 700; }
+  .scope { display: inline-flex; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; font-size: 13px; } .scope span { padding: 6px 10px; border-right: 1px solid var(--border); color: var(--muted-foreground); background: var(--card); } .scope span:last-child { border-right: 0; } .scope span.on { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
+  .srow { display: grid; grid-template-columns: 1fr 340px 170px; gap: 16px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); } .srow small { display: block; color: var(--muted-foreground); font-size: 13px; }
+  .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; font-size: 12px; font-weight: 600; background: var(--muted); color: var(--muted-foreground); }
+  .tag.a { background: var(--primary-soft); color: var(--primary); } .tag.c { background: var(--destructive-soft); color: var(--destructive); } .tag.ok { background: var(--success-soft); color: var(--success); }
+  .mx td.mc { text-align: center; font-size: 16px; } .mx td.mc.my { color: var(--success); } .mx td.mc.mn { color: var(--border-strong); } .mx th.mc { text-align: center; } .mx .foot { display: block; } .mx td.g { background: var(--muted); font-weight: 700; font-size: 13px; color: var(--muted-foreground); }
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .kvl { display: grid; grid-template-columns: 210px 1fr; gap: 10px 14px; font-size: 15px; } .kvl span { color: var(--muted-foreground); }
+  .tree div { padding: 6px 0 6px calc(var(--d) * 22px); font-size: 15px; } .tree b { font-weight: 700; } .tree small { color: var(--muted-foreground); margin-left: 8px; }
+  .res { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); align-items: center; } .res .t { font-size: 12px; color: var(--muted-foreground); }
+  .palette { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); width: 860px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 24px 64px rgba(15,31,61,.25); overflow: hidden; }
+  .palette .q { height: 58px; display: flex; align-items: center; gap: 10px; padding: 0 18px; border-bottom: 1px solid var(--border); font-size: 18px; } .palette h6 { margin: 10px 16px 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--subtle-foreground); }
 </style>
 </head>
 <body>
@@ -238,10 +253,209 @@
   <span class="demo">Dữ liệu minh hoạ</span>
 </section>
 
+
+<!-- [2026-11-28 07:06 PM Johnny Chu - Chu Hoàng Anh] NC-006 — bảy khung Cài đặt hệ thống + tìm kiếm chứng từ (chủ: "vẽ thêm phần user, role, cài đặt chung, các phần thuộc cấu hình, hệ thống, domain…") -->
+<template id="settings-nav">
+  <nav class="snav">
+    <h6>Tổ chức</h6><a data-s="chung">Cài đặt chung</a><a data-s="workspace">Tên miền &amp; Workspace</a>
+    <h6>Con người</h6><a data-s="users">Người dùng</a><a data-s="roles">Vai &amp; quyền</a>
+    <h6>Cấu hình</h6><a data-s="danh-muc">Danh mục &amp; mặt hàng</a><a>Mẫu in &amp; đánh số</a><a>Quy trình duyệt</a>
+    <h6>Hệ thống</h6><a data-s="he-thong">Hệ thống &amp; nhật ký</a><a>Kết nối BizCity (4 bước)</a><a>Tình trạng nền tảng</a>
+  </nav>
+</template>
+
+<!-- F7 — Người dùng -->
+<section class="frame" id="f7">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Người dùng</b></div>
+      <div class="set"><div data-slot="snav" data-s="users"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Người dùng</h1><span class="sp"></span><button class="btn">⬇ Xuất</button><button class="btn pri">＋ Mời người dùng</button></div>
+          <div class="banner" style="background:var(--primary-soft);color:var(--foreground);border-color:#c5dcfa">ⓘ Tài khoản là tài khoản BizCity (đăng nhập một lần, <code>sub = wp:&lt;id&gt;</code>) — app không tạo mật khẩu riêng. Mời bằng email / SĐT; người được mời đăng nhập BizCity là vào được.</div>
+          <div class="card">
+            <div class="filters"><div class="chip on">Trạng thái: Đang hoạt động ✕</div><div class="chip">Cửa hàng ▾</div><div class="chip">Vai ▾</div><div class="chip add">＋ Thêm lọc</div><div class="views"><div class="chip">★ Bộ lọc đã lưu ▾</div></div></div>
+            <table><thead><tr><th>Người dùng</th><th>Tài khoản BizCity</th><th>Vai</th><th>Phạm vi (cửa hàng · kho)</th><th>Đăng nhập gần nhất</th><th>Trạng thái</th></tr></thead><tbody>
+              <tr><td><b>Lan Nguyễn</b><br><small style="color:var(--muted-foreground)">lan@hoamai.vn</small></td><td class="mono">wp:1042</td><td><span class="tag a">Chủ chuỗi</span></td><td>Tất cả cửa hàng (3)</td><td>28/11 18:40</td><td><span class="st approved">Hoạt động</span></td></tr>
+              <tr><td><b>Hùng Trần</b><br><small style="color:var(--muted-foreground)">0912•••221</small></td><td class="mono">wp:1077</td><td><span class="tag">Quản lý cửa hàng</span></td><td>Quận 3</td><td>28/11 17:02</td><td><span class="st approved">Hoạt động</span></td></tr>
+              <tr><td><b>Mai Phạm</b><br><small style="color:var(--muted-foreground)">mai.ketoan@hoamai.vn</small></td><td class="mono">wp:1101</td><td><span class="tag">Kế toán chuỗi</span></td><td>Tất cả cửa hàng (đọc) · sổ HM-01</td><td>27/11 21:15</td><td><span class="st approved">Hoạt động</span></td></tr>
+              <tr><td><b>Tuấn Lê</b><br><small style="color:var(--muted-foreground)">0903•••778</small></td><td class="mono">—</td><td><span class="tag">Thu ngân</span></td><td>Quận 1 · Quầy 2</td><td>—</td><td><span class="st pending">Đã mời — chờ nhận</span></td></tr>
+              <tr><td><b>Hoa Võ</b><br><small style="color:var(--muted-foreground)">hoa@hoamai.vn</small></td><td class="mono">wp:1012</td><td><span class="tag">Nhân viên bán</span></td><td>Quận 1</td><td>12/10 09:11</td><td><span class="st cancelled">Đã khoá</span></td></tr>
+            </tbody></table>
+            <div class="foot">Khoá người dùng giữ nguyên nhật ký và chứng từ họ đã lập; không xoá. Tuỳ chọn cá nhân (bộ lọc, cột) ở <code>user_meta</code>.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F8 — Vai & quyền -->
+<section class="frame" id="f8">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Vai &amp; quyền</b></div>
+      <div class="set"><div data-slot="snav" data-s="roles"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Vai: Quản lý cửa hàng</h1><span class="tag">vai riêng · dựa trên vai hệ thống "Nhân viên"</span><span class="sp"></span><button class="btn">Sao chép vai</button><button class="btn pri">Lưu thay đổi</button></div>
+          <div class="cols2">
+            <div class="card sect"><h3>Phạm vi dữ liệu</h3><div class="kvl"><span>Cửa hàng (tenant)</span><b>Theo người được gán — mỗi lần gán chọn cửa hàng</b><span>Kho</span><b>Kho của cửa hàng được gán</b><span>Mục đích</span><b>Vận hành · Duyệt · Báo cáo</b><span>Xuất dữ liệu</span><b>Có — ghi nhật ký mỗi lần xuất</b></div></div>
+            <div class="card sect"><h3>Người đang giữ vai</h3><div class="kvl"><span>Hùng Trần</span><b>Quận 3</b><span>Bình Đỗ</span><b>Quận 1</b></div><div class="foot" style="padding:10px 0 0">Đổi vai có hiệu lực ngay — quyền tính lại ở lần gọi kế (authz_version).</div></div>
+          </div>
+          <div class="card mx"><table><thead><tr><th>Màn (module)</th><th class="mc">Xem</th><th class="mc">Thêm / Sửa</th><th class="mc">Duyệt</th><th class="mc">Huỷ / Xoá</th><th class="mc">Xuất</th><th>Nút riêng</th></tr></thead><tbody>
+            <tr><td class="g" colspan="7">BÁN HÀNG</td></tr>
+            <tr><td>Đơn bán hàng</td><td class="mc my">✔</td><td class="mc my">✔</td><td class="mc my">✔ <small>≤ 20 tr ₫</small></td><td class="mc my">✔</td><td class="mc my">✔</td><td>In lại · Trả hàng</td></tr>
+            <tr><td>Khách hàng</td><td class="mc my">✔</td><td class="mc my">✔</td><td class="mc mn">—</td><td class="mc mn">✕</td><td class="mc mn">✕ <small>SĐT bị che</small></td><td>Gộp khách (cần bằng chứng)</td></tr>
+            <tr><td class="g" colspan="7">KHO</td></tr>
+            <tr><td>Nhập kho / Xuất kho</td><td class="mc my">✔</td><td class="mc my">✔</td><td class="mc mn">✕</td><td class="mc mn">✕</td><td class="mc my">✔</td><td>—</td></tr>
+            <tr><td class="g" colspan="7">HỆ THỐNG</td></tr>
+            <tr><td>Người dùng · Vai &amp; quyền · Cài đặt chung</td><td class="mc my">✔</td><td class="mc mn">✕</td><td class="mc mn">—</td><td class="mc mn">✕</td><td class="mc mn">✕</td><td>—</td></tr>
+          </tbody></table>
+          <div class="foot">Mỗi ô = một quyền <code>&lt;module&gt;:&lt;chức-năng&gt;-&lt;động-từ&gt;</code> do module khai (màn × thao tác); máy chủ vẫn là cửa — giao diện chỉ ẩn / khoá. Ngưỡng duyệt nhiều cấp lấy từ quy trình duyệt (workflow YAML).</div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F9 — Cài đặt chung -->
+<section class="frame" id="f9">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Cài đặt chung</b></div>
+      <div class="set"><div data-slot="snav" data-s="chung"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Cài đặt chung</h1><span class="sp"></span><span style="color:var(--muted-foreground);font-size:14px">Đang xem ở bậc</span><div class="scope"><span>Bản cài</span><span class="on">Chuỗi (site)</span><span>Cửa hàng</span><span>Chi nhánh</span><span>Cá nhân</span></div></div>
+          <div class="card">
+            <div class="srow"><div><b>Tiền tệ</b><small><code>bizcity.core.currency</code> · lớp A · chỉ bậc bản cài</small></div><div class="in">VND — Việt Nam đồng</div><span class="tag">kế thừa từ bản cài</span></div>
+            <div class="srow"><div><b>Múi giờ</b><small><code>bizcity.core.timezone</code></small></div><div class="in">Asia/Ho_Chi_Minh (GMT+7)</div><span class="tag a">đặt ở chuỗi</span></div>
+            <div class="srow"><div><b>Định dạng số &amp; ngày</b><small><code>bizcity.core.locale</code></small></div><div class="in">1.250.000 ₫ · 28/11/2026</div><span class="tag a">đặt ở chuỗi</span></div>
+            <div class="srow"><div><b>Năm tài chính bắt đầu</b><small><code>bizcity.ketoan.fiscal_year_start</code> · lớp B · có căn cứ pháp lý</small></div><div class="in">01/01</div><span class="tag a">đặt ở chuỗi</span></div>
+            <div class="srow"><div><b>Kho mặc định khi bán</b><small><code>bizcity.pos.default_warehouse</code> · từng cửa hàng ghi đè</small></div><div class="in">— chọn ở bậc Cửa hàng —</div><span class="tag">3 cửa hàng ghi đè</span></div>
+            <div class="srow"><div><b>Giữ tệp đính kèm chat (ngày)</b><small><code>bizcity.cake.storage.chat_retention_days</code></small></div><div class="in">Không giới hạn (R2)</div><span class="tag">mặc định</span></div>
+            <div class="foot">Cài đặt sinh từ registry (<code>bizcity_settings@1</code>): mỗi khoá có mô tả, kiểu, lớp A / B / C, bậc được phép. Đổi giá trị = ghi dòng mới có hiệu lực từ ngày, giữ lịch sử.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F10 — Danh mục & mặt hàng -->
+<section class="frame" id="f10">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › Cấu hình › <b>Danh mục &amp; mặt hàng</b></div>
+      <div class="set"><div data-slot="snav" data-s="danh-muc"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Danh mục &amp; mặt hàng</h1><span class="sp"></span><button class="btn">Kiểm khớp với Kế toán</button></div>
+          <div class="card mx"><table><thead><tr><th>Danh mục</th><th>Chủ (nơi được sửa)</th><th>Cửa hàng ghi đè</th><th>Đồng bộ</th><th>Lần đối chiếu</th></tr></thead><tbody>
+            <tr><td><b>Mặt hàng · ĐVT · nhóm</b></td><td><span class="tag a">Chuỗi — cửa hàng chủ: Quận 1</span></td><td>Giá bán, Đang bán / Ngừng</td><td>changefeed mỗi 5 phút</td><td><span class="tag ok">khớp 28/11 18:30</span></td></tr>
+            <tr><td><b>Bảng giá</b></td><td><span class="tag">Từng cửa hàng</span></td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td><b>Đối tượng / khách</b></td><td><span class="tag a">Kế toán (sổ HM-01)</span></td><td>—</td><td>mã theo SĐT đã xác minh</td><td><span class="tag ok">khớp</span></td></tr>
+            <tr><td><b>Thuế suất</b></td><td><span class="tag a">Kế toán</span></td><td>—</td><td>KCT · 0 · 5 · 8 · 10 · KKKN</td><td><span class="tag ok">khớp</span></td></tr>
+            <tr><td><b>Chi nhánh / kho</b></td><td><span class="tag a">Kế toán (trong pháp nhân)</span></td><td>Kho mặc định</td><td>Quận 1 → CN01 · Quận 3 → CN02 · Thủ Đức → CN03</td><td><span class="tag c">1 lệch — xem</span></td></tr>
+          </tbody></table></div>
+          <div class="cols2">
+            <div class="card sect"><h3>Quy tắc mặt hàng</h3><div class="kvl"><span>Mã SKU</span><b>Chữ hoa + số, ≤ 64 ký tự</b><span>Tên</span><b>≤ 50 ký tự</b><span>Đơn vị nhỏ nhất</span><b>Bắt buộc — số lượng lưu theo đơn vị này</b><span>ĐVT / mặt hàng</span><b>≤ 10, tên trong 40 ĐVT chuẩn</b><span>Biến thể</span><b>Cha + thuộc tính (màu, cỡ) — mỗi biến thể một mã</b><span>Theo dõi</span><b>Lô · Hạn dùng · Số seri (bật theo mặt hàng)</b><span>Giá</span><b>Gồm thuế, 2 chữ số lẻ</b></div></div>
+            <div class="card sect"><h3>Nhóm hàng</h3><div class="tree"><div style="--d:0"><b>Thời trang</b><small>214</small></div><div style="--d:1">Áo<small>120</small></div><div style="--d:2">Áo thun<small>64</small></div><div style="--d:1">Quần<small>71</small></div><div style="--d:0"><b>Phụ kiện</b><small>38</small></div><div style="--d:1">Túi · Mũ · Khăn<small>38</small></div></div></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F11 — Hệ thống & nhật ký -->
+<section class="frame" id="f11">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Hệ thống &amp; nhật ký</b></div>
+      <div class="set"><div data-slot="snav" data-s="he-thong"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Hệ thống &amp; nhật ký</h1></div>
+          <div class="grid3"><div class="card stat"><b>0.4.0</b><span>open-core · app 0.9.2</span></div><div class="card stat"><b>187</b><span>migration — lõi 4 · app 183 · đã áp hết</span></div><div class="card stat"><b>2</b><span>việc nền lỗi cần xem</span></div><div class="card stat"><b>02:00</b><span>sao lưu gần nhất · hôm nay</span></div></div>
+          <div class="cols2">
+            <div class="card"><div class="sect" style="padding-bottom:4px"><h3>Việc nền</h3></div><table><thead><tr><th>Việc</th><th>Trạng thái</th><th>Lần cuối</th></tr></thead><tbody>
+              <tr><td>Xuất Đơn bán hàng (NDJSON, 18.402 dòng)</td><td><span class="st approved">Xong — tải tệp</span></td><td>18:42</td></tr>
+              <tr><td>Đối chiếu danh mục với Kế toán</td><td><span class="st approved">Xong</span></td><td>18:30</td></tr>
+              <tr><td>Gửi chứng từ sang Kế toán (DB-2026-0139@1)</td><td><span class="st cancelled">Lỗi · thử lại 3 / 8</span></td><td>18:25</td></tr>
+              <tr><td>Nhắc việc đến hạn</td><td><span class="st draft">Định kỳ mỗi giờ</span></td><td>18:00</td></tr></tbody></table></div>
+            <div class="card"><div class="sect" style="padding-bottom:4px"><h3>Nhật ký thao tác (chuỗi băm)</h3></div><table><thead><tr><th>Lúc</th><th>Ai</th><th>Thao tác</th></tr></thead><tbody>
+              <tr><td>18:42</td><td>Lan</td><td>Xuất Đơn bán hàng · bộ lọc #a91f…</td></tr>
+              <tr><td>18:40</td><td>Lan</td><td>Đổi vai Hùng → Quản lý cửa hàng</td></tr>
+              <tr><td>18:21</td><td>Agent (MCP)</td><td>Tạo nháp đơn từ tin Zalo — chờ duyệt</td></tr>
+              <tr><td>17:58</td><td>Mai</td><td>Duyệt DB-2026-0139</td></tr></tbody></table>
+              <div class="foot">Chuỗi băm: nguyên vẹn ✔ · <a>Xuất bằng chứng</a> · <a>Mở bàn điều tra</a></div></div>
+          </div>
+          <div class="card sect"><h3>Bí mật &amp; kết nối</h3><div class="kvl"><span>Khoá BizCity</span><b>biz-1a2b…9z8y · đặt 20/11 bởi Lan · lưu mã hoá</b><span>Hoá đơn điện tử</span><b>Đã đặt 3 bí mật · không hiện giá trị</b><span>Khoá gốc bí mật</span><b>Có · dấu vân 4c1e…</b></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F12 — Tên miền & Workspace -->
+<section class="frame" id="f12">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav" data-on="cai-dat"></div>
+    <main class="main">
+      <div class="crumb">Cài đặt hệ thống › <b>Tên miền &amp; Workspace</b></div>
+      <div class="set"><div data-slot="snav" data-s="workspace"></div>
+        <div style="display:grid;gap:14px;align-content:start">
+          <div class="head"><h1>Tên miền &amp; Workspace</h1><span class="sp"></span><span class="tag">trạng thái gốc ở BizCity — ở đây chỉ hiện lại</span></div>
+          <div class="cols2">
+            <div class="card sect"><h3>Workspace</h3><div class="kvl"><span>Doanh nghiệp</span><b>Chuỗi Hoa Mai</b><span>Slug</span><b class="mono">hoa-mai</b><span>Gói</span><b>Doanh nghiệp · hết hạn 31/12/2026</b><span>Khoá BizCity</span><b>một khoá cho cả chuỗi</b><span>App đang bật</span><b>Open Cake · Kế toán · POS</b></div></div>
+            <div class="card sect"><h3>Tên miền</h3><div class="kvl"><span>Open Cake</span><b class="mono">hoa-mai.opencake.net</b><span>Kế toán</span><b class="mono">hoa-mai.openketoan.com</b><span>Tên miền riêng</span><b class="mono">crm.hoamai.vn <span class="tag ok">đã xác minh DNS</span></b><span>Khoá dùng được ở</span><b>3 / 3 tên miền (Hub cấp)</b></div></div>
+          </div>
+          <div class="card mx"><table><thead><tr><th>Cửa hàng (tenant — đơn vị nhỏ nhất)</th><th>Blog BizCity</th><th>Mã</th><th>Sổ kế toán · chi nhánh</th><th>Kho mặc định</th><th>Trạng thái</th></tr></thead><tbody>
+            <tr><td><b>Cửa hàng Quận 1</b> <span class="tag a">chủ danh mục</span></td><td class="mono">wp-blog:212</td><td class="mono">hoa-mai-q1</td><td>HM-01 · CN01</td><td>KHO-Q1</td><td><span class="st approved">Hoạt động</span></td></tr>
+            <tr><td><b>Cửa hàng Quận 3</b></td><td class="mono">wp-blog:215</td><td class="mono">hoa-mai-q3</td><td>HM-01 · CN02</td><td>KHO-Q3</td><td><span class="st approved">Hoạt động</span></td></tr>
+            <tr><td><b>Cửa hàng Thủ Đức</b></td><td class="mono">wp-blog:230</td><td class="mono">hoa-mai-td</td><td>HM-01 · CN03</td><td>KHO-TD</td><td><span class="st pending">Đang dựng</span></td></tr>
+          </tbody></table>
+          <div class="foot">Mỗi cửa hàng = một blog = một tenant (cô lập dữ liệu, đánh số, sổ riêng); cả chuỗi chung một pháp nhân ⇒ một sổ kế toán HM-01, cửa hàng là chi nhánh trong sổ. Thêm cửa hàng: tạo blog ở BizCity ⇒ open-setup dựng tenant.</div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
+<!-- F13 — Tìm kiếm chứng từ (⌘K) -->
+<section class="frame" id="f13">
+  <div data-slot="top"></div>
+  <div class="body"><div data-slot="nav"></div>
+    <main class="main"><div class="crumb">Bán hàng › <b>Đơn bán hàng</b></div><div class="head"><h1>Đơn bán hàng</h1></div><div class="card" style="height:700px;opacity:.5"></div></main>
+  </div>
+  <div class="scrim" style="inset:56px 0 0 0"></div>
+  <div class="palette">
+    <div class="q">🔍 <b>0142</b><span style="color:var(--subtle-foreground)">&nbsp;— số chứng từ, doc_ref, khách, mặt hàng…</span><span class="kbd" style="margin-left:auto">Esc</span></div>
+    <h6>Chứng từ (mọi loại, mọi module — core.document.list)</h6>
+    <div class="res"><span class="st pending" style="width:34px;justify-content:center">●</span><div><b>DB-2026-0142</b> · Đơn bán hàng · Chị Thu · 1.250.000 ₫<div class="t">Cửa hàng Quận 1 · 28/11/2026 · Chờ duyệt · ban-hang.don:DB-2026-0142@2</div></div><span class="kbd">↵ mở</span></div>
+    <div class="res"><span class="st approved" style="width:34px;justify-content:center">●</span><div><b>XK-2026-0142</b> · Phiếu xuất kho · nguồn DB-2026-0142<div class="t">Kho KHO-Q1 · 28/11/2026 · Đã duyệt</div></div><span></span></div>
+    <div class="res"><span class="st draft" style="width:34px;justify-content:center">●</span><div><b>HĐ 0000142</b> · Hoá đơn bán (Kế toán) · nối từ DB-2026-0142<div class="t">app Kế toán · sổ HM-01 · CN01 — mở ở app Kế toán</div></div><span class="tag">app khác</span></div>
+    <h6>Lọc nâng cao</h6>
+    <div class="filters" style="padding:6px 16px 14px"><div class="chip on">Loại: mọi loại ✕</div><div class="chip">Trạng thái ▾</div><div class="chip">Ngày ▾</div><div class="chip">Cửa hàng: Quận 1 ✕</div><div class="chip">Đối tượng ▾</div><div class="chip">Số tiền ▾</div></div>
+  </div>
+  <span class="demo">Dữ liệu minh hoạ</span>
+</section>
+
 <script id="sb" type="application/json">{"$comment":"[2026-11-28 06:58 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 — scoreboard mã ↔ tài liệu (ERP-12 của NC-005, chi tiết 20 mục). Mức 0 chưa có · 1 mới tài liệu · 2 có một phần · 3 có mã + test ở app đó · 4 ở open-core, có test, app đang dùng. Đo lần đầu bằng rà soát chỉ đọc (open-core main 9be302f + nhánh 0.4.0, open-cake 7436d28, open-ketoan dev 0237a4d). Sửa tay khi có bằng chứng mới rồi chạy node tools/scoreboard.mjs.","version":"0.4.0 (chờ phát hành)","measuredAt":"2026-11-28","apps":["open-core","open-cake","open-ketoan"],"primitives":[{"id":"P1","erp":"E-1","name":"Người dùng · danh tính (sub = wp:<id>, SSO, external_sub)","levels":{"open-core":2,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"packages/platform/src/core/auth.ts, security/tokens.ts, db/migrations/0003_platform_external_sub.sql — open-cake đang dùng; chưa test SSO ở lõi","open-cake":"apps/api/src/auth/routes.ts (/api/v1/auth/wp-sso), test/auth.http.test.ts — chưa dùng external_sub","open-ketoan":"apps/api/src/modules/auth/wp-sso.ts, 0183_nguoi_dung_external_sub.sql, test/wp-sso-sub-aud.test.ts"},"gap":"test SSO ở lõi; open-cake ghép theo external_sub"},{"id":"P2","erp":"E-2","name":"Vai · quyền · phạm vi · màn × thao tác","levels":{"open-core":3,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"core/authz/*, roles.ts, 0002_platform_vai_theo_app.sql, test/roles.test.mjs, open-cake dùng (vai: mức 4) — màn × thao tác chưa có ở lõi (mức 1, S003-3 ⛔)","open-cake":"apps/api/src/auth/authz.ts, staff.ts, care/scope.ts, test/scope.http.test.ts","open-ketoan":"modules/access/man-hinh.ts, man-hinh-module.ts, test/phan-quyen-man-hinh.test.ts"},"gap":"màn × thao tác lên lõi (S003-3, chờ NT-HT-003)"},{"id":"P3","erp":"E-3","name":"Cài đặt + thang phạm vi","levels":{"open-core":2,"open-cake":1,"open-ketoan":3},"evidence":{"open-core":"core/settings.ts, setting_values ở 0001 — chưa test, thang còn cứng accounting_unit","open-cake":"db/migrations/0103_flex.sql (chỉ ghi chú dùng setting_values)","open-ketoan":"0074_gia_tri_cau_hinh.sql, test/cau-hinh-gia-tri.test.ts"},"gap":"registerSettingScopes (Q-PIL-6), test ở lõi"},{"id":"P4","erp":"E-3","name":"user_meta + lớp mềm (entity_meta, record_types, records)","levels":{"open-core":1,"open-cake":3,"open-ketoan":2},"evidence":{"open-core":"chỉ nhắc ở core/authz-manifest.ts; S003-2 ☐","open-cake":"0103_flex.sql, apps/api/src/records.ts, test/records.http.test.ts","open-ketoan":"entity_attributes theo ngày (0087, 0168), chưa có lớp mềm"},"gap":"dời lên lõi (S003-2)"},{"id":"P5","erp":"E-4","name":"Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML","levels":{"open-core":2,"open-cake":0,"open-ketoan":3},"evidence":{"open-core":"core/documents.ts, workflow.ts, bảng ở 0001 (kiem-luoc-do khớp open-ketoan) — chưa test ở lõi, open-cake chưa dùng","open-cake":"—","open-ketoan":"test/documents-common.test.ts, workflow.test.ts, dinh-kem-chung-tu.test.ts"},"gap":"test ở lõi; open-cake dùng chứng từ chung thay order_requests riêng"},{"id":"P6","erp":"E-5","name":"Danh sách · lọc · con trỏ · xuất (bizcity_list@1)","levels":{"open-core":1,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"chuẩn bizcity_list@1 0.2 (bizcity-platform #39), S003-4 ☐","open-cake":"con trỏ ở care/inbox.ts, screens/Contacts.tsx — chưa xuất","open-ketoan":"apps/web/src/components/DataGrid.tsx (xuất xlsx), test/excel-export-all.test.ts — khuôn riêng, chưa theo bizcity_list@1"},"gap":"defineListAction + ListScreen + xuất chung (S003-4, S003-6)"},{"id":"P7","erp":"E-5","name":"Nhập chung (ghép cột + chạy thử)","levels":{"open-core":0,"open-cake":0,"open-ketoan":3},"evidence":{"open-core":"","open-cake":"","open-ketoan":"modules/catalog/catalog-import.ts (dryRun), NhapExcelWizard.tsx, test/catalog-import.test.ts — riêng danh mục"},"gap":"nhập chung ở lõi (S003-10)"},{"id":"P8","erp":"E-6","name":"Hoạt động (chatter) trên doc_ref","levels":{"open-core":1,"open-cake":0,"open-ketoan":1},"evidence":{"open-core":"NC-005 §2.1, bizcity_ux@1 — chưa mã","open-cake":"","open-ketoan":"chỉ notifications + document_attachments, chưa ghi chú / việc"},"gap":"bảng activities + khối Hoạt động (S003-9)"},{"id":"P9","erp":"E-7","name":"Tệp / Storage (đường dẫn ký)","levels":{"open-core":2,"open-cake":3,"open-ketoan":2},"evidence":{"open-core":"documents.ts lưu đĩa DATA_DIR — chưa đường dẫn ký","open-cake":"apps/api/src/storage/{local,s3,routes,sniff}.ts, 0109_files.sql, test/storage.test.ts, files.http.test.ts","open-ketoan":"đính kèm có test, chưa lớp storage / đường dẫn ký"},"gap":"Storage của open-cake lên lõi (C5)"},{"id":"P10","erp":"E-8","name":"Việc nền + định kỳ","levels":{"open-core":2,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"core/events.ts (tickClock, thử lại, dead) — chưa API việc / lịch, chưa test","open-cake":"3 vòng setInterval ở apps/api/src/server.ts:87-91 (trái luật 'chỉ một đồng hồ')","open-ketoan":"test/events.test.ts, modules/system/loi-he-thong.ts"},"gap":"registerJob / registerSchedule (S003-11); open-cake bỏ setInterval"},{"id":"P11","erp":"E-9","name":"Đệm (Redis tuỳ chọn)","levels":{"open-core":1,"open-cake":2,"open-ketoan":2},"evidence":{"open-core":"BIZCITY-CACHE-v1; chỉ đệm lẻ (module-registry 30 s, authz)","open-cake":"đệm lẻ ở orders/link.ts, partner.ts","open-ketoan":"đệm lẻ, test/site-cache.test.ts"},"gap":"module đệm chung (C5)"},{"id":"P12","erp":"E-10","name":"Bí mật (platform.secrets)","levels":{"open-core":2,"open-cake":0,"open-ketoan":3},"evidence":{"open-core":"core/secrets.ts, 0004_platform_secrets.sql — chưa test ở lõi","open-cake":"","open-ketoan":"0184_tenant_secrets.sql, test/secrets.test.ts"},"gap":"test ở lõi; khoá Hub lưu bằng secrets"},{"id":"P13","erp":"E-11","name":"Sự kiện / outbox / gửi xuyên app / changefeed","levels":{"open-core":2,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"core/events.ts (outbox, SKIP LOCKED) — chưa test, chưa registerSyncFeed","open-cake":"outbox riêng channel_commands (0106), chưa /api/v1/sync","open-ketoan":"modules/sync/sync.routes.ts, test/spine-changefeed.test.ts"},"gap":"changefeed + gửi / nhận chứng từ chung (S002-3, S002-4)"},{"id":"P14","erp":"E-11","name":"Bằng chứng · audit chuỗi băm · trace","levels":{"open-core":4,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"chuỗi băm ở 0001, test/nen-tang.test.mjs; core/tracing.ts, audit.ts — open-cake dùng tracing","open-cake":"apps/api/src/runtime.ts ghi audit_logs, test/evidence.http.test.ts","open-ketoan":"test/evidence.test.ts, evidence-seal.test.ts, truy-vet.test.ts"},"gap":"core.trace.lookup xuyên app (S002-5)"},{"id":"P15","erp":"E-12","name":"Menu · màn · khung app (web-shell)","levels":{"open-core":1,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"mockup docs/ui/mockup-src/web-shell.html (chờ duyệt); S003-3 ⛔, S003-6 ☐","open-cake":"apps/web/src/app/Shell.tsx, route.ts, permissions.tsx","open-ketoan":"apps/web/src/layout/menu.ts, SideNav.tsx, API man-hinh có test — khuôn riêng"},"gap":"@bizcity/web-shell + registerMenu"},{"id":"P16","erp":"E-12","name":"Hook danh sách đóng + registry module, bật theo tenant","levels":{"open-core":2,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"core/hooks.ts (1 hook), module-registry.ts — chưa test, open-cake chưa dùng","open-cake":"bizcity.app.json, bizcity.authz.json, test/authz-manifest.test.ts — chưa hook / bật module","open-ketoan":"test/module-lifecycle.test.ts, sdk-module-host.test.ts, packages/module-sdk"},"gap":"module-sdk lõi; hook chung mới (S003-5)"},{"id":"P17","erp":"—","name":"Nhiều site: registry, /_sites/v1, migration theo nguồn","levels":{"open-core":3,"open-cake":2,"open-ketoan":3},"evidence":{"open-core":"db/migrate.ts (source, coveredBy), test/migrate.test.mjs 8 ca, open-cake dùng (migration: mức 4) — route /_sites/v1 còn ở app (mức 2)","open-cake":"dùng migrate / site của lõi, chưa cấp site","open-ketoan":"modules/sites/provisioning.routes.ts, test/site-provisioner.test.ts, site-migrate.test.ts"},"gap":"/_sites/v1 khung vào @bizcity/server (NC-003 C7)"},{"id":"P18","erp":"—","name":"API: defineAction → REST + MCP, Idempotency-Key, danh mục lỗi","levels":{"open-core":2,"open-cake":3,"open-ketoan":3},"evidence":{"open-core":"core/actions.ts, errors.ts, http.ts — chưa test ở lõi; open-cake chỉ dùng errors / http","open-cake":"runtime.ts riêng (spec → REST, action_requests), packages/action-client test — chưa MCP","open-ketoan":"test/actions.test.ts, action-meta.test.ts, mcp.test.ts"},"gap":"test lõi; open-cake chuyển sang defineAction của lõi (C5)"},{"id":"P19","erp":"E-12","name":"Bốn bước kết nối open-hub (bizcity_hub_setup@1)","levels":{"open-core":1,"open-cake":2,"open-ketoan":1},"evidence":{"open-core":"chuẩn HUB-SETUP 0.1; chưa @bizcity/server, chưa /api/v1/setup/*","open-cake":"apps/web/src/screens/channel-setup/SetupSteps.tsx (4 bước Zalo) — chưa API chuẩn","open-ketoan":"chỉ thiết kế (CELL-CONNECT)"},"gap":"/api/v1/setup/* + SetupScreen"},{"id":"P20","erp":"E-12","name":"Hệ thiết kế giao diện: token, ui-kit, bốn trạng thái, i18n","levels":{"open-core":1,"open-cake":3,"open-ketoan":2},"evidence":{"open-core":"bizcity_ux@1 0.1 + mockup chờ duyệt; chưa gói ui-kit","open-cake":"packages/ui-kit/src/tokens.css, i18n/vi/*, test/i18n.test.ts, sc-cake-web.test.ts","open-ketoan":"packages/ui-kit/src/{grid,steps,doc-sheet}.tsx — chưa i18n"},"gap":"@bizcity/ui-kit + token một nguồn (S003-12)"}],"topGaps":["Mã chạy của lõi chưa có test ở open-core (actions, events, documents, workflow, settings, secrets, hooks) — chỉ được kiểm ở bản chép của open-ketoan ⇒ phát hành lõi có thể gãy âm thầm","open-cake chưa dùng runtime action / sự kiện / chứng từ của lõi (runtime.ts, outbox channel_commands, 3 setInterval riêng) ⇒ chuỗi cake → POS → kế toán chưa có đường chung","Chưa có khung changefeed ở lõi (registerSyncFeed) — /api/v1/sync chỉ ở open-ketoan","Danh sách chung (defineListAction, ListScreen, xuất CSV / XLSX / JSON) chưa có ở đâu theo bizcity_list@1","Chưa có web-shell / registry menu / màn ở lõi — khung và ui-kit của open-ketoan và open-cake đã tách nhau","Màn × thao tác chỉ có ở open-ketoan","Bốn bước kết nối open-hub chưa có API ở đâu","Lớp mềm (user_meta …) và Storage chỉ ở open-cake, chưa vào migration lõi","Nhập chung chỉ ở danh mục open-ketoan; chatter chưa có ở đâu","Hạ tầng chéo chưa đủ: đệm chung, API việc nền / lịch, thang phạm vi cài đặt cứng accounting_unit, /_sites/v1 còn ở app"]}</script>
 <script>
   const topHtml = document.getElementById('shell-top').innerHTML, navHtml = document.getElementById('shell-nav').innerHTML; // không đặt tên "top": trùng window.top
   document.querySelectorAll('[data-slot="top"]').forEach((e) => (e.outerHTML = topHtml));
+  const snavHtml = document.getElementById('settings-nav').innerHTML;
+  document.querySelectorAll('[data-slot="snav"]').forEach((e) => { e.outerHTML = snavHtml.replace(`data-s="${e.dataset.s}"`, 'class="on"'); });
   document.querySelectorAll('[data-slot="nav"]').forEach((e) => { const on = e.dataset.on; e.outerHTML = on ? navHtml.replace('class="on"', '').replace(`data-k="${on}"`, 'class="on"') : navHtml; });
   const sb = JSON.parse(document.getElementById('sb').textContent);
   const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
