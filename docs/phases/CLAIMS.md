@@ -21,6 +21,7 @@
 | T | PHASE-005 thiết kế + S005-F0…F3, F5-1 | `docs/phases/PHASE-005-*`; sau này `platform/src/entity/*`, `packages/{web-shell, ui-kit, action-client}` | #35 | thiết kế đã chốt; kế tiếp S005-F0 | 2026-11-29 |
 | R | S005-UC-1…2 Upgrade & Conformance + S005-BX-2 core-dev / doctor (đặc tả PHASE-005 · 90, · 95) <!-- [2026-11-29 01:00 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 — YC-P5-10…15 --> | `tools/*`, `packages/cli` | — | đề xuất, chờ lane R nhận | 2026-11-29 |
 | R | S005-ML-1…4 Module Lifecycle (theo đặc tả PHASE-005 · 50) | `packages/{server, module-sdk, cli, testing}` | — | đề xuất, chờ lane R nhận | 2026-11-29 |
+| R | S005-BX-3 R-CORE-10 "Lõi trước" + chuẩn `bizcity_core_first@1` / SC-STD-4 (bizcity-platform #45) + khối AGENTS / mẫu PR ở open-core, open-cake; bàn giao open-ketoan (R-FLOW) <!-- [2026-11-29 01:19 AM Johnny Chu - Chu Hoàng Anh] S005-BX-3 — chủ giao trực tiếp cho lane R --> | `AGENTS.md`, `.github/pull_request_template.md` | `docs/s005-bx3-loi-truoc` | mở PR | 2026-11-29 |
 
 ## Số đã giữ
 
@@ -34,4 +35,5 @@
 | ADR | 0003 | T | đồng bộ (feed, con trỏ, sổ nhận, đối soát) | giữ, chưa viết |
 | ADR | 0004 | T | chứng từ quản / phản chiếu | giữ, chưa viết |
 | R-CORE | 9 | R | danh mục: lõi giữ khung | PR #30 |
-| R-CORE | 10 | — | — | **trống** |
+| R-CORE | 10 | R | Lõi trước — bánh xe đóng góp (S005-BX-3, chủ giao lane R 2026-11-29) | PR `docs/s005-bx3-loi-truoc` |
+| R-CORE | 11 | — | — | **trống** |

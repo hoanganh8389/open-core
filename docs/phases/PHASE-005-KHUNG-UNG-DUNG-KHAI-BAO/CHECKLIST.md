@@ -47,7 +47,7 @@
 | **BX** | **Bánh xe đóng góp** ([95](95-BANH-XE-DONG-GOP.md)) | | | |
 | S005-BX-1 | `tools/ung-vien-loi.mjs` + bảng "Ứng viên lõi" + mục "Đóng góp lõi" trong scoreboard | T | — | ☐ |
 | S005-BX-2 | `bizcity dev link-core` (chế độ core-dev) + `bizcity doctor --tim` | R | S005-ML-3 | ☐ |
-| S005-BX-3 | đề xuất R-CORE-10 "Lõi trước" + luật SC-STD ở open-platform + bàn giao khối AGENTS / mẫu PR cho từng repo app | T | — | ☐ |
+| S005-BX-3 | đề xuất R-CORE-10 "Lõi trước" + luật SC-STD ở open-platform + bàn giao khối AGENTS / mẫu PR cho từng repo app | **R** (chủ giao 2026-11-29) | — | ◐ R-CORE-10 + `bizcity_core_first@1` / SC-STD-4 (platform #45) + open-core, open-cake; open-ketoan chờ R-FLOW |
 | **F5** | **Dùng thật** | | | |
 | S005-F5-1 | open-cake: một thực thể + một màn chuyển sang khai báo; đo Scoreboard DX trước / sau | T (bàn giao open-cake) | S003-7 | ☐ |
 | S005-F5-2 | open-ketoan: theo LANES §7 (sau B1) | R | S003-8 | ⛔ claim NT-HT-003 |

@@ -22,6 +22,7 @@
 - **R-CORE-7** <!-- [2026-11-28 06:44 PM Johnny Chu - Chu Hoàng Anh] R-CANON-19 — một chuẩn REST + JSON + React trên open-core --> open-core là **hạ tầng** của mọi app (canon R-CANON-19): REST từ `defineAction` / `defineListAction` ([`bizcity_list@1`](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/standard/BIZCITY-LIST-v1.md) — `q`, `f.<cột>.<phép>`, `sort`, con trỏ, xuất csv / xlsx / json / ndjson), JSON chuẩn (`ListPage`, `ListQuery`), React ở `@bizcity/web-shell` (`ListScreen`, `useListQuery`, menu, bốn bước). Hiện thực phải qua vector `schema/list/` của open-platform.
 - **R-CORE-8** <!-- [2026-11-28 09:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — R-CORE-8 (chủ 2026-11-28) --> **Core sở hữu hạ tầng chứng từ, app sở hữu loại chứng từ và nghiệp vụ.** Lõi quản lý `business_documents`, `document_versions`, `document_links`, `document_activities` và vòng đời chung; open-cake khai loại *Yêu cầu đặt hàng*, open-ketoan khai loại mua hàng, thanh toán… và **quy tắc ghi sổ**. Lõi **không** chứa logic ledger, costing, kho, công nợ, vai / vai ký kế toán: nghiệp vụ gọi qua **cổng** (`definePort` / `ctx.port`) hoặc **mở rộng khai báo** (kiểu bảng, thang cài đặt, vai ký, mã lỗi). Hai app trao đổi bằng định danh + sự kiện + chứng từ, không đọc CSDL của nhau. Chi tiết: [PHASE-004 · 30](docs/phases/PHASE-004-CORE-DOC-LAP/30-RANH-GIOI-CORE.md).
 - **R-CORE-9** <!-- [2026-11-29 12:26 AM Johnny Chu - Chu Hoàng Anh] ADR-0001 --> **Danh mục: lõi giữ khung, kế toán giữ dữ liệu** ([ADR-0001](docs/adr/ADR-0001-ranh-gioi-master-data.md)). Lõi có hợp đồng định danh (`item_id` ULID, mã có phiên bản, ĐVT nhỏ nhất, `EntityRef`), bất biến MD-1…MD-5 và cổng `masterdata`; **không** tạo bảng danh mục, không đọc `branches` / `warehouses` / `items` bằng SQL. open-ketoan là chủ (bảng, luật SKU, cây đơn vị, kho, phân kho); app khác giữ bản chiếu theo `item_id`, đề xuất = chứng từ `catalog.proposal`.
+- **R-CORE-10** <!-- [2026-11-29 01:19 AM Johnny Chu - Chu Hoàng Anh] S005-BX-3 — chủ 2026-11-29, PHASE-005 · 95, bizcity_core_first@1 --> **Lõi trước — bánh xe đóng góp.** Tối ưu app (open-ketoan, open-cake, open-kiot…) đồng thời hoàn thiện lõi: thứ phổ thông tra lõi trước khi viết; chưa có ⇒ đường A (vào lõi) / B (`core-candidate`) / C (nghiệp vụ) ghi ở ô "Lõi hay app?" của PR; lõi rút ứng viên lên (test, release, ghi app nguồn) và app xoá bản trùng. Ở chính repo này: PR rút có nhãn `rut-len-loi`, duyệt ≤ 1 ngày làm việc; CHANGELOG ghi mục "Đến từ app". Khối chung ở cuối tệp.
 - **R-CORE-6** bước ④ Guru = **lớp phân quyền ở giữa**: app khai chiều phạm vi (`registerAgentScope`: twin-brain `vault`, open-ketoan `module[]` + vai / chi nhánh / kho, open-cake tài khoản kênh, POS cửa hàng); lõi lưu phạm vi đã chọn và MCP chỉ mở tool trong phạm vi đó, giao với quyền vai của người dùng.
 - Thang phạm vi cài đặt: `install → site → tenant → branch → user` + bậc app khai (`registerSettingScopes`); `doc_ref` theo spine 1.2; nhân viên tạm ở `user_meta` (trục `employee` ghi nợ).
 
@@ -47,3 +48,26 @@ pnpm test                                                     # kiem-khung + tes
 node ../bizcity-platform/tools/standard-check.mjs --repo .    # bộ kiểm của open-platform
 pnpm run ma-tran -- --ketoan ../open-ketoan --cake ../open-cake   # ma trận app (S001-1): đổi mã lõi ⇒ báo lỗi MỚI ở open-ketoan / open-cake (R-PLAT-4)
 ```
+
+<!-- bizcity:loi-truoc@1 — khối chung do bizcity-platform phát (bizcity_core_first@1). Sửa ở bizcity-platform/templates/loi-truoc/AGENTS-khoi.md rồi chép lại nguyên khối; SC-STD-4 kiểm dấu này. -->
+## Lõi trước — bánh xe đóng góp (R-CORE-10)
+
+Làm app thì lõi lớn lên: tối ưu open-ketoan, open-cake, open-kiot… là đồng thời hoàn thiện **open-core**; app làm sau hưởng toàn bộ thành quả.
+
+```text
+① App phát triển (nghiệp vụ mới) ─► ② Phát hiện năng lực chung ─► ③ Rút lên lõi (test · release) ─► ④ App dùng lại, xoá bản trùng ─┐
+        ▲                                                                                                                      │
+        └──────────────────────────────── app sau viết ít hơn ◄────────────────────────────────────────────────────────────────┘
+```
+
+1. **Trước khi viết thứ phổ thông** (danh sách, form, nhập / xuất, cài đặt, meta, quyền, chứng từ, sự kiện, đồng bộ, thông báo, báo cáo, CLI…): tra lõi — `bizcity doctor --tim <từ khoá>` (khi chưa có lệnh: đọc `open-core/packages/*/src` + `open-core/CHANGELOG.md`). Lõi có ⇒ **dùng**, không viết lại.
+2. **Lõi chưa có ⇒ chọn đúng một đường**, ghi vào ô **"Lõi hay app?"** của mẫu PR:
+   - **A — vào lõi:** ≥ 2 app cần, hoặc là hạ tầng chung ⇒ mở PR ở open-core trước (nhãn `rut-len-loi`); app dùng chế độ `core-dev` (`bizcity dev link-core`) trong lúc chờ bản phát hành.
+   - **B — ứng viên lõi:** mới một app cần nhưng rõ là phổ thông ⇒ viết trong `src/core-candidate/`, đầu tệp `@bizcity-core-candidate <mô tả>`, không chuỗi nghiệp vụ cứng — để rút lên được nguyên tệp.
+   - **C — nghiệp vụ:** chỉ app này có nghĩa ⇒ viết ở app như thường.
+3. **Phát hiện tự động:** `open-core/tools/ung-vien-loi.mjs` dò ứng viên đã đánh dấu + mã trùng giữa các app ⇒ bảng "Ứng viên lõi" trong scoreboard của open-core.
+4. **Rút lên lõi** có test chạy thật, CHANGELOG lõi ghi app nguồn ⇒ **app xoá bản riêng** khi lên bản lõi kế tiếp (codemod `open-core/tools/doi-nguon/` nếu đổi đường import).
+
+App PHP / WordPress (open-kiot, plugin bizcity-*): "lõi" = hợp đồng + vector chung ở bizcity-platform và PHP SDK chung; cùng bốn bước.
+Giữ chỗ việc ở lõi: `open-core/docs/phases/CLAIMS.md` · chia lane: `open-core/docs/phases/LANES.md` · chuẩn: [`bizcity_core_first@1`](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/standard/BIZCITY-CORE-FIRST-v1.md).
+<!-- /bizcity:loi-truoc -->
