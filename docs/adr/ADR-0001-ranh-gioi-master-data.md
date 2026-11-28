@@ -93,13 +93,14 @@ Ví dụ: open-cake chạy độc lập, chưa nối kế toán.
 Lõi khai báo bằng `definePort`, chủ dữ liệu cấp bằng `providePort`, cùng tiến trình. Ngoài tiến trình thì dùng API và changefeed của chủ (R-CAT-3).
 
 ```ts
+// <!-- [2026-11-29 12:55 AM Johnny Chu - Chu Hoàng Anh] S004-W2-9 — đã hiện thực: packages/platform/src/core/masterdata-port.ts; chỉ khai hàm đã có người gọi (R-PLAT-3) -->
 export const MASTERDATA = definePort<{
-  resolveItem(ref: ItemRef, at?: string): Promise<ResolvedItem | ResolveFailure>;
-  resolveEntity(ref: EntityRef, at?: string): Promise<EntityResolveResult>;
-  orgSubtree(nodeIds: string[]): Promise<string[]>;            // phạm vi vai org_unit → mọi chi nhánh con
-  warehouseBranch(warehouseIds: string[]): Promise<Record<string, string>>;
+  // phạm vi vai: chi nhánh → mã; kho → chi nhánh; nút tổ chức → đường dẫn + mọi chi nhánh cây con. Id không có ở chủ ⇒ không có khoá.
+  orgScopes(ids: { branch: string[]; warehouse: string[]; orgUnit: string[] }): Promise<OrgScopeInfo>;
+  // thêm khi có chỗ gọi: resolveItem(ref: ItemRef, at?) · resolveEntity(ref: EntityRef, at?)
 }>('masterdata');
 ```
+- **Chưa có nhà cấp ⇒ đóng:** lần gán theo chi nhánh / kho / nút **không cấp phạm vi nào** (không `CAPABILITY_MISSING` giữa đường xác thực — một yêu cầu không được hỏng vì app chưa lắp cổng, nhưng cũng không được rộng quyền hơn).
 
 - `MASTERDATA` là **tra danh mục của chủ trong cùng tiến trình**; ánh xạ ID xuyên instance là `entity_links` (lane T) — hai thứ không thay nhau (LANES §3).
 - Phạm vi vai `branch` / `warehouse` / `org_unit` (`core/authz/scope.ts`, `store.ts`; B-15) sẽ đi qua `orgSubtree` / `warehouseBranch`.

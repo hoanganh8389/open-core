@@ -114,6 +114,14 @@ Lane nào sửa tệp chung cũng theo đúng luật dưới. Xung đột merge 
 
 ## 7. Nhật ký bàn giao
 
+### 2026-11-29 12:55 AM · lane R · S004-W2-9 (cổng MASTERDATA)
+- PR: (mở) nhánh `feat/s004-w2-9-cong-masterdata`, chồng lên S004-W1-7a.
+- Tệp chung đã chạm: `core/masterdata-port.ts` (mới, R) · `core/authz/scope.ts`, `store.ts` (chỉ phần đọc cây đơn vị / kho) · `ketoan-legacy/index.ts` (`installKetoanLegacy()` dời vào, thêm nhà cấp) · ADR-0001 D5 theo chữ ký thật · CHANGELOG khối riêng.
+- Số đã giữ / nhả: không.
+- Kiểm: `pnpm test` có CSDL 92 / 92 · `ma-tran --strict` hai app ĐẠT (ketoan MỚI 0) · sổ ranh giới 97 → 96.
+- Lane kia cần biết / cần làm: `MASTERDATA` chỉ có `orgScopes`; lane T **không** thêm hàm tra danh mục vào chỗ khác — cần `resolveItem` / `resolveEntity` thì ghi yêu cầu §6, R thêm vào cổng này. Phạm vi vai theo chi nhánh / kho / nút giờ cần nhà cấp: app khác (cake, POS) không có ⇒ đóng.
+- Việc kế tiếp của lane: B-15 phần còn lại (`settings.ts`, `metrics.ts`, `site-backup.ts`) rồi S004-W2-6 (kiểm ranh giới chặn) → phát hành 0.7.0.
+
 ### 2026-11-29 12:45 AM · lane R · S004-W1-7a (E-1…E-7 → 0)
 - PR: (mở) nhánh `feat/s004-w1-2b-loi-kieu-ketoan`. #30, #32 đã merge.
 - Tệp chung đã chạm: `db/migrate.ts` — `pendingMigrations(q?)` tuỳ chọn kết nối (chỉ thêm) · `ketoan-legacy/index.ts` — `SYSTEM_ROLES` · `ketoan-legacy/pos-installation-auth.ts` — `installKetoanLegacy()` gọi `ketoanAuthzPreset()` · `tools/doi-nguon/ketoan-0.7.mjs` — luật E-5…E-7 · CHANGELOG khối riêng.

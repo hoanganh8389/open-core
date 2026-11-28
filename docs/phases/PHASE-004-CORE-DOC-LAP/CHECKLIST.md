@@ -20,6 +20,7 @@
 | S004-W1-6 | diễn tập: bản sao CSDL dev → bản sao CSDL chạy thật; biên bản | open-ketoan | ☐ |
 | S004-W1-7 | B2–B4 của PHASE-001 (sửa E-1…E-7 + R-1, đổi nguồn gói, đóng băng, xoá nền riêng) | open-ketoan | ⛔ claim NT-HT-003 / NT-MH-011 / HT20 |
 | S004-W1-7a | phía lõi của E-1…E-7 + R-1: `pendingMigrations(q?)`; codemod đổi nguồn thêm E-5…E-7; `installKetoanLegacy()` gọi `ketoanAuthzPreset()` | open-core | ☑ ma trận open-ketoan `--strict` ĐẠT (MỚI 0; còn 3 lỗi có sẵn của chính open-ketoan, cùng có trên nền riêng) |
+| S004-W2-9 | cổng `MASTERDATA` (`orgScopes`) + `authz/scope.ts` / `store.ts` qua cổng (B-15 phần phân quyền); thiếu nhà cấp ⇒ đóng; nhà cấp open-ketoan trong `installKetoanLegacy()` | open-core | ☑ 2 ca (so đúng câu SQL cũ); ma trận `--strict` hai app ĐẠT |
 | S004-W1-7a | phía lõi của E-1…E-7 + R-1: `pendingMigrations(q?)`; codemod đổi nguồn thêm E-5…E-7; `installKetoanLegacy()` gọi `ketoanAuthzPreset()` | open-core | ☑ ma trận open-ketoan `--strict` ĐẠT (MỚI 0; còn 3 lỗi có sẵn của chính open-ketoan, cùng có trên nền riêng) |
 | **W2** | **Ranh giới Core** ([30](30-RANH-GIOI-CORE.md)) | | |
 | S004-W2-1 | `tools/kiem-ranh-gioi.mjs` + `ranh-gioi.json` — đo; `--check` chặn tăng (trong `pnpm test`) | open-core | ☑ 158 vi phạm / 22 tệp |
