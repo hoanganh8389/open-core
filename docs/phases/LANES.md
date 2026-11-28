@@ -198,6 +198,14 @@ Trong cửa sổ đó, lane T **không merge** PR chạm tệp chung ở §4. La
 
 ## 8. Nhật ký bàn giao
 
+### 2026-11-29 01:14 AM · lane T · S005-F0 mốc đo Scoreboard DX
+- PR: `feat/s005-f0-moc-do` (mở).
+- Tệp chung đã chạm: `package.json` — **chỉ thêm** bước `node tools/scoreboard-dx.mjs --check` vào script `test`, không đổi phiên bản / phụ thuộc. Lane R lưu ý khi gộp. CHANGELOG khối riêng; CLAIMS.
+- Không đụng `docs/scoreboard/scoreboard.json` / `SCOREBOARD.md` (của lane R): Scoreboard DX ở tệp riêng `dx.json` / `DX.md`.
+- Kiểm: `pnpm test` có CSDL (số ở PR); `golden.test.mjs` 3 / 3; bánh cóc thử đỏ đúng (178 > 177).
+- Lane kia cần biết: nợ viết tay của open-ketoan đo trên **bản làm việc `open-ketoan-main` @ af5305ec** — thư mục đó đang dở merge README, lane T chỉ đọc. Khi lane R chạy `--check --app open-ketoan=…` nên trỏ một bản sạch `origin/dev`; mốc 211 / 108 có thể lệch nhẹ.
+- Việc kế tiếp của lane T: S005-F1-1 (Entity Registry) — sẽ viết lại module golden bằng `defineEntity` để đo số dòng giảm.
+
 ### 2026-11-29 12:53 AM · lane T · PHASE-005 (thiết kế)
 - PR: chỉ tài liệu (mở) — `docs/phases/PHASE-005-KHUNG-UNG-DUNG-KHAI-BAO/`: README, 10 gói, 20 Entity Registry, 30 Item Master mở rộng, 40 View Framework, 50 Module Lifecycle, 60 Scoreboard DX, CHECKLIST.
 - Tệp chung đã chạm: `docs/phases/README.md` (một dòng), LANES (giao PHASE-003 / 005 + một yêu cầu §6), CLAIMS, CHANGELOG.

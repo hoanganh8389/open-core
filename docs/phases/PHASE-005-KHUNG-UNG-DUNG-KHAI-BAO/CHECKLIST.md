@@ -8,8 +8,8 @@
 | Mã | Việc | Lane | Gốc | Trạng thái |
 |---|---|---|---|---|
 | **F0** | **Mốc đo** | | | |
-| S005-F0-1 | `tools/scoreboard-dx.mjs` + mục `dx` trong `scoreboard.json` + đo điểm D0–D3 cho 3 app (bằng chứng đường dẫn) | T | — | ☐ |
-| S005-F0-2 | module mẫu `golden` (nhóm khách + phiếu yêu cầu) viết **bằng API hiện có** ⇒ số dòng / tệp mốc thật | T | — | ☐ |
+| S005-F0-1 | `tools/scoreboard-dx.mjs` + `docs/scoreboard/dx.json` / `DX.md` (tệp riêng, không đụng `scoreboard.json` của lane R) + đo D0–D3 cho 3 app có bằng chứng + nợ viết tay đo thật; `--check` trong `pnpm test` <!-- [2026-11-29 01:14 AM Johnny Chu - Chu Hoàng Anh] S005-F0 — số đo thật --> | T | — | ☑ lõi 31 % · cake 20 % · ketoan 27 %; nợ: cake 17 route / 8 bảng, ketoan 211 / 108; bánh cóc thử đỏ ở 178 > 177 |
+| S005-F0-2 | module mẫu `golden` (nhóm khách + phiếu yêu cầu) viết **bằng API hiện có** ⇒ số dòng / tệp mốc thật | T | — | ☑ 177 dòng / 3 tệp máy chủ; `golden.test.mjs` 3 / 3 trên Postgres |
 | **F1** | **Entity Registry** | | | |
 | S005-F1-1 | `@bizcity/platform/entity`: `defineEntity`, `field.*`, sáu lớp, registry trong bộ nhớ, `GET /api/v1/meta/entities` | T | — | ☐ |
 | S005-F1-2 | `extendEntity` / `registerField` / `registerRelation` / `registerValidator` + SC-ENT-3 | T | — | ☐ |

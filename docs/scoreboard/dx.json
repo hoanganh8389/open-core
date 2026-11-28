@@ -1,0 +1,582 @@
+{
+  "measuredAt": "2026-11-29",
+  "coreRef": "open-core @ 4dde504 (0.6.0 + 0007)",
+  "apps": [
+    "open-core",
+    "open-cake",
+    "open-ketoan"
+  ],
+  "appRefs": {
+    "open-core": "origin/main @ 4dde504",
+    "open-cake": "D:/projects/open-cake @ 1024200",
+    "open-ketoan": "bản làm việc open-ketoan-main @ af5305ec (đang dở merge README — chỉ đọc)"
+  },
+  "ops": [
+    {
+      "id": "TP-01",
+      "name": "schema kiểm dữ liệu tạo / sửa"
+    },
+    {
+      "id": "TP-02",
+      "name": "kiểu TS chung API ↔ giao diện"
+    },
+    {
+      "id": "TP-03",
+      "name": "API danh sách (lọc, tìm, sắp, con trỏ)"
+    },
+    {
+      "id": "TP-04",
+      "name": "API chi tiết theo ID"
+    },
+    {
+      "id": "TP-05",
+      "name": "xuất CSV / XLSX / JSON / NDJSON"
+    },
+    {
+      "id": "TP-06",
+      "name": "nhập: ghép cột, chạy thử, lỗi từng dòng"
+    },
+    {
+      "id": "TP-07",
+      "name": "màn danh sách (chip lọc, cột, URL, bulk)"
+    },
+    {
+      "id": "TP-08",
+      "name": "form tạo / sửa (lỗi dưới ô)"
+    },
+    {
+      "id": "TP-09",
+      "name": "màn chi tiết"
+    },
+    {
+      "id": "TP-10",
+      "name": "hoạt động / ghi chú / @nhắc / tệp"
+    },
+    {
+      "id": "TP-11",
+      "name": "lịch sử phiên bản"
+    },
+    {
+      "id": "TP-12",
+      "name": "đánh số chứng từ"
+    },
+    {
+      "id": "TP-13",
+      "name": "workflow + nút chuyển trạng thái"
+    },
+    {
+      "id": "TP-14",
+      "name": "chuỗi chứng từ"
+    },
+    {
+      "id": "TP-15",
+      "name": "quyền đọc / ghi + ẩn nút"
+    },
+    {
+      "id": "TP-16",
+      "name": "phạm vi vai (chi nhánh / kho)"
+    },
+    {
+      "id": "TP-17",
+      "name": "che dữ liệu nhạy cảm"
+    },
+    {
+      "id": "TP-18",
+      "name": "menu + số đếm + route URL"
+    },
+    {
+      "id": "TP-19",
+      "name": "REST + MCP cho action"
+    },
+    {
+      "id": "TP-20",
+      "name": "idempotency + audit cho ghi"
+    },
+    {
+      "id": "TP-21",
+      "name": "sự kiện / outbox"
+    },
+    {
+      "id": "TP-22",
+      "name": "chống trùng + cảnh báo"
+    },
+    {
+      "id": "TP-23",
+      "name": "lưu trữ / khôi phục"
+    },
+    {
+      "id": "TP-24",
+      "name": "bốn trạng thái + lỗi có cách sửa"
+    },
+    {
+      "id": "TP-25",
+      "name": "màn Cài đặt + nguồn giá trị + lịch sử"
+    },
+    {
+      "id": "TP-26",
+      "name": "trường phụ thuộc tổ chức"
+    },
+    {
+      "id": "TP-27",
+      "name": "thông báo theo sự kiện + kênh"
+    },
+    {
+      "id": "TP-28",
+      "name": "việc (task) có hạn"
+    },
+    {
+      "id": "TP-29",
+      "name": "tìm đa thực thể + saved views"
+    },
+    {
+      "id": "TP-30",
+      "name": "báo cáo (tham số, nhóm, drill-down, PDF / Excel)"
+    }
+  ],
+  "levels": {
+    "TP-01": {
+      "open-core": {
+        "level": 1,
+        "evidence": "zod viết tay trong input mỗi defineAction — test/golden/nhom-khach.mjs (NhomKhachInput)"
+      },
+      "open-cake": {
+        "level": 2,
+        "evidence": "packages/contracts/src/cake/*.ts — một khối zod mỗi spec, dùng chung server / mock / client; flex/records.ts:9-27 sinh tự động (3 loại)"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "apps/api/src/modules/warehouses/warehouse.routes.ts:23-35 bodySchema / patchSchema viết tay"
+      }
+    },
+    "TP-02": {
+      "open-core": {
+        "level": 1,
+        "evidence": "@bizcity/contracts — interface viết tay; chưa có Infer từ registry"
+      },
+      "open-cake": {
+        "level": 2,
+        "evidence": "packages/contracts/src/cake/entities.ts + z.infer; base/action.ts:72-73"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "@ketoan/contracts; DTO danh mục chép tay hai nơi (WarehouseDto ↔ WarehousesPage.tsx:17)"
+      }
+    },
+    "TP-03": {
+      "open-core": {
+        "level": 1,
+        "evidence": "core/list.ts defineListAction — cột / phép lọc khai lại tay (golden nhomKhachList)"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "apps/api/src/care/inbox.ts:62-122 Kysely tay, con trỏ tự viết; runtime.ts:26-28 paged()"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "warehouse.routes.ts:155 r.get + Kysely tay; con trỏ riêng catalog.service.ts:409"
+      }
+    },
+    "TP-04": {
+      "open-core": {
+        "level": 0,
+        "evidence": "golden getNhomKhach + findById viết tay"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "care/inbox.ts:124 cake.contact.get — handler tay, route / kiểm từ spec"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "mỗi service tự select().where()"
+      }
+    },
+    "TP-05": {
+      "open-core": {
+        "level": 2,
+        "evidence": "defineListAction exportPermission ⇒ csv / json / ndjson (core/list.ts); chưa có xlsx"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "không có (grep text/csv | xlsx = 0)"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "DataGrid xuất .xlsx phía trình duyệt; CSV máy chủ viết tay addins/excel-export/index.ts (17 route)"
+      }
+    },
+    "TP-06": {
+      "open-core": {
+        "level": 0,
+        "evidence": "lõi chưa có — golden importNhomKhach viết tay ~40 dòng"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "không có (grep dryRun | columnMap = 0)"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "components/ExcelImport.tsx + catalog-import.ts:31 importProducts(dryRun); mỗi thực thể tự viết /import (8 endpoint)"
+      }
+    },
+    "TP-07": {
+      "open-core": {
+        "level": 0,
+        "evidence": "lõi chưa có web-shell / ListScreen (S003-6)"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "screens/Contacts.tsx, catalog/item-table.tsx — bảng tay ở 8 tệp; ui-kit Chip / Search / Pager; useRoute().setQuery"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "components/DataGrid.tsx (637 dòng) + CatalogToolbar.tsx; trang ráp tay; bộ lọc không lên URL"
+      }
+    },
+    "TP-08": {
+      "open-core": {
+        "level": 0,
+        "evidence": "lõi chưa có FormSheet"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "catalog/item-sheet.tsx — Sheet + ActionErrorNote; lỗi một chỗ, không dưới ô"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ui.tsx Field / Modal, FormBlocks.tsx; lỗi qua alert; WarehousesPage.tsx:93-128 ráp tay"
+      }
+    },
+    "TP-09": {
+      "open-core": {
+        "level": 0,
+        "evidence": "lõi chưa có DetailScreen"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "screens/Contact360.tsx 129 dòng viết tay"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "modal viewFirst; mỗi thực thể tự dựng (HoSoNccPage.tsx)"
+      }
+    },
+    "TP-10": {
+      "open-core": {
+        "level": 1,
+        "evidence": "ctx.documents.note / activities / attach (chỉ chứng từ, chưa có giao diện)"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "care/inbox.ts:151 timeline riêng của khách; không có ghi chú / @nhắc"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ctx.documents.attach + TepDinhKem.tsx (chỉ mua hàng); không có ghi chú / @nhắc"
+      }
+    },
+    "TP-11": {
+      "open-core": {
+        "level": 1,
+        "evidence": "documents.saveVersion có nhưng spine chưa tự gọi (NC-008 AUDIT)"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "flex chỉ có type_version"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ctx.documents.saveVersion — gần như không dùng (asset.service.ts:780)"
+      }
+    },
+    "TP-12": {
+      "open-core": {
+        "level": 2,
+        "evidence": "defineDocumentType.series ⇒ YC-2026-0001 (golden PhieuYeuCau)"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "cake/orders.ts:116 YC-<6 ký tự cuối ULID> — không có dãy số"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ctx.documents.nextNumber(series) gọi tay mỗi loại"
+      }
+    },
+    "TP-13": {
+      "open-core": {
+        "level": 2,
+        "evidence": "workflow YAML + ctx.documents.transition, tách nhiệm sod (golden); nút giao diện chưa có"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "orders/service.ts:120-135 rẽ nhánh tay; orders/document.ts:10-15 bảng trạng thái phản chiếu"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "core/workflow.ts plan(); chỉ 2 tệp workflow.yaml; action tự ghi trạng thái; không có nút chung"
+      }
+    },
+    "TP-14": {
+      "open-core": {
+        "level": 1,
+        "evidence": "document_links + ctx.documents.link; chưa có core.trace.lookup / màn"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "không có"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ctx.documents.link / links + lineage mặt hàng; không có màn chuỗi"
+      }
+    },
+    "TP-15": {
+      "open-core": {
+        "level": 2,
+        "evidence": "defineAction.permission; che cột theo ListColumn.permission"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "runtime.ts:133 requirePermission theo spec; useCan gọi tay ~21 chỗ"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "defineAction.permission (95); useAuth().can ở 57 tệp, ẩn nút tay"
+      }
+    },
+    "TP-16": {
+      "open-core": {
+        "level": 2,
+        "evidence": "ctx.branchScope + defineListAction.scope (core/list.ts)"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "care/scope.ts — phạm vi hội thoại viết tay, không có chi nhánh / kho"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "authz scope kinds (core/authz/types.ts:40); chỉ một chỗ dùng (bao-cao-kho.ts)"
+      }
+    },
+    "TP-17": {
+      "open-core": {
+        "level": 1,
+        "evidence": "maskValue theo quyền cột ở list (core/list.ts); không có ở API chi tiết"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "Contacts.tsx:60 hiện SĐT nguyên; chỉ flex pii"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "không có che trường"
+      }
+    },
+    "TP-18": {
+      "open-core": {
+        "level": 0,
+        "evidence": "lõi chưa có registerScreens / menu (S003-3)"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "app/Shell.tsx:15-31 NAV tay; main.tsx:46-58 if-chain"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "phan-he/<x>/{manifest,menu,routes}; defineWebModule (module-sdk/src/web.ts)"
+      }
+    },
+    "TP-19": {
+      "open-core": {
+        "level": 2,
+        "evidence": "defineAction.expose { http, mcp } (golden)"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "runtime.ts:126-155 sinh REST theo spec; expose.mcp khai nhưng không có máy chủ MCP"
+      },
+      "open-ketoan": {
+        "level": 2,
+        "evidence": "defineAction.expose; mcp.routes.ts sinh tool từ registry (14 action bật)"
+      }
+    },
+    "TP-20": {
+      "open-core": {
+        "level": 3,
+        "evidence": "actions.ts — action_requests + audit_logs chuỗi băm tự động mọi action ghi"
+      },
+      "open-cake": {
+        "level": 3,
+        "evidence": "runtime.ts:95-124 tự động mọi command"
+      },
+      "open-ketoan": {
+        "level": 2,
+        "evidence": "actions.ts tự động; mã cũ còn writeAudit tay (warehouse.routes.ts:86)"
+      }
+    },
+    "TP-21": {
+      "open-core": {
+        "level": 1,
+        "evidence": "ctx.events.emit gọi tay mỗi action (golden phát 4 chỗ)"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "chỉ pg_notify gợi ý (stream.ts:20-22); emits khai nhưng không phát; không có outbox"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ctx.events.emit + outbox; chỉ ~3 tệp phát"
+      }
+    },
+    "TP-22": {
+      "open-core": {
+        "level": 0,
+        "evidence": "golden assertCodeFree viết tay"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "care-kernel/src/identity.ts (chỉ khách); trùng SKU / email viết tay"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "partner.hints.ts, item.hints.ts, catalog-warn.ts (chỉ đối tượng / hàng)"
+      }
+    },
+    "TP-23": {
+      "open-core": {
+        "level": 1,
+        "evidence": "documentSpine.archive / restore cho chứng từ; thực thể khác viết tay (golden archiveNhomKhach)"
+      },
+      "open-cake": {
+        "level": 1,
+        "evidence": "records.ts:61-67 core.record.archive (chỉ flex); còn lại tay"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "xoá cứng deleteFrom (warehouse.routes.ts:128)"
+      }
+    },
+    "TP-24": {
+      "open-core": {
+        "level": 0,
+        "evidence": "lõi chưa có bộ vẽ màn"
+      },
+      "open-cake": {
+        "level": 2,
+        "evidence": "app/QueryView.tsx:10-31 bọc mỗi truy vấn"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ui.tsx Loading / ErrorBox / Empty + RemedyView.tsx; ráp tay mỗi màn"
+      }
+    },
+    "TP-25": {
+      "open-core": {
+        "level": 1,
+        "evidence": "core/settings.ts registry có phiên bản / nguồn / lịch sử; chưa có màn"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "screens/Settings.tsx + 3 màn cài đặt viết tay"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "settings.ts (đọc); lịch sử chỉ AccountingProfilePage.tsx:88"
+      }
+    },
+    "TP-26": {
+      "open-core": {
+        "level": 1,
+        "evidence": "registerSettingScopes (0006) cho cài đặt; chưa có cho trường"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "không có"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "bảng riêng theo tính năng (stock_levels, bảng giá theo chi nhánh)"
+      }
+    },
+    "TP-27": {
+      "open-core": {
+        "level": 1,
+        "evidence": "core/notify.ts sendNotification gọi tay; chỉ in_app"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "chuông chưa có xử lý (Shell.tsx:84)"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ctx.notify.send in_app; không có quy tắc / kênh"
+      }
+    },
+    "TP-28": {
+      "open-core": {
+        "level": 0,
+        "evidence": "không có"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "không có (NotYet)"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "không có"
+      }
+    },
+    "TP-29": {
+      "open-core": {
+        "level": 1,
+        "evidence": "core.document.list tìm chứng từ (chỉ một thực thể)"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "không có; user_meta cake.inbox.filters khai nhưng không dùng"
+      },
+      "open-ketoan": {
+        "level": 0,
+        "evidence": "MenuSearch.tsx chỉ tìm chức năng"
+      }
+    },
+    "TP-30": {
+      "open-core": {
+        "level": 0,
+        "evidence": "không có"
+      },
+      "open-cake": {
+        "level": 0,
+        "evidence": "không có (NotYet)"
+      },
+      "open-ketoan": {
+        "level": 1,
+        "evidence": "ReportPanel.tsx + print/*; mỗi báo cáo route + trang tay (report.routes.ts 24 route)"
+      }
+    }
+  },
+  "golden": {
+    "files": [
+      "packages/platform/test/golden/0001_golden.sql",
+      "packages/platform/test/golden/nhom-khach.mjs",
+      "packages/platform/test/golden/phieu-yeu-cau.mjs"
+    ],
+    "baselineLoc": 177,
+    "test": "TEST_DATABASE_URL=… node --test packages/platform/test/golden.test.mjs (3 / 3 ĐẠT trên Postgres 16)",
+    "note": "Chỉ phần máy chủ (đo thật). Giao diện chưa đo được vì lõi chưa có web-shell: màn danh sách + form tương đương hôm nay tốn ≈ 108 dòng (open-cake catalog/item-table + item-sheet) đến 118 dòng (open-ketoan WarehousesPage) cho MỖI thực thể, chưa kể màn chi tiết ⇒ tính năng vàng hôm nay ≈ 177 + ~350 ≈ 530 dòng (phần giao diện là ước theo số đối chiếu)."
+  },
+  "debt": {
+    "open-cake": {
+      "directRoutes": 17,
+      "handTables": 8,
+      "sha": "1024200",
+      "note": "1 trong 17 là vòng lặp sinh route theo spec (runtime.ts:131); 66 spec defineActionSpec riêng của Cake, 0 defineAction lõi"
+    },
+    "open-ketoan": {
+      "directRoutes": 211,
+      "handTables": 108,
+      "sha": "af5305ec",
+      "note": "204 defineAction; 80 tệp dùng DataGrid"
+    }
+  }
+}
