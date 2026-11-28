@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm
+- 2026-11-28 — **PHASE-001 open-ketoan chạy trên open-core** (tài liệu; <!-- [2026-11-28 04:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 -->): đo khớp tên 646 / 646 import, khớp kiểu 7 lỗi mới (đều do P2b), 11 vấn đề lúc chạy R-1…R-11, phương án B (lớp chuyển tiếp trước), việc S001-1…9.
+
 ## [0.3.1] — 2026-11-28
 
 ### Thêm (C3 — gom bản nền mới của open-ketoan)
