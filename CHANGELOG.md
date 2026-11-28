@@ -2,6 +2,11 @@
 
 ## [Chưa phát hành]
 
+## [0.6.0] — 2026-11-28
+<!-- [2026-11-28 09:36 PM Johnny Chu - Chu Hoàng Anh] S004-W0 — phát hành 0.6.0: gom S003-20 (tìm chứng từ) + S003-4 (defineListAction). Số phiên bản: thêm API, không đổi API đã phát hành 0.5.0. -->
+
+> **Lưu ý khi nâng từ 0.5.0:** `core.document.list` trả hàng theo **tên cột** (`doc_no`, `total_fc`…) và `sums` theo tên cột — kiểu này chưa có app nào dùng ở 0.5.0 (open-cake chỉ dùng `documentSpine.mirror`). Không có migration mới (lõi vẫn 0001–0005).
+
 ### Thêm (S003-4 — defineListAction)
 - 2026-11-28 — **`defineListAction`** (<!-- [2026-11-28 09:15 PM Johnny Chu - Chu Hoàng Anh] S003-4 -->, `bizcity_list@1`): `core/list.ts` — khai một danh sách (nguồn + cột + quyền xem / xuất + phạm vi vai) ⇒ lõi sinh **action danh sách** (`<id>`, GET, MCP chỉ đọc) và **action xuất** (`<module>.<thực thể>.export`, quyền xuất riêng, ghi bằng chứng gồm số dòng + băm bộ lọc, không mở cho AI): `q` · `f.<cột>.<phép>` · `sort` ≤ 3 khoá · con trỏ keyset gắn chữ ký sắp xếp · `count` · `sums` (có `sumOnlyWith`) · phạm vi vai giao với bộ lọc · **che cột theo quyền xem cột** (R-STD-LIST-11: thiếu quyền ⇒ che, không bỏ cột, `meta.masked`). Xuất **csv** (BOM, nhãn cột, số thuần, thoát dấu phẩy / nháy kép), **json** (`bizcity_list_export@1` có bộ lọc + cột + tổng) và **ndjson** (dòng đầu là header); ≤ 10 000 dòng, lớn hơn ⇒ `NOT_READY` nêu cách xử lý (xuất nền: S003-11; xlsx: cần quyết định thư viện). `listDefJson` sinh ListDef JSON hợp lệ theo schema của bizcity-platform; `validateListDef` chặn khai sai lúc khai (định danh SQL, cột trùng, defaultSort). **Cột là định danh do mã khai — không bao giờ lấy từ người dùng.**
 - **Đổi:** `core.document.list` nay là một `defineListAction` (cùng hành vi, thêm `core.document.export`); hàng trả về theo **tên cột** (`doc_no`, `total_fc`…) thay vì camelCase; `sums` theo tên cột (`total`, `total_fc`). Test 57 / 57 có CSDL; open-cake chạy thật 199 / 199 trên lõi này.
