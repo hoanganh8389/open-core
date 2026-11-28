@@ -3,7 +3,7 @@
 ## [Chưa phát hành]
 
 ### Thêm (S001-4)
-- 2026-11-28 — **`schema_migrations.source`** (<!-- [2026-11-28 05:19 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-4 -->): trình chạy tự thêm cột `source` (mặc định `app`, dòng cũ giữ `app`) và `module` (trước chỉ open-ketoan có, từ 0053) — chạy lại vô hại; mỗi dòng mới ghi đúng nguồn (`platform` / `app` / `mod_<key>`), kể cả dòng ghi nhận bằng `coveredBy`. Khoá chính giữ `name` (planMigrations đã chặn trùng tên giữa các nguồn). Thử lại 183 migration open-ketoan: cài mới / nâng cấp như S001-3.
+- 2026-11-28 — **`schema_migrations.source`** (<!-- [2026-11-28 05:17 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-4 -->): trình chạy tự thêm cột `source` (mặc định `app`, dòng cũ giữ `app`) và `module` (trước chỉ open-ketoan có, từ 0053) — chạy lại vô hại; mỗi dòng mới ghi đúng nguồn (`platform` / `app` / `mod_<key>`), kể cả dòng ghi nhận bằng `coveredBy`. Khoá chính giữ `name` (planMigrations đã chặn trùng tên giữa các nguồn). Thử lại 183 migration open-ketoan: cài mới / nâng cấp như S001-3.
 
 ### Thêm (S001-3)
 - 2026-11-28 — **hook `coveredBy`** (<!-- [2026-11-28 05:11 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 -->): migration của nguồn khác mà app đã có sẵn nội dung ⇒ ghi nhận, không chạy (trình chạy + `pendingMigrations`); `ketoanLegacyHooks` khai `CORE_COVERED_BY_KETOAN` (lõi 0001 / 0002 ⇐ dãy gốc open-ketoan, 0003 ⇐ 0183, 0004 ⇐ 0184). Thử thật với 183 migration của open-ketoan trên Postgres 16: cài mới — 183 tệp chạy, 4 tệp lõi ghi nhận, pending 0; nâng cấp — bản cũ 139 bảng, bật lõi chạy thêm 0 tệp, vẫn 139 bảng.
