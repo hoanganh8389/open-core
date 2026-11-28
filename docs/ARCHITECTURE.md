@@ -24,6 +24,8 @@ app = open-core + module:  open-cake (+crm) · open-ketoan (+ketoan) · POS · H
 open-setup: registry Workspace × app = instance, ghi core_version
 ```
 
+**Ranh giới (R-CORE-8)** <!-- [2026-11-28 09:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — R-CORE-8 (chủ 2026-11-28) -->: lõi sở hữu **hạ tầng chứng từ** (đầu phiếu, phiên bản, liên kết, hoạt động, vòng đời 6 nhóm, tìm / xuất) — app sở hữu **loại chứng từ và nghiệp vụ** (cake: Yêu cầu đặt hàng; kế toán: mua hàng, thanh toán, quy tắc ghi sổ). Lõi không chứa ledger / costing / kho / vai kế toán; nghiệp vụ đi qua cổng (`ctx.port`) hoặc khai báo mở rộng. Kiểm kê và lộ trình dọn: [PHASE-004](phases/PHASE-004-CORE-DOC-LAP/README.md).
+
 ## 2. Mười hai thứ lõi bảo đảm (ERP-12 — NC-005)
 
 | # | Thứ | Mã ở lõi | Tình trạng (xem scoreboard) |

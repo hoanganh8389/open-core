@@ -5,6 +5,8 @@
 > **Trên:** canon R-CANON-17 / 18 · bizcity-platform [NC-003](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/research/NC-003-TACH-OPEN-CORE.md) (C3 ☑, C4, C6) · [NC-004](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/research/NC-004-TRU-COT-XUYEN-DOANH-NGHIEP.md)
 > **Trạng thái từng việc:** [CHECKLIST.md](CHECKLIST.md)
 
+> **Nối tiếp ở [PHASE-004](../PHASE-004-CORE-DOC-LAP/README.md)** <!-- [2026-11-28 09:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — R-CORE-8 (chủ 2026-11-28) -->: bản đồ tương thích đo lại 2026-11-28 ([10](../PHASE-004-CORE-DOC-LAP/10-BAN-DO-TUONG-THICH-OPEN-KETOAN.md)), kịch bản diễn tập S001-8 chi tiết ([20](../PHASE-004-CORE-DOC-LAP/20-DIEN-TAP-NANG-CAP.md)); W2 dọn ranh giới lõi **trước** B3 để open-ketoan chuyển một lần lên lõi đã sạch (0.7.0).
+
 ## 0. Mục tiêu
 
 open-ketoan bỏ bản `packages/platform` + `packages/contracts` riêng, **cài `@bizcity/platform` và `@bizcity/contracts` từ bản phát hành của open-core**, mà:
