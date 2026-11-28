@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (tài liệu)
+- 2026-11-28 — **PHASE-003 khung quản trị chung** (<!-- [2026-11-28 06:33 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 -->): người dùng + `user_meta`, vai / màn × thao tác, menu, hook danh sách đóng, danh sách / lọc / xuất theo `bizcity_list@1`, web-shell; việc S003-1…8.
+
 ## [0.4.0] — 2026-11-28
 
 <!-- [2026-11-28 05:45 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-5 -->
