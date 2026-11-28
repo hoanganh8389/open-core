@@ -10,6 +10,9 @@
 | S004-W1-1 | bản đồ tương thích ([10](10-BAN-DO-TUONG-THICH-OPEN-KETOAN.md)) — đo 65 / 74 tệp, gói, API, migration, cấu hình | open-core | ☑ |
 | S004-W1-2 | kịch bản diễn tập trên bản sao CSDL ([20](20-DIEN-TAP-NANG-CAP.md)) — bất biến L / D / H, 11 bước, quay lui | open-core | ☑ |
 | S004-W1-3 | bộ đo bất biến `tools/dien-tap/do-bat-bien.mjs` (chỉ đọc, JSON, `--so`, `--chi-tiet`) | open-core | ☑ 8 ca tự kiểm |
+| S004-W1-3b | bộ đo bản 2: nội dung từng dòng (ô + `--dong`), nhóm M (MD-1…MD-4), R (báo cáo), S (lược đồ), mục bắt buộc theo hồ sơ, `--chat` | open-core | ☑ 11 ca |
+| S004-W1-3c | `do-api.mjs`: báo cáo + ma trận quyền qua API, bản A ↔ B | open-core | ☑ 2 ca |
+| S004-W1-5a | `dien-tap.mjs`: nâng cấp · chạy lại · quay lui · nâng cấp lại trên bản chép | open-core | ☑ 3 ca (`template`; `pg_dump` chưa chạy thử) |
 | S004-W1-4 | `0187_truc_chung_tu.sql` ở open-ketoan + `coveredBy` lõi 0005 | open-ketoan (R-FLOW) + open-core | ☐ |
 | S004-W1-5 | `scripts/dien-tap-nang-cap.sh` | open-ketoan | ☐ |
 | S004-W1-6 | diễn tập: bản sao CSDL dev → bản sao CSDL chạy thật; biên bản | open-ketoan | ☐ |

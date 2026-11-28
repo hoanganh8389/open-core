@@ -18,6 +18,20 @@
 
 ## 3. Bất biến phải giữ (lệch = 0)
 
+**Bản 2 của bộ đo** (`bizcity_dien_tap_bat_bien@2`) <!-- [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b -->:
+
+1. **Nội dung từng dòng:** sổ (L-7, L-8), chứng từ kế toán (D-1, D-2, D-6) và danh mục (M) băm **cả dòng**, chia 256 ô theo khoá. Khi lệch, phép so chỉ ra ô lệch; `--chi-tiet <mã> --o <ô>` liệt kê từng dòng của ô đó. Đo với `--dong <thư mục>` thì ghi thêm tệp *khoá ⇥ md5*, và `--so … --dong-truoc d1 --dong-sau d2` chỉ ra đúng khoá dòng bị đổi, thêm hay mất.
+2. **Master Data** ([ADR-0001](../../adr/ADR-0001-ranh-gioi-master-data.md)):
+   - M-1: `item_id` + ánh xạ mã hàng; M-1.ulid: `item_id` đúng khuôn ULID.
+   - M-2: lịch sử mã mặt hàng / đối tượng / kho; M-2.chong: khoảng hiệu lực chồng nhau; M-2.tai: mã cấp lại cho mặt hàng khác.
+   - M-3: ĐVT + tỷ lệ quy đổi; M-3.goc: hai đơn vị tỷ lệ 1; M-3.ty_le: tỷ lệ ≤ 0.
+   - M-4: kho, cây đơn vị, loại kho / phân kho; M-4.mo_coi: kho mồ côi; M-4.vong: cây có vòng; M-4.loai: loại kho lạ.
+   - M-5: nhóm hàng, phân loại, đối tượng, thuộc tính.
+3. **Mục bắt buộc** theo hồ sơ (`--ho-so open-ketoan` mặc định | `core`): thiếu bảng hoặc cột của mục bắt buộc ⇒ `thieu-bat-buoc`; lần đo thoát 1, phép so tính là lệch. **Không còn "không áp dụng"** cho bảng sổ, chứng từ, danh mục, quyền. Riêng `--truoc-nang-cap` miễn các mục W (bảng của 0005 chưa có).
+4. **Báo cáo:** R-1 cân đối phát sinh theo năm (kèm dư cuối luỹ kế), R-2 công nợ theo đối tượng, R-3 nhập / xuất kho theo kho × mặt hàng, R-4 bảng kê thuế GTGT. Các báo cáo này dựng lại bằng SQL trên CSDL. **Hành vi của mã** (báo cáo API trả gì, ai được gọi gì) đo bằng `tools/dien-tap/do-api.mjs` (§4 bước 7).
+5. **Lược đồ:** S-1 vân lược đồ (cột, ràng buộc, chỉ mục, trigger, hàm, khung nhìn), S-2 sổ migration. Lược đồ đổi khi nâng cấp là bình thường (chỉ ghi chú); `--so --chat` đòi **giống hệt mọi mục**, dùng khi chạy lại migration và khi quay lui.
+
+
 Đo bằng **`tools/dien-tap/do-bat-bien.mjs`** (S004-W1-3, **đã có** <!-- [2026-11-28 10:08 PM Johnny Chu - Chu Hoàng Anh] S004-W1-3 -->): mọi câu là SELECT trong giao dịch `READ ONLY`; mỗi mục một SAVEPOINT (một câu lỗi không làm hỏng mục khác); băm = md5 từng dòng cộng tiền tố 60 bit (không phụ thuộc thứ tự, nhẹ với bảng lớn) + số dòng; bảng / cột không có ⇒ `khong-ap-dung` / `thieu-cot` (không đoán).
 
 ```bash
@@ -83,10 +97,11 @@ Luật so: mục `bang` — trước = sau (số dòng + băm); mục `khong` (L
 | 4 | Bật **bản B** trên cùng CSDL: `db:migrate` (nguồn lõi + app, `ketoanLegacyHooks`) | migration chạy: lõi 0001–0004 ghi nhận, 0005 ghi nhận theo 0187, 0187 chạy; không lỗi; ghi thời gian |
 | 5 | `/ready` của bản B | đủ migration, sổ vai có vai kế toán (R-1), `appRoot` đúng (R-2) |
 | 6 | Chạy `do-bat-bien` ⇒ `sau.json`; so với `truoc.json` | lệch ngoài §3.4 = **0** |
-| 7 | Khói (smoke) chỉ đọc qua API bản B, mỗi vai một người: mở 3 báo cáo (cân đối phát sinh, sổ chi tiết công nợ, bảng kê thuế) của 2 kỳ đã khoá + kỳ đang mở | JSON báo cáo **giống hệt** bản A (so băm) |
+| 6b | **Chạy lại** `db:migrate` của bản B; đo ⇒ `sau2.json`; `--so sau.json sau2.json --chat` <!-- [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b --> | giống hệt (migration lặp lại được) |
+| 7 | Khói (smoke) chỉ đọc qua API bản B, mỗi vai một người: mở 3 báo cáo (cân đối phát sinh, sổ chi tiết công nợ, bảng kê thuế) của 2 kỳ đã khoá + kỳ đang mở | JSON báo cáo **giống hệt** bản A (so băm) — `do-api.mjs --kich-ban kb.json --goc <bản A | B>` rồi `--so`: báo cáo (trạng thái + băm thân đã chuẩn hoá) và **ma trận quyền** (người × đường: trạng thái + mã lỗi; POST luôn `?dryRun=1`) |
 | 8 | Khói ghi trên **bản sao thứ hai** `dien_tap_b` (khôi phục lại từ dump): lập 1 phiếu mua, 1 phiếu thu, duyệt, ghi sổ, huỷ một phiếu | số chứng từ kế tiếp đúng dãy (D-7), bút toán cân (L-2), `document_activities` có dòng (W4), chuỗi bằng chứng nguyên vẹn (H-1) |
 | 9 | Toàn bộ `npm test` của open-ketoan bản B (CSDL test riêng) | đạt đủ, số test ≥ bản A |
-| 10 | **Quay lui:** xoá `dien_tap_a`, khôi phục dump, bật lại bản A | bản A chạy, `do-bat-bien` = `truoc.json` — quay lui không mất gì |
+| 10 | **Quay lui:** xoá `dien_tap_a`, khôi phục dump, bật lại bản A | bản A chạy, `do-bat-bien --so truoc.json quay_lui.json --chat` giống hệt — quay lui không mất gì; nâng cấp lại bản đã khôi phục ⇒ cùng kết quả bước 6 + cùng vân lược đồ S-1 (tái lập) |
 | 11 | Biên bản | thời gian dừng (bước 3 → 5), kết quả từng mục §3, danh sách lệch (phải rỗng), commit A / B, phiên bản lõi; xoá bản sao |
 
 ## 5. Không đạt thì
@@ -101,5 +116,7 @@ Luật so: mục `bang` — trước = sau (số dòng + băm); mục `khong` (L
 |---|---|---|
 | S004-W1-3 | ☑ `tools/dien-tap/do-bat-bien.mjs` (JSON, `--so`, `--chi-tiet`); tự kiểm 8 ca trên CSDL lõi + bảng sổ dựng theo cột thật của open-ketoan (`test/dien-tap.test.mjs`) | open-core |
 | S004-W1-4 | `0187_truc_chung_tu.sql` ở open-ketoan + `CORE_COVERED_BY_KETOAN['0005_…'] = '0187_truc_chung_tu.sql'` | open-ketoan (R-FLOW) + open-core |
+| S004-W1-5a | ☑ <!-- [2026-11-29 12:40 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b --> `tools/dien-tap/dien-tap.mjs` (open-core): phần CSDL của bước 4–6b, 10: chép bản sao (không đụng nguồn) → đo → sao lưu (`template` hoặc `pg_dump`) → migrate → B1 so → **B2 chạy lại** (giống hệt) → **B3 quay lui** (giống hệt trước) → **B4 nâng cấp lại** (tái lập, S-1 bằng nhau) → biên bản JSON. Tự kiểm 3 ca. Chế độ `pg_dump` cần `pg_dump` / `pg_restore` (`--pg-bin`) — **chưa chạy thử** (máy làm không có), chạy ở W1-6 | open-core |
+| S004-W1-3c | ☑ `tools/dien-tap/do-api.mjs`: kịch bản báo cáo + ma trận quyền, so bản A ↔ B; tự kiểm 2 ca | open-core |
 | S004-W1-5 | `scripts/dien-tap-nang-cap.sh` (bước 1–11, tham số: tệp dump, thư mục DATA_DIR, ref A, ref B) | open-ketoan |
 | S004-W1-6 | chạy diễn tập trên bản sao CSDL dev, rồi bản sao CSDL chạy thật; nộp biên bản | open-ketoan, người có quyền dữ liệu thật |
