@@ -2,12 +2,12 @@
 
 <!-- sinh bởi tools/scoreboard.mjs từ scoreboard.json — đừng sửa tay tệp này -->
 
-> **Đo lúc:** 2026-11-28 · **open-core:** 0.4.0 (chờ phát hành) · **Nguồn:** [`scoreboard.json`](scoreboard.json) · **Màn trong app:** Cài đặt hệ thống › Tình trạng nền tảng ([mockup](../ui/mockup-shots/f5-tinh-trang-nen-tang.png))
+> **Đo lúc:** 2026-11-28 · **open-core:** 0.4.0 · **Nguồn:** [`scoreboard.json`](scoreboard.json) · **Màn trong app:** Cài đặt hệ thống › Tình trạng nền tảng ([mockup](../ui/mockup-shots/f5-tinh-trang-nen-tang.png))
 > **Thang:** 0 chưa có · 1 mới tài liệu · 2 có một phần · 3 có mã + test ở app · 4 ở open-core, có test, app dùng
 
 | App | Mức trung bình |
 |---|---|
-| open-core | **44 %** |
+| open-core | **49 %** |
 | open-cake | **48 %** |
 | open-ketoan | **65 %** |
 
@@ -17,20 +17,20 @@
 | P2 | Vai · quyền · phạm vi · màn × thao tác | **3** | **3** | **3** | màn × thao tác lên lõi (S003-3, chờ NT-HT-003) |
 | P3 | Cài đặt + thang phạm vi | **2** | **1** | **3** | registerSettingScopes (Q-PIL-6), test ở lõi |
 | P4 | user_meta + lớp mềm (entity_meta, record_types, records) | **1** | **3** | **2** | dời lên lõi (S003-2) |
-| P5 | Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML | **2** | **0** | **3** | test ở lõi; open-cake dùng chứng từ chung thay order_requests riêng |
+| P5 | Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML | **3** | **0** | **3** | open-cake dùng chứng từ chung thay order_requests riêng; trục chứng từ S003-14 |
 | P6 | Danh sách · lọc · con trỏ · xuất (bizcity_list@1) | **1** | **2** | **3** | defineListAction + ListScreen + xuất chung (S003-4, S003-6) |
 | P7 | Nhập chung (ghép cột + chạy thử) | **0** | **0** | **3** | nhập chung ở lõi (S003-10) |
 | P8 | Hoạt động (chatter) trên doc_ref | **1** | **0** | **1** | bảng activities + khối Hoạt động (S003-9) |
 | P9 | Tệp / Storage (đường dẫn ký) | **2** | **3** | **2** | Storage của open-cake lên lõi (C5) |
-| P10 | Việc nền + định kỳ | **2** | **2** | **3** | registerJob / registerSchedule (S003-11); open-cake bỏ setInterval |
+| P10 | Việc nền + định kỳ | **3** | **2** | **3** | registerJob / registerSchedule (S003-11); open-cake bỏ setInterval |
 | P11 | Đệm (Redis tuỳ chọn) | **1** | **2** | **2** | module đệm chung (C5) |
 | P12 | Bí mật (platform.secrets) | **2** | **0** | **3** | test ở lõi; khoá Hub lưu bằng secrets |
-| P13 | Sự kiện / outbox / gửi xuyên app / changefeed | **2** | **2** | **3** | changefeed + gửi / nhận chứng từ chung (S002-3, S002-4) |
+| P13 | Sự kiện / outbox / gửi xuyên app / changefeed | **3** | **2** | **3** | changefeed + gửi / nhận chứng từ chung (S002-3, S002-4) |
 | P14 | Bằng chứng · audit chuỗi băm · trace | **4** | **3** | **3** | core.trace.lookup xuyên app (S002-5) |
 | P15 | Menu · màn · khung app (web-shell) | **1** | **2** | **3** | @bizcity/web-shell + registerMenu |
 | P16 | Hook danh sách đóng + registry module, bật theo tenant | **2** | **2** | **3** | module-sdk lõi; hook chung mới (S003-5) |
 | P17 | Nhiều site: registry, /_sites/v1, migration theo nguồn | **3** | **2** | **3** | /_sites/v1 khung vào @bizcity/server (NC-003 C7) |
-| P18 | API: defineAction → REST + MCP, Idempotency-Key, danh mục lỗi | **2** | **3** | **3** | test lõi; open-cake chuyển sang defineAction của lõi (C5) |
+| P18 | API: defineAction → REST + MCP, Idempotency-Key, danh mục lỗi | **3** | **3** | **3** | test lõi; open-cake chuyển sang defineAction của lõi (C5) |
 | P19 | Bốn bước kết nối open-hub (bizcity_hub_setup@1) | **1** | **2** | **1** | /api/v1/setup/* + SetupScreen |
 | P20 | Hệ thiết kế giao diện: token, ui-kit, bốn trạng thái, i18n | **1** | **3** | **2** | @bizcity/ui-kit + token một nguồn (S003-12) |
 
@@ -57,7 +57,7 @@
 - **open-ketoan** (2): entity_attributes theo ngày (0087, 0168), chưa có lớp mềm
 
 ### P5 Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML
-- **open-core** (2): core/documents.ts, workflow.ts, bảng ở 0001 (kiem-luoc-do khớp open-ketoan) — chưa test ở lõi, open-cake chưa dùng
+- **open-core** (3): core/documents.ts (bộ đếm mặc định trên document_sequences), workflow.ts — test/workflow.test.mjs, test/documents-events.test.mjs (cấp số, phiên bản, DocLink, RLS) chạy thật trên Postgres; open-cake chưa dùng
 - **open-cake** (0): —
 - **open-ketoan** (3): test/documents-common.test.ts, workflow.test.ts, dinh-kem-chung-tu.test.ts
 
@@ -82,7 +82,7 @@
 - **open-ketoan** (2): đính kèm có test, chưa lớp storage / đường dẫn ký
 
 ### P10 Việc nền + định kỳ
-- **open-core** (2): core/events.ts (tickClock, thử lại, dead) — chưa API việc / lịch, chưa test
+- **open-core** (3): core/events.ts (tickClock, thử lại, dead) — thử lại → dead có test (test/documents-events.test.mjs); chưa API việc / lịch
 - **open-cake** (2): 3 vòng setInterval ở apps/api/src/server.ts:87-91 (trái luật 'chỉ một đồng hồ')
 - **open-ketoan** (3): test/events.test.ts, modules/system/loi-he-thong.ts
 
@@ -97,7 +97,7 @@
 - **open-ketoan** (3): 0184_tenant_secrets.sql, test/secrets.test.ts
 
 ### P13 Sự kiện / outbox / gửi xuyên app / changefeed
-- **open-core** (2): core/events.ts (outbox, SKIP LOCKED) — chưa test, chưa registerSyncFeed
+- **open-core** (3): core/events.ts (outbox, SKIP LOCKED) — outbox, dedupeKey, giao một lần, thử lại → dead có test chạy thật (test/documents-events.test.mjs); chưa registerSyncFeed
 - **open-cake** (2): outbox riêng channel_commands (0106), chưa /api/v1/sync
 - **open-ketoan** (3): modules/sync/sync.routes.ts, test/spine-changefeed.test.ts
 
@@ -122,7 +122,7 @@
 - **open-ketoan** (3): modules/sites/provisioning.routes.ts, test/site-provisioner.test.ts, site-migrate.test.ts
 
 ### P18 API: defineAction → REST + MCP, Idempotency-Key, danh mục lỗi
-- **open-core** (2): core/actions.ts, errors.ts, http.ts — chưa test ở lõi; open-cake chỉ dùng errors / http
+- **open-core** (3): core/actions.ts, errors.ts, http.ts — test/actions-runtime.test.mjs chạy thật (quyền, khuôn input, Idempotency-Key, bằng chứng, huỷ giao dịch, chạy thử); open-cake chỉ dùng errors / http
 - **open-cake** (3): runtime.ts riêng (spec → REST, action_requests), packages/action-client test — chưa MCP
 - **open-ketoan** (3): test/actions.test.ts, action-meta.test.ts, mcp.test.ts
 

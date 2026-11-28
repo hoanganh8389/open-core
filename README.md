@@ -47,7 +47,7 @@ Luật cấp hệ: [canon open-hub §2.2](https://github.com/hoanganh8389/open-h
 "@bizcity/platform":  "https://github.com/hoanganh8389/open-core/releases/download/v0.3.0/bizcity-platform-0.3.0.tgz"
 ```
 
-Test (Postgres 16 thật, `bizcity-platform` cạnh repo cho `users-check`): `TEST_DATABASE_URL=postgres://… pnpm test`. Đóng gói: `pnpm run build && node tools/dong-goi.mjs 0.3.0`.
+Test (Postgres 16 thật, `bizcity-platform` cạnh repo cho `users-check`): dựng máy chủ thử `docker run -d --name oc-test-pg -e POSTGRES_USER=octest -e POSTGRES_PASSWORD=octest -p 127.0.0.1:55499:5432 postgres:16-alpine` rồi `TEST_DATABASE_URL=postgres://octest:octest@127.0.0.1:55499/postgres pnpm test` — mỗi tệp test tạo CSDL riêng, áp migration lõi, chạy action / chứng từ / sự kiện / RLS thật (`packages/platform/test/_csdl.mjs`); không có `TEST_DATABASE_URL` thì các ca cần CSDL bỏ qua. Đóng gói: `pnpm run build && node tools/dong-goi.mjs 0.4.0`.
 
 ## Giấy phép
 

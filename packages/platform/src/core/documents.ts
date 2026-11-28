@@ -19,13 +19,26 @@ import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { DOC_LINK_ROLES, DOC_REF_RE, SIGN_ROLE_RE, type AttachmentRef, type DocLinkRole, type DocRef, type DocumentLink, type DocumentSignature, type DocumentVersion, type FileInput } from '@bizcity/contracts';
+import { sql } from 'kysely';
 import type { Db } from '../db/client.js';
 import { Errors } from './errors.js';
 import { todayVN } from './date-rules.js';
 
 /** Bộ đếm số chứng từ do Kernel cung cấp (modules/documents/numbering.ts). */
 export type DocumentNumberer = (tx: Db, tenantId: string, key: string, year: number) => Promise<number>;
-let numberer: DocumentNumberer | null = null;
+// [2026-11-28 07:41 PM Johnny Chu - Chu Hoàng Anh] S001-T — bộ đếm mặc định của lõi trên document_sequences (bảng lõi 0001), chép đúng
+// cách của open-ketoan (packages/kernel/src/modules/documents/numbering.ts): app chưa đăng ký bộ đếm riêng (open-cake…) vẫn cấp số được;
+// open-ketoan đăng ký lại bộ đếm của Kernel — cùng bảng, cùng khoá, không nhảy số.
+const KEY_RE = /^[a-z][a-z0-9_:-]{0,63}$/;
+export const defaultNumberer: DocumentNumberer = async (tx, tenantId, key, year) => {
+  if (!KEY_RE.test(key)) throw Errors.validation(`Khoá dãy số không hợp lệ: ${key}`);
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) throw Errors.validation(`Năm của dãy số không hợp lệ: ${year}`);
+  const row = await tx.insertInto('document_sequences').values({ tenant_id: tenantId, doc_type: key, year, last_no: 1 })
+    .onConflict((oc) => oc.columns(['tenant_id', 'doc_type', 'year']).doUpdateSet({ last_no: sql`document_sequences.last_no + 1` }))
+    .returning('last_no').executeTakeFirstOrThrow();
+  return Number(row.last_no);
+};
+let numberer: DocumentNumberer | null = defaultNumberer;
 export function registerDocumentNumberer(fn: DocumentNumberer): void {
   numberer = fn;
 }
