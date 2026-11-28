@@ -2,6 +2,8 @@
 
 <!-- [2026-11-28 04:40 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 — mục lục phase. -->
 
+> <!-- [2026-11-29 12:29 AM Johnny Chu - Chu Hoàng Anh] LANES --> **Ai làm việc nào:** [LANES.md](LANES.md) (lane R ranh giới / lane T ba trụ cột, luật sửa tệp chung, bàn giao) · **giữ chỗ:** [CLAIMS.md](CLAIMS.md).
+
 | Phase | Mục tiêu | Trạng thái |
 |---|---|---|
 | [PHASE-001](PHASE-001-OPEN-KETOAN-TREN-OPEN-CORE/README.md) | open-ketoan chạy trên open-core (bỏ bản `packages/platform` riêng), ma trận open-ketoan × open-cake | ◐ phân tích xong |
