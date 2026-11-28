@@ -1,6 +1,6 @@
 {
   "name": "@bizcity/platform",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "license": "GPL-2.0-or-later",
   "private": true,
   "description": "Platform của Bizcity Core: lỗi chuẩn, HTTP, quyền, bằng chứng, runtime action, sự kiện, số đo, kết nối CSDL, chứng từ dùng chung. Kernel và ứng dụng cùng dựa vào; Platform không biết Kernel (LAYOUT-1).",
