@@ -134,6 +134,10 @@ export async function runModuleMigrations(key: string, dir: string, opts: { read
     await client.query('BEGIN');
     await ensureModuleDb(client, key, opts.reads);
     await client.query('COMMIT');
+    // [2026-11-28 05:15 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-4 — app nào cũng có bảng / cột theo dõi (không chỉ open-ketoan 0053); nguồn = mod_<key>
+    await client.query('CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
+    await client.query('ALTER TABLE schema_migrations ADD COLUMN IF NOT EXISTS module text');
+    await client.query("ALTER TABLE schema_migrations ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'app'");
     const done = new Set((await client.query<{ name: string }>('SELECT name FROM schema_migrations WHERE module = $1', [key])).rows.map((x) => x.name));
     const files = (await readdir(dir)).filter((f) => /^\d{4}_[a-z0-9_]+\.sql$/.test(f)).sort();
     for (const file of files) {
@@ -149,7 +153,7 @@ export async function runModuleMigrations(key: string, dir: string, opts: { read
         await client.query('SET LOCAL ROLE NONE');
         const problems = await moduleTableProblems(client, key);
         if (problems.length) throw new Error(`bảng của module chưa đủ cô lập đơn vị: ${problems.map((p) => `${p.table} ${p.problem}`).join('; ')}`);
-        await client.query('INSERT INTO schema_migrations (name, module) VALUES ($1, $2)', [name, key]);
+        await client.query('INSERT INTO schema_migrations (name, module, source) VALUES ($1, $2, $3)', [name, key, `mod_${key}`]);
         await client.query('COMMIT');
         applied.push(file);
       } catch (err) {

@@ -87,3 +87,24 @@ test('open-ketoan: bốn migration lõi hiện có đều có bản tương đư
   for (const f of core) assert.ok(ketoanLegacyHooks.coveredBy(f, 'platform'));
   assert.equal(ketoanLegacyHooks.coveredBy('0186_doc_bao_cao_pos.sql', 'app'), null);
 });
+
+// [2026-11-28 05:15 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-4 — cột source: bản cài cũ (bảng không có source / module) nâng lên vô hại; dòng mới ghi đúng nguồn
+test('schema_migrations: thêm source + module vào bảng cũ; dòng cũ = app, dòng mới = tên nguồn, ghi nhận coveredBy cũng mang nguồn', { skip: !url && 'không có TEST_DATABASE_URL' }, async () => {
+  const c = new pg.Client({ connectionString: url }); await c.connect();
+  try {
+    await c.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
+    await c.query("CREATE TABLE schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now()); INSERT INTO schema_migrations (name) VALUES ('0001_cu.sql')");
+    const core = dir({ '0002_core.sql': 'CREATE TABLE c2 (id int);', '0003_core_co_san.sql': 'CREATE TABLE c3 (id int);' });
+    const app = dir({ '0001_cu.sql': 'SELECT 1;', '0101_app.sql': 'CREATE TABLE a1 (id int);' });
+    await runMigrations(() => {}, { connectionString: url, sources: [{ name: 'platform', dir: core }, { name: 'app', dir: app }], hooks: { coveredBy: (f) => (f === '0003_core_co_san.sql' ? 'app' : null) } });
+    const rows = (await c.query('SELECT name, source, module FROM schema_migrations ORDER BY name')).rows;
+    assert.deepEqual(rows, [
+      { name: '0001_cu.sql', source: 'app', module: null },
+      { name: '0002_core.sql', source: 'platform', module: null },
+      { name: '0003_core_co_san.sql', source: 'platform', module: null },
+      { name: '0101_app.sql', source: 'app', module: null },
+    ]);
+    // chạy lại vô hại
+    assert.deepEqual(await runMigrations(() => {}, { connectionString: url, sources: [{ name: 'platform', dir: core }, { name: 'app', dir: app }] }), []);
+  } finally { await c.end(); }
+});
