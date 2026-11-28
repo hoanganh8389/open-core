@@ -2,6 +2,8 @@
 
 <!-- [2026-11-28 09:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — nguồn trạng thái từng việc của phase. -->
 
+> **Lane** <!-- [2026-11-29 12:29 AM Johnny Chu - Chu Hoàng Anh] LANES -->: nhóm W1–W3 + S004-W2-9 = lane **R**; nhóm W4–W5 + `S004-DM / CT / DB` = lane **T** ([LANES.md](../LANES.md)).
+>
 > Ký hiệu: ☐ chưa làm · ◐ đang / có một phần · ☑ xong (có bằng chứng ở README) · ⛔ bị chặn.
 
 | Mã | Việc | Repo | Trạng thái |
@@ -44,3 +46,10 @@
 | S004-W5-3 | đẩy (webhook ký HMAC) + kéo (`registerSyncFeed` = S002-3) | open-core | ☐ |
 | S004-W5-4 | `defineReconciler` trên việc nền (S003-11) | open-core | ☐ |
 | S004-W5-5 | cake ↔ POS / kế toán chuyển sang đường chung, bỏ mã riêng (= S002-7) | open-cake | ☐ |
+| **DM** | **Danh mục ở lõi** (lane T) — cơ chế, không bảng danh mục ([NC-008](https://github.com/hoanganh8389/bizcity-platform/tree/main/docs/research/NC-008-BA-TRU-COT-DU-LIEU) W2, chủ chốt ① 2026-11-28) <!-- [2026-11-29 12:16 AM Johnny Chu - Chu Hoàng Anh] S004-DM — nhận việc theo R-FLOW: NC-008 W2 (ADR-P2 / P3 / P6) --> | | |
+| S004-DM-1 | `newId(kind)` + `ulidFrom` (vector) ở `@bizcity/contracts`; bản PHP cùng vector ở W1 | open-core | ◐ TS + test; PHP chờ W1 |
+| S004-DM-2 | `entity_links` (lõi 0007, chỉ thêm, có hiệu lực, RLS) + `entityLinks.*` | open-core | ◐ mã + test PG; chưa app nào dùng |
+| S004-DM-3 | `data_authority` (lõi 0007, chỉ `local`) + cổng `assertWritable`; chuyển chủ ở S004-DB-4 | open-core | ◐ mã + test PG; chưa app nào dùng |
+| S004-DM-4 | `defineAxis` + bảng bản sao sinh theo khuôn spine §3; rút lớp mềm 0103 của Cake (S003-2) | open-core + open-cake | ☐ |
+| S004-DM-5 | `defineValidator` (cây kho / tổ chức không vòng, lỗi có trường + trace — MD-04) | open-core | ☐ |
+| S004-DB-1…4 | `sync_changes` + con trỏ snapshot · `registerSyncFeed` (rút từ kế toán) · `event_inbox` · giao thức chuyển `local → ketoan` (NC-008 W4) | open-core | ☐ |
