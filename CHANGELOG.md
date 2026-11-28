@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (tài liệu — PHASE-004)
+- 2026-11-28 — **PHASE-004 Core độc lập** (<!-- [2026-11-28 09:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — R-CORE-8 (chủ 2026-11-28) -->): R-CORE-8 (Core sở hữu hạ tầng chứng từ, app sở hữu loại chứng từ và nghiệp vụ) ở AGENTS + ARCHITECTURE; năm hạng mục W1–W5 có điều kiện xong đo được; **10 — bản đồ tương thích open-ketoan** (đo: nền riêng 0.1 có 65 tệp, 38 giống / 27 khác / 9 chỉ lõi; 18 tệp khác chỉ là đường import; 0 commit kế toán sửa nền sau mốc tách; gói, API E-1…E-7 / R-1…R-11 / N-1…N-3, migration lõi 0001–0005 ↔ kế toán, cấu hình); **20 — diễn tập nâng cấp trên bản sao CSDL** (bất biến sổ cái L-1…L-8, chứng từ D-1…D-7, lịch sử / quyền H-1…H-5, danh sách trắng, 11 bước có quay lui); **30 — ranh giới Core** (kiểm kê B-1…B-11, cổng `definePort` thay `ctx.ledger`, bộ kiểm ranh giới, thứ tự W2 tới 0.7.0). Sửa: ghi chú `coveredBy` của lõi 0005 trỏ đúng `0187_truc_chung_tu.sql` (open-ketoan đã tới 0186).
+
 ## [0.6.0] — 2026-11-28
 <!-- [2026-11-28 09:36 PM Johnny Chu - Chu Hoàng Anh] S004-W0 — phát hành 0.6.0: gom S003-20 (tìm chứng từ) + S003-4 (defineListAction). Số phiên bản: thêm API, không đổi API đã phát hành 0.5.0. -->
 
