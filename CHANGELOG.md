@@ -2,6 +2,16 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S005-F0 — mốc đo Scoreboard DX, lane T)
+- 2026-11-29 — <!-- [2026-11-29 01:14 AM Johnny Chu - Chu Hoàng Anh] S005-F0 — số đo thật -->
+  - **`tools/scoreboard-dx.mjs`** + `docs/scoreboard/dx.json` → `DX.md`: 30 thao tác phổ thông × 3 app, mức D0–D3 có bằng chứng.
+    - Điểm hôm nay: **open-core 31 %**, open-cake 20 %, open-ketoan 27 %.
+    - Nợ viết tay đo thật: open-cake 17 route / 8 bảng tự vẽ; open-ketoan 211 / 108.
+  - **Module mẫu `golden`** (`packages/platform/test/golden/`): Nhóm khách + Phiếu yêu cầu, viết bằng API lõi hiện có, chạy thật trên Postgres (`golden.test.mjs` 3 / 3).
+    - **177 dòng viết tay** phần máy chủ (đo).
+    - Giao diện chưa đo được (lõi chưa có web-shell), ước ≈ 350 theo màn tương đương ở app.
+  - **`--check` vào `pnpm test`**, kiểu bánh cóc: số dòng golden và nợ viết tay (khi truyền `--app`) không được tăng.
+
 ### Thêm (tài liệu — PHASE-005 khung ứng dụng khai báo, lane T)
 - 2026-11-29 — **PHASE-005** (<!-- [2026-11-29 12:53 AM Johnny Chu - Chu Hoàng Anh] PHASE-005 -->): thiết kế năm lớp L1–L5 trên mã đang có.
   - **10:** 14 gói ⇒ 10 gói phát hành + 4 đường con của `@bizcity/platform`, tiêu chí tách G-1…G-4, luật phụ thuộc.

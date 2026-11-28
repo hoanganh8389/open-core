@@ -62,7 +62,7 @@ Có ba con số, cùng sinh bởi `tools/scoreboard-dx.mjs`:
 2. **Bài chuẩn "tính năng vàng"**:
    - `@bizcity/testing/golden` là module mẫu cố định: một danh mục `golden.nhom_khach` (config) + một chứng từ `golden.phieu_yeu_cau` (có workflow, dòng, hoạt động, nhập, xuất).
    - Công cụ đếm **số dòng developer viết** (bỏ chú thích, bỏ tệp sinh) và **số tệp**.
-   - Hôm nay ước khoảng 900 dòng / khoảng 12 tệp (đọc mã, chưa đo bằng công cụ). Đích ≤ **120 dòng / ≤ 4 tệp**.
+   - **Đo thật 2026-11-29** <!-- [2026-11-29 01:14 AM Johnny Chu - Chu Hoàng Anh] S005-F0 — số đo thật -->: phần máy chủ **177 dòng / 3 tệp** (`packages/platform/test/golden/`, chạy thật 3 / 3). Giao diện chưa đo được (lõi chưa có web-shell). Màn danh sách + form tương đương ở app tốn 108–118 dòng mỗi thực thể ⇒ tổng ước **≈ 530 dòng**. Ước "≈ 900" trước đây bị bỏ. Đích ≤ **120 dòng / ≤ 4 tệp**.
    - Module mẫu cũng là bài test thật của khung: chạy đủ list / get / export / import / transition trên Postgres.
 3. **Nợ viết tay ở app**, đo tự động trên bản chép app như `ma-tran`:
    - số route đăng ký **không** qua `defineAction`;
@@ -89,9 +89,9 @@ Có ba con số, cùng sinh bởi `tools/scoreboard-dx.mjs`:
 
 | Bản | Mở khoá | Điểm DX module mẫu | Tính năng vàng |
 |---|---|---|---|
-| hiện tại (0.6) | — | đo lần đầu ở F0 (CHECKLIST) | ≈ 900 dòng (ước, chưa đo) |
-| 0.8 | Entity Registry + API đọc / xuất / nhập sinh tự động (F1, F2) | ≥ 50 % | ≤ 400 dòng |
+| hiện tại (0.6) — **đo 2026-11-29** | — | lõi **31 %** · open-cake 20 % · open-ketoan 27 % ([DX.md](../../scoreboard/DX.md)) | máy chủ **177** (đo) + giao diện ≈ 350 (ước) ≈ 530 |
+| 0.8 | Entity Registry + API đọc / xuất / nhập sinh tự động (F1, F2) | ≥ 50 % | ≤ 350 dòng (máy chủ ≤ 60) |
 | 0.9 | `defineScreen` + web-shell list / form / detail (F3) | ≥ 75 % | ≤ 200 dòng |
 | 1.0 | module lifecycle + scaffold + chuỗi chứng từ trên detail (F4) | ≥ 85 % | ≤ 120 dòng / 4 tệp |
 
-Con số hôm nay là **ước từ đọc mã**, không phải số đo. Số đo đầu tiên là việc F0, trước mọi việc khác, để có mốc thật.
+Mốc đã đo ở F0 <!-- [2026-11-29 01:14 AM Johnny Chu - Chu Hoàng Anh] S005-F0 — số đo thật -->: `node tools/scoreboard-dx.mjs` sinh [DX.md](../../scoreboard/DX.md) từ [dx.json](../../scoreboard/dx.json). `--check` nằm trong `pnpm test`.
