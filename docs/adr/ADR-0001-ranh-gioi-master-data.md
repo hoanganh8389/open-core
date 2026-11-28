@@ -38,6 +38,7 @@ Ngoài ra, open-cake có bảng `catalog_items` riêng, còn POS và HRM sẽ c�
   - `dvt` — `UnitRatio`, đúng một đơn vị gốc tỷ lệ 1;
   - khuôn phát hiện `bizcity_catalog_hint@1`.
 - **Cơ chế:**
+  - **bảng cơ chế** (không phải bảng danh mục — D2) <!-- [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] ADR-0001 — yêu cầu lane T (LANES §6) -->: `entity_links` (ánh xạ ID xuyên instance) và `data_authority` (chủ của một trục trong tenant, có `epoch`) — lõi 0007, lane T, NC-008 ADR-P3 / P6; sau này thêm `sync_changes`, `sync_cursors`, `event_inbox` (ADR-0002…0004 của lane T);
   - móc `masterdata.referenceCheck`;
   - vòng đời không xoá (nháp → dùng → ngừng; lưu trữ / khôi phục);
   - danh sách `bizcity_list@1`, bằng chứng, cài đặt.
@@ -61,6 +62,8 @@ Ngoài ra, open-cake có bảng `catalog_items` riêng, còn POS và HRM sẽ c�
 Trụ cột R-CANON-18 về danh mục được bảo đảm bằng **hợp đồng + bất biến + cổng**, không bằng bảng ở migration lõi. R-CORE-4 ("thiếu trụ thì thêm bảng ở lõi") **không áp dụng** cho dữ liệu danh mục: lược đồ thuộc về chủ dữ liệu, để lõi phát hành độc lập (R-CORE-8). Kiểu bảng danh mục chỉ có trong khu cách ly `ketoan-legacy` (đến 0.8), sau đó ở Kernel của kế toán.
 
 ### D3. Bất biến định danh — không thương lượng
+
+Mã **MD-1…MD-5** (một chữ số) là **bất biến** của ADR này. Ca nghiệm thu NC-008 viết **MD-01…MD-07** (hai chữ số); việc của lane T là **S004-DM-n**. Ba nghĩa không dùng lẫn.
 
 Mọi chủ dữ liệu phải giữ, và diễn tập nâng cấp đo được (nhóm M của bộ đo):
 
@@ -98,6 +101,7 @@ export const MASTERDATA = definePort<{
 }>('masterdata');
 ```
 
+- `MASTERDATA` là **tra danh mục của chủ trong cùng tiến trình**; ánh xạ ID xuyên instance là `entity_links` (lane T) — hai thứ không thay nhau (LANES §3).
 - Phạm vi vai `branch` / `warehouse` / `org_unit` (`core/authz/scope.ts`, `store.ts`; B-15) sẽ đi qua `orgSubtree` / `warehouseBranch`.
 - Chưa có nhà cấp ⇒ `CAPABILITY_MISSING`. Lõi không tự đọc `branches`.
 
