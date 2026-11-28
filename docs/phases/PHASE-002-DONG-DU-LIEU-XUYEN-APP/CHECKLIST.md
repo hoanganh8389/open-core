@@ -6,7 +6,7 @@
 
 | Mã | Việc | Trạng thái |
 |---|---|---|
-| S002-1 | migration lõi 0005 — bốn bảng chứng từ + `document_sequences` | ☐ |
+| S002-1 | khớp lược đồ bảng lõi (`tools/kiem-luoc-do.mjs`) — bảng chứng từ đã ở 0001 | ☑ |
 | S002-2 | kiểu `*Ref`, `DocLink`, `QtyLine` ở `@bizcity/contracts` | ☑ |
 | S002-3 | khung changefeed `registerSyncFeed` | ☐ |
 | S002-4 | gửi / nhận chứng từ xuyên app | ☐ |
