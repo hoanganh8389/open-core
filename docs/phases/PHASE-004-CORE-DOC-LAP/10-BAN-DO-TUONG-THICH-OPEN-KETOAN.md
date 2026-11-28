@@ -57,6 +57,24 @@ Luật: mỗi migration lõi mới phải có quyết định cho CSDL kế toá
 
 Tóm tắt — đủ ở [30](30-RANH-GIOI-CORE.md): kiểu ≈ 50 bảng kế toán trong `db/types.ts`; `ctx.ledger` + `registerLedgerReader / Submitter / CancelGate`; `masterdata/{default-warehouse,partner.repository,catalog-ensure}.ts`; `classifyLedgerTriggerError`; vai ký `cashier / chief_accountant / director`; thang cài đặt `accounting_unit`; `BOOK_MODE`. **Nguyên tắc:** mã ra khỏi lõi đi thẳng vào open-ketoan (cùng nội dung), nên phía kế toán chỉ đổi đường import — hành vi sổ không đổi.
 
+### 5.1 Đổi nguồn sang lõi 0.7 — codemod <!-- [2026-11-29 12:10 AM Johnny Chu - Chu Hoàng Anh] S004-W2-2 -->
+
+Lõi 0.7 không còn kiểu bảng kế toán trong `Database`; phần chỉ kế toán dùng nằm ở **khu cách ly** `@bizcity/platform/ketoan-legacy/*` (còn phát hành ở 0.7, xoá ở 0.8). Kế toán chạy **một lần** lúc đổi nguồn:
+
+```bash
+node <open-core>/tools/doi-nguon/ketoan-0.7.mjs <open-ketoan> --thu   # xem trước: 13 tệp sửa · 3 tệp thêm (đo trên dev 0237a4d)
+node <open-core>/tools/doi-nguon/ketoan-0.7.mjs <open-ketoan>
+```
+
+| Việc | Ở đâu |
+|---|---|
+| `import type { Account, LedgerEntriesTable, … } from '@bizcity/platform/db/types'` → tên thuộc khu cách ly đổi sang `@bizcity/platform/ketoan-legacy/db-types` | 11 tệp `packages/kernel` |
+| tệp chuyển tiếp `apps/api/src/db/types.ts` thêm `export * from '@bizcity/platform/ketoan-legacy/db-types'` | 1 tệp |
+| `src/ketoan-legacy-nap.ts` (nạp kiểu bảng vào `AppDatabase`) ở `apps/api`, `packages/kernel`, `packages/module-sdk`; bản `apps/api` gọi `installKetoanLegacy()` (móc khoá `okti_`) và `main.ts` import ở dòng đầu | 3 tệp mới + `main.ts` |
+| `@bizcity/platform/masterdata/*`, `documents/signature.routes`, `core/catalog-warn` | **không sửa** — đường cũ là tệp trỏ tới khu cách ly ở 0.7 |
+
+Ma trận app chạy codemod trên bản tạm trước khi đo (trả tệp gốc sau): open-ketoan sau đổi nguồn = **khớp tên 647 import, thiếu 0; lỗi kiểu MỚI = đúng 7 lỗi cũ E-1…E-7**, không thêm lỗi nào do tách. 0.8: kế toán mang `ketoan-legacy/` về Kernel (đổi import từ `@bizcity/platform/ketoan-legacy/*` sang đường của mình), lõi xoá khu + tệp trỏ (S004-W2-7).
+
 ## 6. Cấu hình / triển khai
 
 | Thứ | Đổi |

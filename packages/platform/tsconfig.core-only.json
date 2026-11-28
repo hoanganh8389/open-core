@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true },
+  "exclude": ["src/ketoan-legacy/**", "src/masterdata/**", "src/documents/signature.routes.ts", "src/core/catalog-warn.ts", "dist", "node_modules"]
+}

@@ -7,9 +7,10 @@
     "R-VAI": "vai / vai ký / quyền kế toán cứng",
     "R-THANG": "bậc cài đặt kế toán cứng (accounting_unit)",
     "R-ENV": "cấu hình sổ cứng (BOOK_MODE)",
-    "R-TEP": "tệp chuyển tiếp *-ketoan-* (xoá sau B4)"
+    "R-TEP": "tệp chuyển tiếp *-ketoan-* (xoá sau B4)",
+    "R-CACH-LY": "khu cách ly ketoan-legacy / import vào khu (xoá ở 0.8)"
   },
-  "total": 154,
+  "total": 97,
   "files": {
     "packages/contracts/src/documents.ts": {
       "R-SO": 1
@@ -48,6 +49,9 @@
     "packages/platform/src/core/authz/scope.ts": {
       "R-BANG": 1
     },
+    "packages/platform/src/core/catalog-warn.ts": {
+      "R-CACH-LY": 1
+    },
     "packages/platform/src/core/libraries/index.ts": {
       "R-BANG": 1
     },
@@ -58,22 +62,41 @@
     "packages/platform/src/db/migrate-ketoan-legacy.ts": {
       "R-TEP": 1
     },
-    "packages/platform/src/db/types.ts": {
-      "R-BANG": 42,
-      "R-THANG": 1
-    },
     "packages/platform/src/documents/signature.routes.ts": {
-      "R-BANG": 3,
-      "R-VAI": 8
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/catalog-warn.ts": {
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/db-types.ts": {
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/index.ts": {
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/masterdata/catalog-ensure.ts": {
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/masterdata/default-warehouse.ts": {
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/masterdata/partner.repository.ts": {
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/pos-installation-auth.ts": {
+      "R-CACH-LY": 1
+    },
+    "packages/platform/src/ketoan-legacy/signature.routes.ts": {
+      "R-CACH-LY": 1
     },
     "packages/platform/src/masterdata/catalog-ensure.ts": {
-      "R-BANG": 7
+      "R-CACH-LY": 1
     },
     "packages/platform/src/masterdata/default-warehouse.ts": {
-      "R-BANG": 1
+      "R-CACH-LY": 1
     },
     "packages/platform/src/masterdata/partner.repository.ts": {
-      "R-BANG": 8
+      "R-CACH-LY": 1
     },
     "packages/platform/src/system/diagnostics.ts": {
       "R-VAI": 1
