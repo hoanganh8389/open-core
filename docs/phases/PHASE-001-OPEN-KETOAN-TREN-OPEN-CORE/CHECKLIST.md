@@ -8,7 +8,7 @@
 |---|---|---|---|
 | S001-1 | công cụ ma trận `tools/ma-tran-app.mjs` | open-core | ☑ |
 | S001-2 | `PlatformConfig` + thư mục tường minh | open-core | ☑ |
-| S001-3 | hook migration tương đương | open-core | ☐ |
+| S001-3 | hook migration tương đương | open-core | ☑ |
 | S001-4 | cột `source` cho `schema_migrations` | open-core | ☐ |
 | S001-5 | phát hành 0.4.0 | open-core | ☐ |
 | S001-6 | B2 — sửa E-1…E-7 + R-1 | open-ketoan | ⛔ NT-HT-003 giữ `core/auth.ts`, `authz/*` |
