@@ -8,6 +8,18 @@
 
 **open-platform** (`bizcity-platform`: chuẩn + bộ kiểm) quy định → **open-core (repo này)** hiện thực và phải qua bộ kiểm đó → app = open-core + module → **open-setup** cấp instance. Repo này **không** chứa chuẩn (đổi chuẩn ⇒ PR ở open-platform trước) và **không** chứa nghiệp vụ.
 
+<!-- [2026-11-28 12:24 AM Johnny Chu - Chu Hoàng Anh] NC-004 — trụ cột xuyên doanh nghiệp, open-core bảo đảm (canon R-CANON-18) -->
+## Trụ cột xuyên doanh nghiệp (lõi phải bảo đảm)
+
+**Trụ cột xuyên doanh nghiệp (canon R-CANON-18, [NC-004](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/research/NC-004-TRU-COT-XUYEN-DOANH-NGHIEP.md)) — không app nào định nghĩa lại:**
+- `qty` luôn quy về **đơn vị nhỏ nhất** (tỷ lệ 1); `unit` / `unitQty` / `unitRatio` chỉ để hiện; số lượng `numeric(18,4)`, tỷ lệ `(18,6)`, tiền `(18,2)`.
+- `tenant ↔ blog_id` một-một; chuỗi nhiều cửa hàng = nhiều tenant; chi nhánh / kho / phòng ban là cây `branches` trong tenant.
+- `contact_id` ↔ `partner.code` theo SPINE §4; `item_id` ULID bất biến.
+- Chứng từ: `doc_ref` `<module>.<type>:<id>` + `version` + `content_hash`, bốn bảng, `document_links`, workflow YAML `<module>.<type>.workflow.yaml`; gửi đi với `Idempotency-Key = <doc_ref>@<version>` + `traceparent`.
+- Vai quyền, cài đặt, meta / bản ghi mềm, tệp, API, MCP, **bốn bước kết nối open-hub** (`bizcity_hub_setup@1`), đệm, kiểm, bàn điều tra: dùng của lõi.
+- **R-CORE-4** trụ nào app cần mà lõi chưa có ⇒ thêm ở lõi (bảng ở `migrations` lõi, kiểu ở `@bizcity/contracts`, action / `register*` ở `@bizcity/platform`) theo NC-004 §7; không để app tự dựng bản riêng.
+- **R-CORE-5** đường `/api/v1/setup/*` (bốn bước, `bizcity_hub_setup@1`) là của lõi; app chỉ khai bước ② ③ ④ của mình.
+
 ## Luật
 
 - **R-PLAT-1** không import gói nghiệp vụ (`@ketoan/*`, `@open-ketoan/*`, `@cake/*`, `@open-cake/*`); không chuỗi nghiệp vụ cứng (`ketoan`, `crm`, `kt_`, `cake_`) — đọc từ `PlatformConfig` / cấu hình app. `tools/kiem-khung.mjs` chặn.
