@@ -10,7 +10,7 @@
 | S001-2 | `PlatformConfig` + thư mục tường minh | open-core | ☑ |
 | S001-3 | hook migration tương đương | open-core | ☑ |
 | S001-4 | cột `source` cho `schema_migrations` | open-core | ☑ |
-| S001-5 | phát hành 0.4.0 | open-core | ☐ |
+| S001-5 | phát hành 0.4.0 | open-core | ☑ |
 | S001-6 | B2 — sửa E-1…E-7 + R-1 | open-ketoan | ⛔ NT-HT-003 giữ `core/auth.ts`, `authz/*` |
 | S001-7 | B3 — đổi nguồn gói, Docker, bộ kiểm, ADR-0040 | open-ketoan | ☐ |
 | S001-8 | diễn tập nâng cấp trên bản sao | open-ketoan | ☐ |

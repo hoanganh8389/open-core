@@ -2,6 +2,14 @@
 
 ## [Chưa phát hành]
 
+## [0.4.0] — 2026-11-28
+
+<!-- [2026-11-28 05:45 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-5 -->
+**Lõi sẵn sàng cho open-ketoan chuyển sang (PHASE-001 phía open-core xong) + định danh chung trên dây (PHASE-002).** Không phá API của 0.3.x: tên export giữ nguyên; migration lõi không thêm tệp mới.
+
+### Thêm (S001-5)
+- Ma trận app: làn **chạy thật** `--chay-that` — đóng lõi thành tgz, cài vào bản tạm của open-cake, chạy đủ test trên Postgres (`CAKE_TEST_DATABASE_URL`); báo số qua / hỏng / bỏ qua. 0.4.0: open-cake **199 / 199**, 0 bỏ qua; open-ketoan khớp tên 646 / 646, không lỗi kiểu mới ngoài 7 lỗi đã biết (PHASE-001 §1.1, sửa phía app ở S001-6).
+
 ### Thêm (S002-1)
 - 2026-11-28 — **`tools/kiem-luoc-do.mjs`** (<!-- [2026-11-28 05:34 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 S002-1 -->): dựng CSDL chỉ có migration lõi và CSDL của app (open-ketoan: dãy riêng + `ketoanLegacyHooks`), so **cột · ràng buộc · trigger · RLS** của mọi bảng lõi; khác biệt có chủ ý ghi kèm lý do (`DA_BIET`), khác lạ ⇒ KHÔNG ĐẠT. Lần đầu: 28 bảng, 547 mục, 12 khác có chủ ý (ràng buộc vai kế toán, khoá ngoại / trigger kế toán), **0 khác lạ** — bốn bảng chứng từ, `document_sequences`, `document_signatures`, `mcp_confirm_tokens`, `event_outbox` đã có trong `0001` lõi và khớp từng cột với open-ketoan.
 
