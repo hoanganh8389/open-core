@@ -1874,6 +1874,36 @@ export interface DocumentActivitiesTable {
   created_at: TimestampDefault;
 }
 
+// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-2 — lõi 0007: ánh xạ ID xuyên instance (chỉ thêm; đóng = valid_to)
+/** Lõi 0007: ánh xạ ID của app ↔ instance khác (NC-008 ADR-P6). */
+export interface EntityLinksTable {
+  id: Generated<string>;
+  tenant_id: string;
+  entity_type: string;
+  local_id: string;
+  peer_instance: string;
+  remote_id: Generated<string>;
+  remote_code: Generated<string>;
+  link_kind: 'canonical' | 'alias' | 'merged_from' | 'proposal';
+  valid_from: TimestampDefault;
+  valid_to: ColumnType<Date | null, string | null | undefined, string | null>;
+  created_by: string;
+  closed_by: string | null;
+  evidence_ref: Generated<string>;
+}
+
+// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-3 — lõi 0007: chủ của trục danh mục trong tenant
+/** Lõi 0007: chủ dữ liệu theo trục (NC-008 ADR-P3 §2). */
+export interface DataAuthorityTable {
+  tenant_id: string;
+  axis: string;
+  owner_instance: string;
+  epoch: Generated<number>;
+  state: Generated<'local' | 'transferring' | 'replica'>;
+  since: TimestampDefault;
+  history: ColumnType<unknown[], string | undefined, string>;
+}
+
 /** 0045 (documents.links): tham chiếu giữa chứng từ. */
 export interface DocumentLinksTable {
   id: Generated<string>;
@@ -2123,6 +2153,9 @@ export interface Database extends AppDatabase {
   document_sequences: DocumentSequencesTable;
   business_documents: BusinessDocumentsTable;
   document_activities: DocumentActivitiesTable;
+  // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-2/3 — bảng cơ chế danh mục lõi 0007
+  entity_links: EntityLinksTable;
+  data_authority: DataAuthorityTable;
   catalog_trash: CatalogTrashTable;
   document_versions: DocumentVersionsTable;
   document_links: DocumentLinksTable;

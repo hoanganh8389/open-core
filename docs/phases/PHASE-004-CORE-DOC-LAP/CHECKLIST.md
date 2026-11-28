@@ -44,3 +44,10 @@
 | S004-W5-3 | đẩy (webhook ký HMAC) + kéo (`registerSyncFeed` = S002-3) | open-core | ☐ |
 | S004-W5-4 | `defineReconciler` trên việc nền (S003-11) | open-core | ☐ |
 | S004-W5-5 | cake ↔ POS / kế toán chuyển sang đường chung, bỏ mã riêng (= S002-7) | open-cake | ☐ |
+| **MD** | **Danh mục ở lõi** — cơ chế, không bảng danh mục ([NC-008](https://github.com/hoanganh8389/bizcity-platform/tree/main/docs/research/NC-008-BA-TRU-COT-DU-LIEU) W2, chủ chốt ① 2026-11-28) <!-- [2026-11-29 12:16 AM Johnny Chu - Chu Hoàng Anh] S004-MD — nhận việc theo R-FLOW: NC-008 W2 (ADR-P2 / P3 / P6) --> | | |
+| S004-MD-1 | `newId(kind)` + `ulidFrom` (vector) ở `@bizcity/contracts`; bản PHP cùng vector ở W1 | open-core | ◐ TS + test; PHP chờ W1 |
+| S004-MD-2 | `entity_links` (lõi 0007, chỉ thêm, có hiệu lực, RLS) + `entityLinks.*` | open-core | ◐ mã + test PG; chưa app nào dùng |
+| S004-MD-3 | `data_authority` (lõi 0007, chỉ `local`) + cổng `assertWritable`; chuyển chủ ở S004-SY | open-core | ◐ mã + test PG; chưa app nào dùng |
+| S004-MD-4 | `defineAxis` + bảng bản sao sinh theo khuôn spine §3; rút lớp mềm 0103 của Cake (S003-2) | open-core + open-cake | ☐ |
+| S004-MD-5 | `defineValidator` (cây kho / tổ chức không vòng, lỗi có trường + trace — MD-04) | open-core | ☐ |
+| S004-SY-1…4 | `sync_changes` + con trỏ snapshot · `registerSyncFeed` (rút từ kế toán) · `event_inbox` · giao thức chuyển `local → ketoan` (NC-008 W4) | open-core | ☐ |
