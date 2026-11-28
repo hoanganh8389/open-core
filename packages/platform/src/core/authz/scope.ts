@@ -17,6 +17,7 @@ import { type AuthContext, type Permission } from '../auth.js';
 import { authorize, scopeOf } from './engine.js';
 import { buildCatalog, codePermissions, type CatalogEntry } from './catalog.js';
 import { loadAuthzSnapshot } from './store.js';
+import { masterdataFor } from '../masterdata-port.js';
 import type { AuthzDecision, AuthzPurpose, AuthzResourceContext, AuthzScopeResult } from './types.js';
 
 export type ScopeVia = 'tenant' | 'scope' | 'none';
@@ -109,24 +110,27 @@ export interface LanGanChiNhanh {
  * con (theo `branches.unit_path`, 0174), tính tại thời điểm gọi. Vai trò của đơn vị đã tắt bị bỏ.
  */
 export async function lanGanTheoChiNhanh(conn: Db, tenantId: string, userId?: string): Promise<LanGanChiNhanh[]> {
-  const { rows } = await sql<LanGanChiNhanh>`
-    WITH a AS (
-      SELECT a.user_id::text AS user_id, a.scope_type, a.scope_id, a.role, a.tenant_role_id::text AS tenant_role_id, r.base_role, r.kind, r.label
-        FROM user_role_assignments a LEFT JOIN tenant_roles r ON r.id = a.tenant_role_id AND r.tenant_id = a.tenant_id
-       WHERE a.tenant_id = ${tenantId} ${userId ? sql`AND a.user_id = ${userId}` : sql``}
-         AND a.revoked_at IS NULL AND a.scope_type IN ('branch', 'warehouse', 'org_unit')
-         AND a.valid_from <= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
-         AND (a.valid_to IS NULL OR a.valid_to >= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date)
-         AND (a.tenant_role_id IS NULL OR r.is_active))
-    SELECT a.user_id, b.code, a.scope_type, a.role, a.tenant_role_id, a.base_role, a.kind, a.label, NULL::text AS nut
-      FROM a JOIN branches b ON a.scope_type = 'branch' AND b.tenant_id = ${tenantId} AND b.id = a.scope_id
-    UNION ALL
-    SELECT a.user_id, b.code, a.scope_type, a.role, a.tenant_role_id, a.base_role, a.kind, a.label, NULL::text
-      FROM a JOIN warehouses w ON a.scope_type = 'warehouse' AND w.tenant_id = ${tenantId} AND w.id = a.scope_id
-             JOIN branches b ON b.tenant_id = ${tenantId} AND b.id = w.branch_id
-    UNION ALL
-    SELECT a.user_id, b.code, a.scope_type, a.role, a.tenant_role_id, a.base_role, a.kind, a.label, n.code
-      FROM a JOIN branches n ON a.scope_type = 'org_unit' AND n.tenant_id = ${tenantId} AND n.id = a.scope_id
-             JOIN branches b ON b.tenant_id = ${tenantId} AND (b.unit_path = n.unit_path OR left(b.unit_path, length(n.unit_path) + 1) = n.unit_path || '/')`.execute(conn);
-  return rows;
+  // [2026-11-29 12:55 AM Johnny Chu - Chu Hoàng Anh] S004-W2-9 (B-15, ADR-0001 D5) — lõi chỉ đọc bảng của lõi (user_role_assignments, tenant_roles); mã chi nhánh / kho / cây đơn vị hỏi CHỦ qua cổng MASTERDATA.
+  //   Chưa có nhà cấp ⇒ lần gán theo chi nhánh / kho / nút không ra dòng nào (đóng — không bao giờ mở rộng quyền).
+  const { rows } = await sql<{ user_id: string; scope_type: LanGanChiNhanh['scope_type']; scope_id: string; role: Role | null; tenant_role_id: string | null; base_role: Role | null; kind: string | null; label: string | null }>`
+    SELECT a.user_id::text AS user_id, a.scope_type, a.scope_id::text AS scope_id, a.role, a.tenant_role_id::text AS tenant_role_id, r.base_role, r.kind, r.label
+      FROM user_role_assignments a LEFT JOIN tenant_roles r ON r.id = a.tenant_role_id AND r.tenant_id = a.tenant_id
+     WHERE a.tenant_id = ${tenantId} ${userId ? sql`AND a.user_id = ${userId}` : sql``}
+       AND a.revoked_at IS NULL AND a.scope_type IN ('branch', 'warehouse', 'org_unit')
+       AND a.valid_from <= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date
+       AND (a.valid_to IS NULL OR a.valid_to >= (now() AT TIME ZONE 'Asia/Ho_Chi_Minh')::date)
+       AND (a.tenant_role_id IS NULL OR r.is_active)`.execute(conn);
+  if (!rows.length) return [];
+  const md = masterdataFor(conn, tenantId, 'core.authz.scope');
+  if (!md) return [];
+  const ids = (k: LanGanChiNhanh['scope_type']) => [...new Set(rows.filter((r) => r.scope_type === k).map((r) => r.scope_id))];
+  const info = await md.orgScopes({ branch: ids('branch'), warehouse: ids('warehouse'), orgUnit: ids('org_unit') });
+  const out: LanGanChiNhanh[] = [];
+  const base = (r: (typeof rows)[number]) => ({ user_id: r.user_id, scope_type: r.scope_type, role: r.role, tenant_role_id: r.tenant_role_id, base_role: r.base_role, kind: r.kind, label: r.label });
+  for (const r of rows) {
+    if (r.scope_type === 'branch') { const b = info.branch[r.scope_id]; if (b) out.push({ ...base(r), code: b.code, nut: null }); }
+    else if (r.scope_type === 'warehouse') { const w = info.warehouse[r.scope_id]; if (w) out.push({ ...base(r), code: w.branchCode, nut: null }); }
+    else { const n = info.orgUnit[r.scope_id]; if (n) for (const code of n.branchCodes) out.push({ ...base(r), code, nut: n.code }); }
+  }
+  return out;
 }

@@ -10,7 +10,7 @@
     "R-TEP": "tệp chuyển tiếp *-ketoan-* (xoá sau B4)",
     "R-CACH-LY": "khu cách ly ketoan-legacy / import vào khu (xoá ở 0.8)"
   },
-  "total": 97,
+  "total": 96,
   "files": {
     "packages/contracts/src/documents.ts": {
       "R-SO": 1
@@ -45,9 +45,6 @@
     "packages/platform/src/core/authz-ketoan-legacy.ts": {
       "R-VAI": 23,
       "R-TEP": 1
-    },
-    "packages/platform/src/core/authz/scope.ts": {
-      "R-BANG": 1
     },
     "packages/platform/src/core/catalog-warn.ts": {
       "R-CACH-LY": 1

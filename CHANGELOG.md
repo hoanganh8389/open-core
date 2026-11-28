@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S004-W2-9 — cổng MASTERDATA, phạm vi vai không đọc bảng kế toán)
+- 2026-11-29 — <!-- [2026-11-29 12:55 AM Johnny Chu - Chu Hoàng Anh] S004-W2-9 --> `core/masterdata-port.ts`: `MASTERDATA` (`orgScopes({ branch, warehouse, orgUnit })`) — lõi hỏi chủ danh mục về cây đơn vị / kho (ADR-0001 D5). `authz/scope.ts` (`lanGanTheoChiNhanh`) và `authz/store.ts` (nút `org_unit`) chỉ đọc bảng của lõi rồi gọi cổng. **Thiếu nhà cấp ⇒ đóng:** lần gán theo chi nhánh / kho / nút không cấp phạm vi; nút không tra được ⇒ lần gán `org_unit` không có scope (trước: path rỗng lọt vào `orgPaths`). Nhà cấp của open-ketoan (đúng SQL cũ) ở khu cách ly, đăng ký trong `installKetoanLegacy()`. Tự kiểm so đúng câu SQL cũ.
+
 ### Đổi (S004-W1-7a — open-ketoan biên dịch trên lõi: 0 lỗi kiểu mới)
 - 2026-11-29 — <!-- [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a --> `pendingMigrations(q?, opts)`: không truyền kết nối ⇒ tự mở tới `DATABASE_URL` / `opts.connectionString` (chỗ gọi cũ `pendingMigrations()` chạy nguyên — E-1…E-4). Khu cách ly: `SYSTEM_ROLES` (danh sách vai tĩnh của kế toán, E-7); `installKetoanLegacy()` gọi luôn `ketoanAuthzPreset()` (R-1). Codemod đổi nguồn thêm luật E-5…E-7. Ma trận `--only ketoan --strict`: **ĐẠT, lỗi mới 0** (trước: 7).
 

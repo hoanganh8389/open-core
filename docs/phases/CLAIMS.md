@@ -12,7 +12,7 @@
 | R | S004-W1-3b / 3c / 5a bộ đo bất biến bản 2 + dò API + diễn tập chạy lại / quay lui | `tools/dien-tap/*`, `test/dien-tap*.test.mjs` | `feat/s004-w1-3b-do-bat-bien-v2` · #32 (chồng #30) | mở PR | 2026-11-29 |
 | R | ADR-0001 ranh giới Master Data + R-CORE-9 | `docs/adr/ADR-0001-*`, `AGENTS.md` | #30 | mở PR | 2026-11-29 |
 | R | S004-W1-7a E-1…E-7 + R-1 về 0 từ phía lõi (tương thích `pendingMigrations` + codemod đổi nguồn) | `db/migrate.ts`, `ketoan-legacy/*`, `tools/doi-nguon/*` | `feat/s004-w1-2b-loi-kieu-ketoan` | mở PR | 2026-11-29 |
-| R | S004-W2-9 cổng `MASTERDATA` + phạm vi vai qua cổng | `core/ports.ts` (dùng), `core/authz/scope.ts`, `store.ts` | — | đã nêu ở ADR-0001, chưa có nhánh | 2026-11-29 |
+| R | S004-W2-9 cổng `MASTERDATA` + phạm vi vai qua cổng | `core/ports.ts` (dùng), `core/authz/scope.ts`, `store.ts` | `feat/s004-w2-9-cong-masterdata` (chồng W1-7a) | mở PR | 2026-11-29 |
 | T | S004-DM-1…3 `newId`, `entity_links`, `data_authority` | `contracts/master-data-core.ts`, `core/master-data.ts`, migration 0007 | `feat/s004-md-danh-muc-loi` · #29 | mở PR | 2026-11-28 |
 | T | LANES + CLAIMS (tài liệu này) | `docs/phases/LANES.md`, `CLAIMS.md` | `docs/lanes-ba-tru-cot` | mở PR | 2026-11-29 |
 | T | S004-DM-4 `defineAxis` + bảng bản sao | `core/master-data.ts`, migration (giữ số khi bắt đầu) | — | giữ chỗ, chờ #29 | 2026-11-29 |

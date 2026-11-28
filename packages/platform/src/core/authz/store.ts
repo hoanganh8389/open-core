@@ -14,6 +14,7 @@ import type { Db } from '../../db/client.js';
 import { ADMIN_ROLES, impliedBy } from '../auth.js';
 import { legacyAssignment, systemRole, systemRoles, SYSTEM_ROLE_PREFIX } from './legacy.js';
 import type { AuthzAssignment, AuthzPurpose, AuthzRole, AuthzRule, AuthzScope } from './types.js';
+import { masterdataFor } from '../masterdata-port.js';
 
 export const TENANT_ROLE_PREFIX = 'tenant:';
 
@@ -53,7 +54,8 @@ export function roleAssignmentToAuthz(userId: string, row: RoleAssignmentRow): A
   // [2026-11-17 04:40 PM khanhtd] NT-HT-003 — GĐ5: nút sơ đồ tổ chức = phạm vi org_unit (cây con) + từng chi nhánh thuộc cây con
   const scopes: AuthzScope[] = row.scope_type === 'tenant' ? [{ kind: 'all' }]
     : row.scope_type === 'org_unit'
-      ? [{ kind: 'org_unit', id: String(row.scope_id), path: row.org_path ?? '', subtree: true }, ...(row.org_branch_ids ?? []).map((id): AuthzScope => ({ kind: 'branch', id: String(id) }))]
+      // [2026-11-29 12:55 AM Johnny Chu - Chu Hoàng Anh] S004-W2-9 — nút chưa tra được (không có nhà cấp / nút đã mất) ⇒ KHÔNG có phạm vi (trước: path '' lọt vào orgPaths của scopeOf)
+      ? (row.org_path ? [{ kind: 'org_unit' as const, id: String(row.scope_id), path: row.org_path, subtree: true }, ...(row.org_branch_ids ?? []).map((id): AuthzScope => ({ kind: 'branch', id: String(id) }))] : [])
       : [{ kind: row.scope_type, id: String(row.scope_id) }];
   return {
     id: `ura:${row.id}`, principalKind: 'user', principalId: String(userId),
@@ -81,16 +83,12 @@ export async function loadAuthzSnapshot(conn: Db, tenantId: string, userId: stri
   if (primary) {
     // [2026-11-17 04:40 PM khanhtd] NT-HT-003 — GĐ5: nạp path + chi nhánh của nút cho lần gán org_unit (một truy vấn)
     const nodeIds = [...new Set(rows.rows.filter((r) => r.scope_type === 'org_unit' && r.scope_id).map((r) => String(r.scope_id)))];
+    // [2026-11-29 12:55 AM Johnny Chu - Chu Hoàng Anh] S004-W2-9 (B-15) — đường dẫn + chi nhánh của nút hỏi CHỦ qua cổng MASTERDATA (trước: SQL đọc branches). Không có nhà cấp / nút không có ⇒ lần gán org_unit không có phạm vi.
     if (nodeIds.length) {
-      const nodes = (await sql<{ id: string; path: string; branch_ids: string[] | null }>`
-        SELECT n.id::text, replace(n.unit_path, '/', chr(92)) AS path,
-               (SELECT array_agg(b.id::text) FROM branches b
-                 WHERE b.tenant_id = n.tenant_id AND (b.unit_path = n.unit_path OR left(b.unit_path, length(n.unit_path) + 1) = n.unit_path || '/')) AS branch_ids
-          FROM branches n WHERE n.tenant_id = ${tenantId} AND n.id = ANY(${nodeIds}::bigint[])`.execute(conn)).rows;
-      const byId = new Map(nodes.map((n) => [n.id, n]));
+      const info = await masterdataFor(conn, tenantId, 'core.authz.snapshot')?.orgScopes({ branch: [], warehouse: [], orgUnit: nodeIds });
       for (const r of rows.rows) {
-        const n = r.scope_type === 'org_unit' ? byId.get(String(r.scope_id)) : undefined;
-        if (n) { r.org_path = n.path; r.org_branch_ids = n.branch_ids ?? []; }
+        const n = r.scope_type === 'org_unit' ? info?.orgUnit[String(r.scope_id)] : undefined;
+        if (n) { r.org_path = n.path; r.org_branch_ids = n.branchIds; }
       }
     }
     assignments.push(legacyAssignment(String(userId), primary), ...rows.rows.map((r) => roleAssignmentToAuthz(userId, r)));
