@@ -18,7 +18,16 @@
 
 ## 3. Bất biến phải giữ (lệch = 0)
 
-Đo bằng `tools/dien-tap/do-bat-bien` (việc **S004-W1-3**: một tệp SQL chỉ đọc + một trình chạy in JSON). Mỗi mục là một băm hoặc một con số; so trước (bản A) và sau (bản B) — **khác là KHÔNG ĐẠT**, trừ các mục ở §3.4.
+Đo bằng **`tools/dien-tap/do-bat-bien.mjs`** (S004-W1-3, **đã có** <!-- [2026-11-28 10:08 PM Johnny Chu - Chu Hoàng Anh] S004-W1-3 -->): mọi câu là SELECT trong giao dịch `READ ONLY`; mỗi mục một SAVEPOINT (một câu lỗi không làm hỏng mục khác); băm = md5 từng dòng cộng tiền tố 60 bit (không phụ thuộc thứ tự, nhẹ với bảng lớn) + số dòng; bảng / cột không có ⇒ `khong-ap-dung` / `thieu-cot` (không đoán).
+
+```bash
+node tools/dien-tap/do-bat-bien.mjs --db "$DB_A" --nhan "bản A <commit>" --out truoc.json   # bước 2
+node tools/dien-tap/do-bat-bien.mjs --db "$DB_A" --nhan "bản B <commit>" --out sau.json     # bước 6 (cùng CSDL, sau migrate)
+node tools/dien-tap/do-bat-bien.mjs --so truoc.json sau.json                                  # ĐẠT ⇒ exit 0 · lệch ⇒ exit 1
+node tools/dien-tap/do-bat-bien.mjs --db "$DB_A" --chi-tiet L-3                               # tìm chỗ lệch theo đơn vị
+```
+
+Luật so: mục `bang` — trước = sau (số dòng + băm); mục `khong` (L-2, L-4, L-6, H-1 chuỗi) — phải 0, **hoặc giữ đúng mốc sai sẵn** của dữ liệu thật (ghi biên bản; nâng cấp làm tăng **hay tự sửa** đều là lệch); mục `sau` (W-1…W-3, danh sách trắng §3.4) — chỉ đo khi có cột / bảng mới, phải 0. **Không có trong bộ đo:** L-8 (chạy `scripts/doi-chieu-ke-toan.sql` của open-ketoan, so cột "lech"), H-4 (quyền hiệu lực — đo qua API ở bước 7), D-5 phần tệp trên đĩa (so sha256 `DATA_DIR/attachments` — việc của `dien-tap-nang-cap.sh`). Mọi mục khác của §3 có mã riêng trong bộ đo. Mỗi mục là một băm hoặc một con số; so trước (bản A) và sau (bản B) — **khác là KHÔNG ĐẠT**, trừ các mục ở §3.4.
 
 ### 3.1 Sổ cái
 
@@ -90,7 +99,7 @@
 
 | Mã | Việc | Ở đâu |
 |---|---|---|
-| S004-W1-3 | `tools/dien-tap/do-bat-bien.sql` + trình chạy (JSON, `--chi-tiet`) đủ các mục §3; tự kiểm trên CSDL test của lõi (dữ liệu mẫu) | open-core (bộ đo chung, đọc bảng theo tên; bảng không có thì bỏ qua và ghi "không áp dụng") |
+| S004-W1-3 | ☑ `tools/dien-tap/do-bat-bien.mjs` (JSON, `--so`, `--chi-tiet`); tự kiểm 8 ca trên CSDL lõi + bảng sổ dựng theo cột thật của open-ketoan (`test/dien-tap.test.mjs`) | open-core |
 | S004-W1-4 | `0187_truc_chung_tu.sql` ở open-ketoan + `CORE_COVERED_BY_KETOAN['0005_…'] = '0187_truc_chung_tu.sql'` | open-ketoan (R-FLOW) + open-core |
 | S004-W1-5 | `scripts/dien-tap-nang-cap.sh` (bước 1–11, tham số: tệp dump, thư mục DATA_DIR, ref A, ref B) | open-ketoan |
 | S004-W1-6 | chạy diễn tập trên bản sao CSDL dev, rồi bản sao CSDL chạy thật; nộp biên bản | open-ketoan, người có quyền dữ liệu thật |
