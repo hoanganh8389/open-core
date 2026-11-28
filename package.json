@@ -1,7 +1,7 @@
 {
   "name": "open-core",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "open-core — lõi chạy của Bizcity Open (@bizcity/platform, @bizcity/contracts, @bizcity/server…): một nguồn, mọi gói chung một số phiên bản. GPL-2.0-or-later.",
   "license": "GPL-2.0-or-later",
   "type": "module",

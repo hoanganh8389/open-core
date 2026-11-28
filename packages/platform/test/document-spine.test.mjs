@@ -111,3 +111,27 @@ test('ctx.documents trong action: chỉ tạo / chuyển chứng từ của modu
   assert.equal((await tx((trx) => documentSpine.get(trx, t1, r.data.id))).status, 'waiting');
   assert.equal(await ma(runAction(tao, { type: 'ban-hang.don' }, { auth: nguoi(t1, 1, 'documents:write'), requestId: 'r2', idempotencyKey: 'khoa-don-0002' })), 'VALIDATION_ERROR');
 });
+
+// [2026-11-28 08:18 PM Johnny Chu - Chu Hoàng Anh] S003-14b — loại phản chiếu: app giữ trạng thái, lõi giữ đầu phiếu + hoạt động
+test('phản chiếu: khai đúng một cách ghi; trạng thái lạ bị từ chối; thêm → cập nhật → đổi trạng thái ghi hoạt động; gọi lặp không ghi thêm', { skip }, async () => {
+  assert.throws(() => defineDocumentType({ type: 'thu.hai_cach', label: 'x', series: 'X', workflow: wf, mirror: { statuses: { draft: 'draft' } } }), /đúng một/);
+  assert.throws(() => defineDocumentType({ type: 'thu.sai_nhom', label: 'x', mirror: { statuses: { moi: 'review' } } }), /moi→review/);
+  defineDocumentType({ type: 'thu.yeu_cau', label: 'Yêu cầu thử', mirror: { statuses: { draft: 'draft', pending: 'pending', confirmed: 'approved', rejected: 'cancelled' } } });
+  const key = '01JH0000000000000000000000';
+  const m = (status, extra = {}) => tx((trx) => documentSpine.mirror(trx, t1, 'thu.yeu_cau', { key, status, total: 500000, partnerRef: 'CAKE-1', ...extra }, 'user:1', extra.reason ? { reason: extra.reason } : {}));
+  const h = await m('draft');
+  assert.deepEqual([h.docRef, h.status, h.group, h.docNo, h.total], [`thu.yeu_cau:${key}`, 'draft', 'draft', key, 500000]);
+  await m('draft', { total: 600000 });
+  await m('pending');
+  await m('pending');
+  const r = await m('rejected', { reason: 'Hết hàng' });
+  assert.deepEqual([r.group, r.total], ['cancelled', 500000]);
+  const act = await tx((trx) => documentSpine.activities(trx, t1, h.docRef));
+  assert.deepEqual(act.map((a) => [a.kind, a.from, a.to, a.reason]), [['create', null, 'draft', ''], ['transition', 'draft', 'pending', ''], ['transition', 'pending', 'rejected', 'Hết hàng']]);
+  assert.equal(await ma(m('shipped')), 'VALIDATION_ERROR');
+  assert.equal(await ma(tx((trx) => documentSpine.transition(trx, t1, h.docRef, 'submit', actorOf(lap)))), 'CONFLICT', 'loại phản chiếu không chuyển ở lõi');
+  assert.equal(await ma(tx((trx) => documentSpine.create(trx, t1, 'thu.yeu_cau', {}, 'user:1'))), 'CONFLICT');
+  assert.equal(await ma(tx((trx) => documentSpine.mirror(trx, t1, 'thu.don', { key: 'x1', status: 'draft' }, 'user:1'))), 'CONFLICT', 'loại quản lý không phản chiếu');
+  await tx((trx) => documentSpine.archive(trx, t1, h.docRef, 'user:1', 'Dọn'));
+  assert.equal((await tx((trx) => documentSpine.get(trx, t1, h.docRef))).archived, true);
+});

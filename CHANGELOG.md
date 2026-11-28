@@ -2,6 +2,12 @@
 
 ## [Chưa phát hành]
 
+## [0.5.0] — 2026-11-28
+<!-- [2026-11-28 08:18 PM Johnny Chu - Chu Hoàng Anh] S003-14b — phát hành 0.5.0: trục chứng từ (quản lý + phản chiếu), đa tiền tệ, test runtime lõi -->
+
+### Thêm (S003-14b — loại chứng từ phản chiếu)
+- 2026-11-28 — `defineDocumentType` khai **đúng một** cách ghi: `workflow` (lõi cấp số, giữ trạng thái — `create` / `update` / `transition`) hoặc `mirror: { statuses }` (app giữ bảng nguồn + trạng thái, vd yêu cầu đặt hàng của open-cake do cửa hàng báo trạng thái). `documentSpine.mirror()` thêm / cập nhật đầu phiếu `<type>:<key>`, đổi trạng thái ⇒ hoạt động `transition`; gọi lặp không ghi thêm. Loại chứng từ nhận gạch dưới ở phần loại (khớp doc_ref spine 1.2: `cake.order_request`). Test 7 ca.
+
 ### Thêm (S003-14, S003-19 — trục chứng từ + đa tiền tệ)
 - 2026-11-28 — **Trục chứng từ chung** (<!-- [2026-11-28 08:12 PM Johnny Chu - Chu Hoàng Anh] S003-14 -->, NC-007 §3): migration lõi `0005_platform_truc_chung_tu.sql` (đầu phiếu thêm `currency`, `fx_rate`, `total_fc`, `org_unit_code`, `archived_at`; bảng `document_activities` chỉ thêm + RLS; `doc_type` nhận gạch nối); `core/document-spine.ts` — `defineDocumentType` (loại + dãy số + workflow YAML + khoá meta zod), `create` / `get` / `update` (chỉ nháp) / `transition` (workflow.plan) / `note` / `archive` (chỉ khi đã kết thúc, cần lý do) / `restore` / `activities`; `ctx.documents.*` trong action (chỉ loại của module mình). Không chạy 0005 trên CSDL open-ketoan lúc này (`CORE_COVERED_BY_KETOAN`, PHASE-001 R-4): `business_documents` của open-ketoan sinh ở 0156.
 - 2026-11-28 — **Đa tiền tệ** (S003-19, Q-ERP-1, NC-007 §8): contracts `CURRENCY_RE`, `BASE_CURRENCY`, `Money`, `currencyDigits`, `roundCurrency`, `toBaseAmount` (theo quy ước R-MONEY: số tiền là number); `resolveMoney` — cùng tiền ⇒ tỷ giá 1; ngoại tệ cần tỷ giá + nguyên tệ, tổng tiền hạch toán do máy chủ tính; đóng băng khi rời nháp.
