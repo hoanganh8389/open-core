@@ -9,7 +9,7 @@
 | S003-1 | chuẩn `bizcity_list@1` (0.1 bản nháp → 0.2 schema + vector) | ◐ |
 | S003-2 | `user_meta` ở migration lõi + `ctx.userMeta` | ☐ |
 | S003-3 | `registerScreens` / `registerMenu` + `/api/v1/man-hinh`, `/api/v1/menu` | ⛔ dời từ open-ketoan khi NT-HT-003 trả chỗ |
-| S003-4 | `defineListAction` + xuất CSV / XLSX + MCP chỉ đọc | ☐ |
+| S003-4 | `defineListAction` + xuất CSV / XLSX + MCP chỉ đọc | ◐ lõi xong: `defineListAction` + xuất csv / json / ndjson, 57 / 57; còn xlsx, xuất nền, MCP đã sẵn sàng (đọc), ListScreen (S003-6) |
 | S003-5 | hook lõi mới (danh sách đóng) | ☐ |
 | S003-6 | `@bizcity/web-shell`: ListScreen, FilterBar, SavedViews, menu, màn bốn bước | ☐ |
 | S003-7 | open-cake dùng khung chung | ☐ |
@@ -25,4 +25,4 @@
 | S003-17 | `media` + trình điều khiển S3-compatible (R2 / S3 / MinIO) + màn Media (NC-007 §6) | ☐ |
 | S003-18 | `ledger_ref {book, org_unit_code}` + cây đơn vị + catalog feed / đề xuất từ kế toán (NC-007 §1–2) | ☐ |
 | S003-19 | `Money` + `fx_rate` ở trục chứng từ (đa tiền tệ, Q-ERP-1 chốt có — NC-007 §8) | ◐ lõi xong: `currency` / `fx_rate` / `total_fc` (0005), contracts `currencyDigits` / `roundCurrency` / `toBaseAmount`, `resolveMoney`; còn bảng tỷ giá phía kế toán, spine 1.3 |
-| S003-20 | tìm chứng từ chuẩn hoá `core.document.list` + `list-query.ts` (NC-006 §3, NC-007 §3) | ◐ lõi xong (51 / 51); còn palette ⌘K ở web-shell, app đưa action vào mountActions |
+| S003-20 | tìm chứng từ chuẩn hoá `core.document.list` + `core.document.export` (một ListDef, S003-4) + `list-query.ts` (NC-006 §3, NC-007 §3) | ◐ lõi xong; còn palette ⌘K ở web-shell, app đưa action vào mountActions |

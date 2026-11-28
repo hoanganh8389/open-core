@@ -7,7 +7,7 @@
 
 | App | Mức trung bình |
 |---|---|
-| open-core | **54 %** |
+| open-core | **55 %** |
 | open-cake | **51 %** |
 | open-ketoan | **65 %** |
 
@@ -18,7 +18,7 @@
 | P3 | Cài đặt + thang phạm vi | **2** | **1** | **3** | registerSettingScopes (Q-PIL-6), test ở lõi |
 | P4 | user_meta + lớp mềm (entity_meta, record_types, records) | **1** | **3** | **2** | dời lên lõi (S003-2) |
 | P5 | Chứng từ: 4 bảng, đánh số, phiên bản, liên kết, workflow YAML | **4** | **3** | **3** | open-ketoan lên 0005 qua R-FLOW; màn tìm chứng từ (core.document.list) |
-| P6 | Danh sách · lọc · con trỏ · xuất (bizcity_list@1) | **2** | **2** | **3** | defineListAction + ListScreen + xuất chung (S003-4, S003-6) |
+| P6 | Danh sách · lọc · con trỏ · xuất (bizcity_list@1) | **3** | **2** | **3** | xlsx + xuất nền > 10 000 dòng (S003-11), ListScreen ở web-shell (S003-6), app dùng defineListAction |
 | P7 | Nhập chung (ghép cột + chạy thử) | **0** | **0** | **3** | nhập chung ở lõi (S003-10) |
 | P8 | Hoạt động (chatter) trên doc_ref | **3** | **0** | **1** | bảng activities + khối Hoạt động (S003-9) |
 | P9 | Tệp / Storage (đường dẫn ký) | **2** | **3** | **2** | Storage của open-cake lên lõi (C5) |
@@ -62,7 +62,7 @@
 - **open-ketoan** (3): test/documents-common.test.ts, workflow.test.ts, dinh-kem-chung-tu.test.ts
 
 ### P6 Danh sách · lọc · con trỏ · xuất (bizcity_list@1)
-- **open-core** (2): core/list-query.ts + core/document-search.ts (core.document.list: q, lọc, sort, con trỏ keyset, count, sums, phạm vi vai) — test/document-search.test.mjs chạy cùng vector bizcity-platform; defineListAction chung + xuất (S003-4) chưa
+- **open-core** (3): core/list.ts (defineListAction: danh sách + xuất csv / json / ndjson, quyền xuất riêng, bằng chứng, che cột theo quyền), list-query.ts, document-search.ts (core.document.list / export là một ListDef) — test/list-action.test.mjs, document-search.test.mjs chạy cùng vector + schema bizcity-platform; chưa xlsx / xuất nền / ListScreen
 - **open-cake** (2): con trỏ ở care/inbox.ts, screens/Contacts.tsx — chưa xuất
 - **open-ketoan** (3): apps/web/src/components/DataGrid.tsx (xuất xlsx), test/excel-export-all.test.ts — khuôn riêng, chưa theo bizcity_list@1
 
