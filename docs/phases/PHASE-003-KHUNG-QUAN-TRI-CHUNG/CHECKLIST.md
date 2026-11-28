@@ -19,7 +19,7 @@
 | S003-11 | việc nền + định kỳ | ☐ |
 | S003-12 | `bizcity_ux@1` — token, khung, màn mẫu (f1–f20 chủ đã duyệt 2026-11-28; Q-UX-1 theo mockup) | ◐ |
 | S003-13 | scoreboard + màn Tình trạng nền tảng | ◐ |
-| S003-14 | trục chứng từ: `defineDocumentType`, meta đầu phiếu (`business_documents.meta`, khoá khai trong loại — không thêm bảng), `document_versions`, `document_activities` (NC-007 §3) | ◐ lõi xong: 0005, `document-spine.ts`, `ctx.documents.create / update / transition / note / archive / restore`, test 6 ca; còn màn + open-cake / open-ketoan dùng |
+| S003-14 | trục chứng từ: `defineDocumentType`, meta đầu phiếu (`business_documents.meta`, khoá khai trong loại — không thêm bảng), `document_versions`, `document_activities` (NC-007 §3) | ◐ lõi xong: 0005, `document-spine.ts`, `ctx.documents.create / update / transition / note / archive / restore`, test 6 ca; 0.5.0 đã phát hành; open-cake dùng (yêu cầu đặt hàng, phản chiếu — chạy thật 199 / 199); còn màn + open-ketoan lên 0005 (R-FLOW) |
 | S003-15 | thanh công cụ + "Tất cả bộ lọc" + cây đơn vị trong `<ListScreen>`; `archive / restore / purge` (NC-007 §4) | ☐ |
 | S003-16 | `bizcity_issues@1` + màn Nhật ký & trace, Lỗi & sửa lỗi (NC-007 §5) | ☐ |
 | S003-17 | `media` + trình điều khiển S3-compatible (R2 / S3 / MinIO) + màn Media (NC-007 §6) | ☐ |
