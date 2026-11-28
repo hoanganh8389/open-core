@@ -198,6 +198,16 @@ Trong cửa sổ đó, lane T **không merge** PR chạm tệp chung ở §4. La
 
 ## 8. Nhật ký bàn giao
 
+### 2026-11-29 01:17 AM · lane T · S005-F1 Entity Registry bản đầu
+- PR: `feat/s005-f1-entity` (mở). #37 (F0) đã merge @ `30a1039`.
+- Tệp chung đã chạm: không. Đường con mới `packages/platform/src/entity/` (lane T); CHANGELOG khối riêng; CLAIMS; `docs/scoreboard/dx.json` / `DX.md` (của lane T).
+- Số đã giữ: không (không có migration).
+- Kiểm: `pnpm test` có CSDL **98 / 98 ĐẠT, 0 bỏ qua**; golden **177 ⇒ 78 dòng**, bánh cóc hạ mốc; điểm DX lõi **31 % ⇒ 48 %**.
+- Lane kia cần biết:
+  - `defineEntity` đặt `sideEffects: ['documents']` cho ghi sinh ra (chưa có giá trị `masterdata` riêng cho lớp config / record). Nếu lane R đổi danh sách `ActionSideEffect` thì báo.
+  - `standard-check` ở máy hiện thêm SC-STD-4 vì thư mục bizcity-platform đang ở nhánh `std/core-first` (PR #45 của bizcity-platform, chưa merge). Khi #45 merge, open-core chép khối "Lõi trước" vào AGENTS.md + mẫu PR. Đó là việc S005-BX-3 của lane T.
+- Việc kế tiếp của lane T: S005-F1-2 (`extendEntity` / `registerField` / `registerRelation` / `registerValidator` + SC-ENT-3) rồi F1-3 (`entity_meta` ở lõi — sẽ giữ số migration 0008 ở CLAIMS).
+
 ### 2026-11-29 01:14 AM · lane T · S005-F0 mốc đo Scoreboard DX
 - PR: `feat/s005-f0-moc-do` (mở).
 - Tệp chung đã chạm: `package.json` — **chỉ thêm** bước `node tools/scoreboard-dx.mjs --check` vào script `test`, không đổi phiên bản / phụ thuộc. Lane R lưu ý khi gộp. CHANGELOG khối riêng; CLAIMS.

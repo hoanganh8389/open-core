@@ -2,6 +2,24 @@
 
 ## [Chưa phát hành]
 
+### Thêm (S005-F1 — Entity Registry bản đầu, lane T)
+- 2026-11-29 — <!-- [2026-11-29 01:17 AM Johnny Chu - Chu Hoàng Anh] S005-F1 — Entity Registry bản đầu --> **`@bizcity/platform/entity/entity`**.
+  - **API:**
+    - `defineEntity({ key, label, class, storage: { table }, fields, permissions, lifecycle?, path? })` cùng `field.{text, code, number, money, bool, enum, date}`;
+    - `listEntities`, `getEntity`, `entityMeta`;
+    - action `core.meta.entities` (GET /api/v1/meta/entities, lọc theo quyền đọc).
+  - **Một khai báo sinh:**
+    - schema tạo / sửa (chữ hoa, mặc định, enum, ngày; số nhận chuỗi);
+    - `<key>.list` / `.export` (qua `defineListAction`: cột, tìm, sắp, phép lọc theo kiểu, ẩn lưu trữ);
+    - `<key>.get`.
+  - **Riêng lớp `config` / `record`**, sinh thêm:
+    - `<key>.create` / `.update` / `.archive`, có chống trùng `unique` (CONFLICT nêu trường) và sự kiện `<key>.changed`;
+    - `<key>.import`: ghép cột theo nhãn + `aliases`, chạy thử mặc định, lỗi theo dòng + trường, có lỗi thì không ghi dòng nào.
+  - **SC-ENT-1 chặn lúc nạp:** lớp `master` / `replica` / `document` / `ledger` không sinh ghi, và khai quyền ghi cho chúng là lỗi.
+  - **Module mẫu:** Nhóm khách viết lại bằng `defineEntity` — **112 ⇒ 13 dòng**, cùng test, cùng mã action. Golden 177 ⇒ **78 dòng**; điểm DX lõi 31 % ⇒ **48 %**.
+  - Test: `entity.test.mjs` 5 ca + golden 3 ca. `pnpm test` 98 / 98.
+  - **Chưa có:** `extendEntity` / `registerField`, `storage: 'meta'`, `field.ref`, JSON Schema, che `sensitive`, XLSX.
+
 ### Thêm (S005-F0 — mốc đo Scoreboard DX, lane T)
 - 2026-11-29 — <!-- [2026-11-29 01:14 AM Johnny Chu - Chu Hoàng Anh] S005-F0 — số đo thật -->
   - **`tools/scoreboard-dx.mjs`** + `docs/scoreboard/dx.json` → `DX.md`: 30 thao tác phổ thông × 3 app, mức D0–D3 có bằng chứng.
