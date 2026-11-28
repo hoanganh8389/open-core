@@ -1,7 +1,7 @@
 # PHASE-002 — Dòng dữ liệu xuyên app trên open-core (chứng từ, đồng bộ danh mục, truy nguồn)
 <!-- [2026-11-28 05:18 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 — chủ (2026-11-28): "tính xuyên suốt về mặt dữ liệu đối với các repo sử dụng chung open-core sẽ thế nào?" → "tiếp": đưa ba thiếu sót lớn (bảng chứng từ ở lõi, đường gửi / nhận chứng từ chung, khung changefeed chung) + truy nguồn liên app thành phase. -->
 
-> **Áp dụng cho:** open-core · mọi app trên open-core (open-cake, open-ketoan, POS, HRM, MRP…) · **Trạng thái:** ☐ — kế hoạch
+> **Áp dụng cho:** open-core · mọi app trên open-core (open-cake, open-ketoan, POS, HRM, MRP…) · **Trạng thái:** ☐ — kế hoạch; Q-DD-1…4 chốt theo đề xuất (một API, một quy tắc cho mọi app)
 > **Trên:** canon R-CANON-13 (mỗi app một CSDL), R-CANON-18 (trụ cột) · bizcity-platform [NC-004](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/research/NC-004-TRU-COT-XUYEN-DOANH-NGHIEP.md) §3, §11 · chuẩn [SPINE 1.2](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/standard/BIZCITY-SPINE-v1.md), [DOCUMENT](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/standard/BIZCITY-DOCUMENT-v1.md), [LINEAGE](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/standard/BIZCITY-LINEAGE-v1.md), [EVENT](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/standard/BIZCITY-EVENT-v1.md), [ORDER-FLOW](https://github.com/hoanganh8389/bizcity-platform/blob/main/docs/standard/BIZCITY-ORDER-FLOW-v1.md)
 > **Trạng thái từng việc:** [CHECKLIST.md](CHECKLIST.md) · **Đi sau:** [PHASE-001](../PHASE-001-OPEN-KETOAN-TREN-OPEN-CORE/README.md) (S002-1 cần `coveredBy` của S001-3)
 
@@ -32,9 +32,10 @@ mỗi mũi tên = outbox bên gửi + document_links bên nhận · sửa trư�
 | G-5 | Kiểu TS cho định danh chung | `@bizcity/contracts`: `ContactRef`, `PartnerRef`, `ItemRef`, `BranchRef`, `DocRef`, `DocLink`, `QtyLine` (zod, khớp `schema/spine/refs.schema.json` 1.2 — vector dùng chung làm test) |
 | G-6 | Regex `doc_ref` 1.2 chưa đối chiếu dữ liệu thật | `tools/kiem-doc-ref.mjs`: đếm `doc_ref` / `doc_no` ngoài bộ ký tự hoặc > 200 ký tự trên **bản sao** CSDL (chỉ đọc) — chạy trước khi open-ketoan áp |
 
-## 2. Vấn đề cần chốt
+## 2. Nguyên tắc chung (chốt)
+<!-- [2026-11-28 05:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 — chủ (2026-11-28): "Q-DD không cần hỏi sâu, xuyên suốt để thống nhất api, quy tắc, nguyên tắc là ok" ⇒ chốt theo đề xuất -->
 
-| Mã | Câu hỏi | Đề xuất |
+| Mã | Câu hỏi | Chốt (theo đề xuất) |
 |---|---|---|
 | Q-DD-1 | Chữ ký giữa hai app cùng Workspace | HMAC bằng khoá máy-máy do open-setup cấp mỗi cặp instance (không dùng khoá `biz-…` của Hub — R-STD-KEY-2) |
 | Q-DD-2 | App nhận tắt / chưa bật | bộ gửi giữ trong outbox, thử lại có giãn; quá hạn ⇒ trạng thái "chưa gửi được" hiện ở bàn điều tra, **không** tự huỷ chứng từ nguồn |
@@ -60,3 +61,4 @@ Một chuỗi mẫu cake → POS → kho → kế toán chạy trên bốn CSDL 
 ## Nhật ký
 
 - 2026-11-28: mở phase (kế hoạch), từ phân tích dòng dữ liệu xuyên app.
+- 2026-11-28: <!-- [2026-11-28 05:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-002 — chủ (2026-11-28): "Q-DD không cần hỏi sâu, xuyên suốt để thống nhất api, quy tắc, nguyên tắc là ok" ⇒ chốt theo đề xuất --> Q-DD-1…4 chốt theo đề xuất; S002-4 hết chặn.
