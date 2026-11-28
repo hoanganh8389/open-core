@@ -1889,6 +1889,8 @@ export interface SchemaMigrationsTable {
   applied_at: TimestampDefault;
   /** NULL: Core; khoá module: migration của module (0053, ADR-0011 D4). */
   module: ColumnType<string | null, string | null | undefined, string | null>;
+  /** [2026-11-28 05:15 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-4 — nguồn: `app` (mặc định, cả dòng cũ) · tên nguồn lõi (vd `platform`) · `mod_<key>`. */
+  source: ColumnType<string, string | undefined, string>;
 }
 
 /** Toàn bộ cơ sở dữ liệu. */

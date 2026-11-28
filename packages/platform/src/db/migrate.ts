@@ -86,6 +86,10 @@ export async function runMigrations(log: (msg: string) => void = console.log, op
   const applied: string[] = [];
   try {
     await client.query('CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
+    // [2026-11-28 05:15 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-4 — nguồn của từng migration (core / app / mod_<key>; D-PLAT-5) + cột module (module-db.ts dùng; open-ketoan có từ 0053, app khác chưa có).
+    //   Khoá chính GIỮ là name: planMigrations đã chặn trùng tên giữa các nguồn. Chạy lại vô hại; bản cài cũ: dòng cũ nhận source = 'app'.
+    await client.query("ALTER TABLE schema_migrations ADD COLUMN IF NOT EXISTS source text NOT NULL DEFAULT 'app'");
+    await client.query('ALTER TABLE schema_migrations ADD COLUMN IF NOT EXISTS module text');
     // Khoá để hai tiến trình khởi động cùng lúc không chạy migration hai lần.
     await client.query('SELECT pg_advisory_lock(727001)');
     try {
@@ -96,7 +100,7 @@ export async function runMigrations(log: (msg: string) => void = console.log, op
         // [2026-11-28 05:08 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 — nội dung đã có ở nguồn khác ⇒ ghi nhận, không chạy lại (chống tạo trùng bảng)
         const cover = opts.hooks?.coveredBy?.(m.file, m.source);
         if (cover) {
-          await client.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT DO NOTHING', [m.file]);
+          await client.query('INSERT INTO schema_migrations (name, source) VALUES ($1, $2) ON CONFLICT DO NOTHING', [m.file, m.source]);
           done.add(m.file);
           log(`→ ${m.file} (${m.source}) đã có ở ${cover} — ghi nhận, không chạy`);
           continue;
@@ -106,7 +110,7 @@ export async function runMigrations(log: (msg: string) => void = console.log, op
         await client.query('BEGIN');
         try {
           await client.query(sql);
-          await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [m.file]);
+          await client.query('INSERT INTO schema_migrations (name, source) VALUES ($1, $2)', [m.file, m.source]);
           await client.query('COMMIT');
           applied.push(m.file);
         } catch (err) {
