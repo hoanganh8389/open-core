@@ -1,4 +1,4 @@
-// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-1…3 — cơ chế danh mục ở lõi chạy thật (NC-008): newId + vector ULID, entity_links chỉ thêm
+// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-1…3 — cơ chế danh mục ở lõi chạy thật (NC-008): newId + vector ULID, entity_links chỉ thêm
 // (đổi ánh xạ có dấu vết, tra theo thời điểm, không gộp ngầm, RLS), data_authority (local, cổng ghi, epoch không giảm, đi một chiều).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -15,7 +15,7 @@ before(async () => { if (!url) return; t1 = await themDonVi(url, 'md-1'); t2 = a
 after(async () => { await c?.end(); await db.destroy(); });
 const tx = (fn) => db.transaction().execute(fn);
 
-test('S004-MD-1 newId: vector ULID cố định (bản PHP cùng vector làm ở W1), sắp theo thời gian, trục khoá bằng code bị từ chối', () => {
+test('S004-DM-1 newId: vector ULID cố định (bản PHP cùng vector làm ở W1), sắp theo thời gian, trục khoá bằng code bị từ chối', () => {
   // Vector: thời điểm 1469918176385 ms + 10 byte 0x00…0x09 ⇒ phải ra đúng chuỗi này ở mọi hiện thực (bizcity_sync@1 vector, W1).
   const bytes = Uint8Array.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   assert.equal(ulidFrom(1469918176385, bytes), '01ARYZ6S41000G40R40M30E209');
@@ -34,7 +34,7 @@ test('S004-MD-1 newId: vector ULID cố định (bản PHP cùng vector làm ở
 
 const L = { entityType: 'item', peerInstance: 'ketoan-01' };
 
-test('S004-MD-2 link: gắn lặp trả dòng cũ; đổi ánh xạ đóng dòng cũ + thêm dòng mới; tra theo thời điểm', { skip }, async () => {
+test('S004-DM-2 link: gắn lặp trả dòng cũ; đổi ánh xạ đóng dòng cũ + thêm dòng mới; tra theo thời điểm', { skip }, async () => {
   const a = await tx((trx) => entityLinks.link(trx, t1, { ...L, localId: 'cake-sp-1', remoteId: '01ARYZ6S41000G40R40M30E209', remoteCode: 'SUA900' }, 'user:1'));
   const again = await tx((trx) => entityLinks.link(trx, t1, { ...L, localId: 'cake-sp-1', remoteId: '01ARYZ6S41000G40R40M30E209', remoteCode: 'SUA900' }, 'user:1'));
   assert.equal(again.id, a.id, 'idempotent');
@@ -54,7 +54,7 @@ test('S004-MD-2 link: gắn lặp trả dòng cũ; đổi ánh xạ đóng dòng
   assert.equal(byCode.localId, 'cake-sp-1');
 });
 
-test('S004-MD-2 không gộp ngầm: một remote đã thuộc local khác ⇒ CONFLICT; alias / proposal không chiếm chỗ canonical', { skip }, async () => {
+test('S004-DM-2 không gộp ngầm: một remote đã thuộc local khác ⇒ CONFLICT; alias / proposal không chiếm chỗ canonical', { skip }, async () => {
   await tx((trx) => entityLinks.link(trx, t1, { ...L, localId: 'cake-sp-2', remoteId: '01BX5ZZKBKACTAV9WEVGEMMVS0' }, 'user:1'));
   assert.equal(await ma(tx((trx) => entityLinks.link(trx, t1, { ...L, localId: 'cake-sp-3', remoteId: '01BX5ZZKBKACTAV9WEVGEMMVS0' }, 'user:1'))), 'CONFLICT');
   const p = await tx((trx) => entityLinks.link(trx, t1, { ...L, localId: 'cake-sp-3', remoteId: '01BX5ZZKBKACTAV9WEVGEMMVS0', kind: 'proposal' }, 'system:doi-chieu'));
@@ -64,7 +64,7 @@ test('S004-MD-2 không gộp ngầm: một remote đã thuộc local khác ⇒ C
   assert.equal(await ma(tx((trx) => entityLinks.link(trx, t1, { ...L, entityType: 'Hang Hoa', localId: 'x', remoteId: 'y' }, 'user:1'))), 'VALIDATION_ERROR');
 });
 
-test('S004-MD-2 chỉ thêm ở CSDL: sửa cột / xoá / mở lại dòng đã đóng đều bị trigger chặn; đóng một lần thì được', { skip }, async () => {
+test('S004-DM-2 chỉ thêm ở CSDL: sửa cột / xoá / mở lại dòng đã đóng đều bị trigger chặn; đóng một lần thì được', { skip }, async () => {
   const l = await tx((trx) => entityLinks.link(trx, t1, { ...L, localId: 'cake-sp-9', remoteId: '01BX5ZZKBKACTAV9WEVGEMMVS9' }, 'user:1'));
   await assert.rejects(c.query('UPDATE entity_links SET remote_id = $2 WHERE id = $1', [l.id, 'khac']), /chỉ thêm/);
   await assert.rejects(c.query('DELETE FROM entity_links WHERE id = $1', [l.id]), /chỉ thêm/);
@@ -74,7 +74,7 @@ test('S004-MD-2 chỉ thêm ở CSDL: sửa cột / xoá / mở lại dòng đã
   assert.equal(await ma(tx((trx) => entityLinks.close(trx, t1, l.id, 'user:1'))), 'NOT_FOUND', 'đóng lần hai');
 });
 
-test('S004-MD-2 cô lập đơn vị: RLS — đơn vị khác không thấy, không ghi hộ', { skip }, async () => {
+test('S004-DM-2 cô lập đơn vị: RLS — đơn vị khác không thấy, không ghi hộ', { skip }, async () => {
   await tx((trx) => entityLinks.link(trx, t1, { ...L, localId: 'rls-1', remoteId: '01BX5ZZKBKACTAV9WEVGEMMVSR' }, 'user:1'));
   const app = new pg.Client({ connectionString: url }); await app.connect();
   try {
@@ -87,7 +87,7 @@ test('S004-MD-2 cô lập đơn vị: RLS — đơn vị khác không thấy, kh
   } finally { await app.end(); }
 });
 
-test('S004-MD-3 data_authority: ensureLocal không giành chủ; cổng ghi theo trạng thái; epoch không giảm; không đi tắt local → replica', { skip }, async () => {
+test('S004-DM-3 data_authority: ensureLocal không giành chủ; cổng ghi theo trạng thái; epoch không giảm; không đi tắt local → replica', { skip }, async () => {
   const a = await tx((trx) => dataAuthority.ensureLocal(trx, t1, 'item', 'cake-01'));
   assert.deepEqual([a.ownerInstance, a.state, a.epoch], ['cake-01', 'local', 1]);
   const b = await tx((trx) => dataAuthority.ensureLocal(trx, t1, 'item', 'kiot-01'));

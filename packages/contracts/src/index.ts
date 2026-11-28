@@ -43,4 +43,4 @@ export * from './lineage.js';
 export * from './item-master.js'; // [2026-11-03 10:30 PM Johnny Chu - Chu Hoàng Anh] PHASE-024 — B2a: bizcity_item_master@1 (định danh, mã có phiên bản, kết quả tra mã) // [2026-11-03 09:00 PM Johnny Chu - Chu Hoàng Anh] PHASE-025 — W1: bizcity_lineage@1 // [2026-11-03 02:00 PM Johnny Chu - Chu Hoàng Anh] PHASE-024 — ADR-0020: căn cứ của mã (R-GATE-11)
 export * from './entity-codes.js'; // [2026-11-08 01:49 PM Johnny Chu - Chu Hoàng Anh] PHASE-026 — S026-4: entity_codes / resolveEntity (đối tượng, chi nhánh, kho)
 export * from './library-bindings.js'; // [2026-11-09 08:00 PM Johnny Chu - Chu Hoàng Anh] PHASE-030 — S030-51b: bảng gắn trường ↔ thư viện + khuôn libraryFindings[]
-export * from './master-data-core.js'; // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-1…3 — cơ chế danh mục ở lõi (NC-008): newId, entity_links, data_authority
+export * from './master-data-core.js'; // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-1…3 — cơ chế danh mục ở lõi (NC-008): newId, entity_links, data_authority

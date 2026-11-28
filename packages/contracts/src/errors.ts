@@ -69,7 +69,7 @@ export const ERROR_REASONS = {
   SAMPLE_EXISTS: 'Bản cài đã có Công ty Mẫu — mở ở Thiết lập nhanh (TI15), không tạo thêm',
   DOC_CANCELLED: 'Phiếu đã huỷ',
   DOC_SOURCE_READONLY: 'Chứng từ nhận từ hệ thống khác: sửa ở nguồn rồi gửi lại',
-  // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-3 — chủ dữ liệu theo trục (NC-008 ADR-P3): ghi vào trục không thuộc mình; đưa vào BIZCITY-ERRORS §4 ở đợt W1
+  // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-3 — chủ dữ liệu theo trục (NC-008 ADR-P3): ghi vào trục không thuộc mình; đưa vào BIZCITY-ERRORS §4 ở đợt W1
   AXIS_READ_ONLY: 'Trục danh mục này là bản sao (chủ ở app khác): gửi đề xuất cho chủ, không ghi thẳng; kèm axis, owner',
   AXIS_TRANSFERRING: 'Trục danh mục đang chuyển chủ (đóng băng ghi): chờ chuyển xong hoặc huỷ chuyển; kèm axis',
   DOC_ALREADY_CONFIRMED: 'Đã xác nhận nhận tiền trước đó',

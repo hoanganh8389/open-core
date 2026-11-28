@@ -2,8 +2,8 @@
 
 ## [Chưa phát hành]
 
-### Thêm (S004-MD-1…3 — cơ chế danh mục ở lõi, NC-008 W2)
-- 2026-11-29 — **Danh mục ở lõi = cơ chế, không phải bảng danh mục** (<!-- [2026-11-29 12:16 AM Johnny Chu - Chu Hoàng Anh] S004-MD-1…3 — NC-008 (chủ chốt ① Q-NC8-1…10, 2026-11-28) -->, ADR-P2 / P3 / P6 của NC-008): lõi không có bảng hàng / ĐVT / đối tác (R-CHAIN-0, R-PLAT-3).
+### Thêm (S004-DM-1…3 — cơ chế danh mục ở lõi, NC-008 W2)
+- 2026-11-29 — **Danh mục ở lõi = cơ chế, không phải bảng danh mục** (<!-- [2026-11-29 12:16 AM Johnny Chu - Chu Hoàng Anh] S004-DM-1…3 — NC-008 (chủ chốt ① Q-NC8-1…10, 2026-11-28) -->, ADR-P2 / P3 / P6 của NC-008): lõi không có bảng hàng / ĐVT / đối tác (R-CHAIN-0, R-PLAT-3).
   - **`newId(kind)`** (`@bizcity/contracts`): ULID cho trục khoá bằng ID (`item`, `contact`, `document`, `event`); trục khoá bằng `code` (`partner`, `branch`, `warehouse`, `org_unit`) bị từ chối. `ulidFrom(ms, bytes)` thuần cho vector (đúng 80 bit ngẫu nhiên, khác `newSiteId` cũ lấy byte % 32), `ulidTime`. Vector `01ARYZ6S41000G40R40M30E209` kiểm bằng cách tính độc lập; bản PHP cùng vector ở W1.
   - **Migration lõi 0007**: `entity_links` (ánh xạ ID ↔ instance khác; chỉ thêm — trigger chỉ cho đóng `valid_to` một lần; một canonical đang mở cho mỗi local và mỗi remote; RLS) và `data_authority` (chủ của trục trong tenant, ở chính app; `epoch` không giảm; `local → transferring → replica` một chiều, thành replica phải tăng epoch; không xoá; RLS). `0007` ghi `coveredBy` "chờ" trên CSDL open-ketoan (kế toán là chủ danh mục, nhận bảng ở W5 sau R-FLOW).
   - **`core/master-data.ts`**: `entityLinks.{link, resolveLocal, resolveRemote, close, history}` (gắn lặp idempotent; đổi ánh xạ = đóng + thêm; tra theo thời điểm; remote đã thuộc local khác ⇒ `CONFLICT`, không gộp ngầm; `proposal` không chiếm chỗ canonical) và `dataAuthority.{get, ensureLocal, assertWritable}` (không giành chủ; `CONFLICT` với `details.reason` `AXIS_TRANSFERRING` / `AXIS_READ_ONLY`). Hai mã lý do mới ở `ERROR_REASONS` — đưa vào BIZCITY-ERRORS §4 ở W1. Chưa có hàm chuyển chủ (W4).

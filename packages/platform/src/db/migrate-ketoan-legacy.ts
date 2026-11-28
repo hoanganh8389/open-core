@@ -52,7 +52,7 @@ export const CORE_COVERED_BY_KETOAN: Readonly<Record<string, string>> = {
   // [2026-11-28 09:52 PM Johnny Chu - Chu Hoàng Anh] S004-W2-4 — không chạy trên CSDL open-ketoan: ràng buộc cũ của kế toán (liệt kê accounting_unit) vẫn hợp lệ với mọi giá trị nó ghi;
   // kế toán đăng ký bậc accounting_unit bằng registerSettingScopes. Bản cài mới của app khác nhận 0006 bình thường.
   '0006_platform_bac_cai_dat_mo.sql': 'không chạy — ràng buộc cũ của open-ketoan vẫn hợp lệ (PHASE-004 Q-P4-4)',
-  // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-2/3 — entity_links + data_authority: open-ketoan là CHỦ danh mục (R-CHAIN-0), chưa cần ánh xạ ngược
+  // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-2/3 — entity_links + data_authority: open-ketoan là CHỦ danh mục (R-CHAIN-0), chưa cần ánh xạ ngược
   // hay cổng chủ lúc này; nhận bảng khi chuyển sang lõi (NC-008 W5, sau claim NT-HT-003 / NT-MH-011 / NT-BH-061). Không đụng CSDL kế toán khi chưa qua R-FLOW.
   '0007_platform_danh_muc_co_che.sql': 'chờ open-ketoan lên lõi (NC-008 W5, R-FLOW) — kế toán là chủ danh mục, chưa dùng entity_links / data_authority',
 };

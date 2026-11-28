@@ -1,5 +1,5 @@
 // @bizcity-layer P master-data
-// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-2 + S004-MD-3 — cơ chế danh mục ở lõi (NC-008 ADR-P6, ADR-P3 §2): ánh xạ ID xuyên instance
+// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-2 + S004-DM-3 — cơ chế danh mục ở lõi (NC-008 ADR-P6, ADR-P3 §2): ánh xạ ID xuyên instance
 // và chủ dữ liệu theo trục. Lõi không biết hàng / ĐVT / đối tác là gì (R-CHAIN-0, R-PLAT-3): chỉ lưu "ID này ở bên kia là gì" và "ai là chủ trục này".
 /**
  * entityLinks — bảng entity_links (lõi 0007). Chỉ thêm: đổi ánh xạ = đóng dòng cũ (valid_to) + thêm dòng mới; lịch sử tra được theo thời điểm.

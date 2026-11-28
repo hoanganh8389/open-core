@@ -1,4 +1,4 @@
--- [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-2 + S004-MD-3 — cơ chế danh mục ở lõi (NC-008 ADR-P6, ADR-P3 §2; Q-NC8-2 = ①, Q-NC8-8 = ①).
+-- [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-2 + S004-DM-3 — cơ chế danh mục ở lõi (NC-008 ADR-P6, ADR-P3 §2; Q-NC8-2 = ①, Q-NC8-8 = ①).
 -- =============================================================================
 -- 0007 Cơ chế danh mục. Lõi KHÔNG có bảng hàng / ĐVT / đối tác (R-CHAIN-0, R-PLAT-3): chỉ hai bảng cơ chế mọi app cần.
 --   entity_links    ánh xạ ID của app này ↔ ID / mã của instance khác (thay ext_* của open-cake, kiot_links của open-kiot, tgs_catalog_* ).

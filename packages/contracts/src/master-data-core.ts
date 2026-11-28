@@ -1,4 +1,4 @@
-// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-1…3 — cơ chế danh mục ở lõi (NC-008 ADR-P2 §2, ADR-P3 §2, ADR-P6): bộ sinh ID,
+// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-1…3 — cơ chế danh mục ở lõi (NC-008 ADR-P2 §2, ADR-P3 §2, ADR-P6): bộ sinh ID,
 // vai ánh xạ, trạng thái chủ dữ liệu. Lõi giữ CƠ CHẾ, không giữ bảng danh mục (Q-NC8-2 = ①): hàng / ĐVT / đối tác vẫn ở app chủ.
 /**
  * Danh mục ở lõi — hợp đồng.

@@ -1874,7 +1874,7 @@ export interface DocumentActivitiesTable {
   created_at: TimestampDefault;
 }
 
-// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-2 — lõi 0007: ánh xạ ID xuyên instance (chỉ thêm; đóng = valid_to)
+// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-2 — lõi 0007: ánh xạ ID xuyên instance (chỉ thêm; đóng = valid_to)
 /** Lõi 0007: ánh xạ ID của app ↔ instance khác (NC-008 ADR-P6). */
 export interface EntityLinksTable {
   id: Generated<string>;
@@ -1892,7 +1892,7 @@ export interface EntityLinksTable {
   evidence_ref: Generated<string>;
 }
 
-// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-3 — lõi 0007: chủ của trục danh mục trong tenant
+// [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-3 — lõi 0007: chủ của trục danh mục trong tenant
 /** Lõi 0007: chủ dữ liệu theo trục (NC-008 ADR-P3 §2). */
 export interface DataAuthorityTable {
   tenant_id: string;
@@ -2153,7 +2153,7 @@ export interface Database extends AppDatabase {
   document_sequences: DocumentSequencesTable;
   business_documents: BusinessDocumentsTable;
   document_activities: DocumentActivitiesTable;
-  // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-MD-2/3 — bảng cơ chế danh mục lõi 0007
+  // [2026-11-28 11:47 PM Johnny Chu - Chu Hoàng Anh] S004-DM-2/3 — bảng cơ chế danh mục lõi 0007
   entity_links: EntityLinksTable;
   data_authority: DataAuthorityTable;
   catalog_trash: CatalogTrashTable;
