@@ -26,6 +26,8 @@
 
 ## Luật
 
+- **Lane** <!-- [2026-11-29 12:29 AM Johnny Chu - Chu Hoàng Anh] LANES --> open-core có hai lane làm song song: **R** (ranh giới + tương thích open-ketoan) và **T** (ba trụ cột Danh mục · Chứng từ · Đồng bộ). Trước khi nhận việc đọc [docs/phases/LANES.md](docs/phases/LANES.md) (ai làm gì, luật sửa tệp chung, bàn giao) và giữ chỗ ở [docs/phases/CLAIMS.md](docs/phases/CLAIMS.md) (việc, số migration, số ADR, số R-CORE).
+
 - **R-PLAT-1** không import gói nghiệp vụ (`@ketoan/*`, `@open-ketoan/*`, `@cake/*`, `@open-cake/*`); không chuỗi nghiệp vụ cứng (`ketoan`, `crm`, `kt_`, `cake_`) — đọc từ `PlatformConfig` / cấu hình app. `tools/kiem-khung.mjs` chặn.
 - **R-PLAT-2** app gắn nghiệp vụ qua cổng đăng ký (`register*`, migration `sources` + `hooks`, `AppDatabase` gộp khai báo).
 - **R-PLAT-3** thêm vào lõi chỉ khi ≥ 2 app cần hoặc là hạ tầng chung theo canon; ADR ở `docs/adr/`.

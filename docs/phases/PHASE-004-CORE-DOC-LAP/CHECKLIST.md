@@ -2,6 +2,8 @@
 
 <!-- [2026-11-28 09:21 PM Johnny Chu - Chu Hoàng Anh] PHASE-004 — nguồn trạng thái từng việc của phase. -->
 
+> **Lane** <!-- [2026-11-29 12:29 AM Johnny Chu - Chu Hoàng Anh] LANES -->: nhóm W1–W3 + S004-W2-9 = lane **R**; nhóm W4–W5 + `S004-DM / CT / DB` = lane **T** ([LANES.md](../LANES.md)).
+>
 > Ký hiệu: ☐ chưa làm · ◐ đang / có một phần · ☑ xong (có bằng chứng ở README) · ⛔ bị chặn.
 
 | Mã | Việc | Repo | Trạng thái |
