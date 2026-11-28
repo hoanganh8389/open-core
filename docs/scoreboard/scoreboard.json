@@ -1,6 +1,6 @@
 {
   "$comment": "[2026-11-28 06:58 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 — scoreboard mã ↔ tài liệu (ERP-12 của NC-005, chi tiết 20 mục). Mức 0 chưa có · 1 mới tài liệu · 2 có một phần · 3 có mã + test ở app đó · 4 ở open-core, có test, app đang dùng. Đo lần đầu bằng rà soát chỉ đọc (open-core main 9be302f + nhánh 0.4.0, open-cake 7436d28, open-ketoan dev 0237a4d). Sửa tay khi có bằng chứng mới rồi chạy node tools/scoreboard.mjs.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "measuredAt": "2026-11-28",
   "apps": ["open-core", "open-cake", "open-ketoan"],
   "primitives": [

@@ -2,7 +2,7 @@
 
 <!-- sinh bởi tools/scoreboard.mjs từ scoreboard.json — đừng sửa tay tệp này -->
 
-> **Đo lúc:** 2026-11-28 · **open-core:** 0.4.0 · **Nguồn:** [`scoreboard.json`](scoreboard.json) · **Màn trong app:** Cài đặt hệ thống › Tình trạng nền tảng ([mockup](../ui/mockup-shots/f5-tinh-trang-nen-tang.png))
+> **Đo lúc:** 2026-11-28 · **open-core:** 0.5.0 · **Nguồn:** [`scoreboard.json`](scoreboard.json) · **Màn trong app:** Cài đặt hệ thống › Tình trạng nền tảng ([mockup](../ui/mockup-shots/f5-tinh-trang-nen-tang.png))
 > **Thang:** 0 chưa có · 1 mới tài liệu · 2 có một phần · 3 có mã + test ở app · 4 ở open-core, có test, app dùng
 
 | App | Mức trung bình |

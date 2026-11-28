@@ -15,24 +15,40 @@ import { Errors } from './errors.js';
 import { documents } from './documents.js';
 import type { Workflow, WorkflowActor, StatusGroup } from './workflow.js';
 
+// [2026-11-28 08:18 PM Johnny Chu - Chu Hoàng Anh] S003-14b — hai cách ghi, mỗi loại đúng một (R-DOCX-1):
+//   quản lý (workflow): lõi cấp số, giữ trạng thái — create / update / transition.
+//   phản chiếu (mirror): app giữ bảng nguồn + trạng thái (vd yêu cầu đặt hàng của open-cake, trạng thái do cửa hàng gửi về), lõi giữ bản đầu phiếu
+//   để tìm chứng từ toàn hệ + dòng hoạt động — như trigger đồng bộ business_documents của open-ketoan. App gọi mirror() sau mỗi lần ghi.
 export interface DocumentTypeDef {
-  /** `<module>.<loại>` — trùng `workflow.type`, là tiền tố của doc_ref. */
+  /** `<module>.<loại>` — là tiền tố của doc_ref (loại quản lý: trùng `workflow.type`). */
   type: string;
   label: string;
-  /** Dãy số (chữ hoa / số, ≤ 10 ký tự): số chứng từ `<series>-<năm>-<số>`. */
-  series: string;
-  workflow: Workflow;
+  /** Loại quản lý: dãy số (chữ hoa / số, ≤ 10 ký tự): số chứng từ `<series>-<năm>-<số>`. */
+  series?: string;
+  /** Loại quản lý: workflow YAML. */
+  workflow?: Workflow;
+  /** Loại phản chiếu: trạng thái của app → sáu nhóm chuẩn (STD-DOC-4). */
+  mirror?: { statuses: Record<string, StatusGroup> };
   /** Khoá meta được phép (như register_meta): không khai = không nhận meta. */
   meta?: z.AnyZodObject;
 }
 
-const TYPE_RE = /^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/;
+// Khớp doc_ref (spine 1.2): phần loại cho gạch dưới (cake.order_request); loại quản lý còn phải khớp workflow (chỉ gạch nối).
+const TYPE_RE = /^[a-z][a-z0-9-]*\.[a-z][a-z0-9_-]*$/;
+const GROUPS: readonly StatusGroup[] = ['draft', 'pending', 'approved', 'in_progress', 'done', 'cancelled'];
 const types = new Map<string, DocumentTypeDef>();
 
 export function defineDocumentType(def: DocumentTypeDef): DocumentTypeDef {
   if (!TYPE_RE.test(def.type)) throw new Error(`Loại chứng từ dạng <module>.<loại>: ${def.type}`);
-  if (def.workflow.type !== def.type) throw new Error(`Loại ${def.type} khác workflow.type ${def.workflow.type}`);
-  if (!def.workflow.statesIn('draft').length) throw new Error(`Workflow ${def.type} cần ít nhất một trạng thái nhóm draft (trạng thái đầu)`);
+  if (!!def.workflow === !!def.mirror) throw new Error(`Loại ${def.type}: khai đúng một trong workflow (lõi quản lý) hoặc mirror (app giữ trạng thái)`);
+  if (def.workflow) {
+    if (!def.series) throw new Error(`Loại ${def.type} (quản lý) cần series`);
+    if (def.workflow.type !== def.type) throw new Error(`Loại ${def.type} khác workflow.type ${def.workflow.type}`);
+    if (!def.workflow.statesIn('draft').length) throw new Error(`Workflow ${def.type} cần ít nhất một trạng thái nhóm draft (trạng thái đầu)`);
+  } else {
+    const bad = Object.entries(def.mirror!.statuses).filter(([k, g]) => !/^[a-z][a-z0-9_]*$/.test(k) || !GROUPS.includes(g));
+    if (!Object.keys(def.mirror!.statuses).length || bad.length) throw new Error(`Loại ${def.type}: bảng trạng thái phản chiếu sai (${bad.map(([k, g]) => `${k}→${g}`).join(', ') || 'trống'})`);
+  }
   if (types.has(def.type) && types.get(def.type) !== def) throw new Error(`Loại chứng từ ${def.type} đã khai`);
   types.set(def.type, def);
   return def;
@@ -43,6 +59,12 @@ export function documentType(type: string): DocumentTypeDef {
   return t;
 }
 export function listDocumentTypes(): DocumentTypeDef[] { return [...types.values()]; }
+type ManagedDef = DocumentTypeDef & { workflow: Workflow; series: string };
+function managed(type: string): ManagedDef {
+  const t = documentType(type);
+  if (!t.workflow) throw Errors.conflict(`${t.label} (${type}) do app giữ trạng thái — app ghi đầu phiếu qua mirror(), không tạo / sửa / chuyển ở lõi`);
+  return t as ManagedDef;
+}
 
 /** Tiền của đầu phiếu. Cùng tiền hạch toán: chỉ `total`. Ngoại tệ: `currency` + `fxRate` + `totalFc` ⇒ `total` tính ở máy chủ. */
 export interface MoneyInput { total?: number; currency?: string; fxRate?: number; totalFc?: number }
@@ -52,6 +74,15 @@ export interface DocumentHeaderInput extends MoneyInput {
   partnerRef?: string;
   orgUnitCode?: string;
   meta?: Record<string, unknown>;
+}
+/** Đầu phiếu phản chiếu từ bảng nguồn của app. */
+export interface MirrorInput extends DocumentHeaderInput {
+  /** Khoá trong doc_ref: `<type>:<key>` (vd ULID của app). */
+  key: string;
+  /** Trạng thái của app (khai trong mirror.statuses). */
+  status: string;
+  docNo?: string;
+  version?: number;
 }
 export interface DocumentHeader {
   docRef: DocRef; type: string; docNo: string; date: string | null; title: string; partnerRef: string; orgUnitCode: string;
@@ -108,7 +139,7 @@ async function load(tx: Db, tenantId: string, docRef: string, lock = false): Pro
 export const documentSpine = {
   /** Tạo đầu phiếu ở trạng thái nháp đầu tiên, cấp số theo dãy của loại, ghi hoạt động "create". */
   async create(tx: Db, tenantId: string, type: string, input: DocumentHeaderInput, actor: string, opts: { baseCurrency?: string } = {}): Promise<DocumentHeader> {
-    const t = documentType(type);
+    const t = managed(type);
     const money = resolveMoney(input, opts.baseCurrency);
     const meta = checkMeta(t, input.meta ?? {});
     const docNo = await documents.nextNumber(tx, tenantId, type.split('.')[0]!, t.series, input.date ? { date: input.date } : {});
@@ -129,7 +160,7 @@ export const documentSpine = {
   /** Sửa đầu phiếu — chỉ khi đang nháp (R-FX: tiền và tỷ giá đóng băng khi rời nháp; sửa sau duyệt = phiên bản mới). */
   async update(tx: Db, tenantId: string, docRef: string, patch: DocumentHeaderInput, actor: string, opts: { baseCurrency?: string } = {}): Promise<DocumentHeader> {
     const r = await load(tx, tenantId, docRef, true);
-    const t = documentType(r.doc_type);
+    const t = managed(r.doc_type);
     if (!t.workflow.editable(r.status_raw)) throw Errors.conflict(`${t.label} ${r.doc_no} đang "${t.workflow.label(r.status_raw)}": chỉ sửa được khi nháp`);
     const cur = toHeader(r);
     const moneyTouched = ['total', 'currency', 'fxRate', 'totalFc'].some((k) => k in patch);
@@ -148,7 +179,7 @@ export const documentSpine = {
   /** Chuyển trạng thái theo workflow (quyền, tách nhiệm, lý do — workflow.plan); ghi hoạt động "transition". */
   async transition(tx: Db, tenantId: string, docRef: string, verb: string, who: WorkflowActor, input: { reason?: string } = {}): Promise<DocumentHeader & { ledger: boolean }> {
     const r = await load(tx, tenantId, docRef, true);
-    const t = documentType(r.doc_type);
+    const t = managed(r.doc_type);
     if (r.archived_at) throw Errors.conflict(`${r.doc_no} đang lưu trữ — khôi phục trước`);
     const step = t.workflow.plan(verb, { id: docRef, status: r.status_raw, createdBy: String(r.created_by) }, who, input);
     const approved = step.group === 'approved';
@@ -158,6 +189,37 @@ export const documentSpine = {
     }).where('tenant_id', '=', tenantId).where('doc_ref', '=', docRef).returningAll().executeTakeFirstOrThrow();
     await activity(tx, tenantId, docRef, { kind: 'transition', actor: who.id, from: step.from, to: step.to, reason: input.reason?.trim(), data: { verb, ...(step.level ? { level: step.level } : {}) } });
     return { ...toHeader(row as unknown as Row), ledger: step.ledger };
+  },
+
+  /**
+   * Phản chiếu đầu phiếu từ bảng nguồn của app (loại mirror): thêm nếu chưa có (hoạt động "create"), cập nhật nếu đã có; trạng thái đổi ⇒
+   * hoạt động "transition" (từ → tới, lý do). Gọi lặp với cùng dữ liệu không ghi thêm hoạt động.
+   */
+  async mirror(tx: Db, tenantId: string, type: string, input: MirrorInput, actor: string, opts: { reason?: string; baseCurrency?: string } = {}): Promise<DocumentHeader> {
+    const t = documentType(type);
+    if (!t.mirror) throw Errors.conflict(`${t.label} (${type}) do lõi quản lý trạng thái — dùng create / transition, không mirror`);
+    const group = t.mirror.statuses[input.status];
+    if (!group) throw Errors.validation(`Trạng thái "${input.status}" chưa khai trong ${type} (mirror.statuses)`);
+    if (!/^[A-Za-z0-9_.:-]{1,200}$/.test(input.key)) throw Errors.validation(`Khoá chứng từ không hợp lệ: ${input.key}`);
+    const docRef = `${type}:${input.key}`;
+    const money = resolveMoney(input, opts.baseCurrency);
+    const meta = checkMeta(t, input.meta ?? {});
+    const prev = await tx.selectFrom('business_documents').select(['status_raw']).where('tenant_id', '=', tenantId).where('doc_ref', '=', docRef).forUpdate().executeTakeFirst();
+    const v = {
+      doc_no: input.docNo ?? input.key, doc_date: input.date ?? null, title: input.title ?? '', partner_ref: input.partnerRef ?? '', org_unit_code: input.orgUnitCode ?? '',
+      status_raw: input.status, status: group, version: input.version ?? 1, total: String(money.total), currency: money.currency, fx_rate: String(money.fxRate),
+      total_fc: money.totalFc == null ? null : String(money.totalFc), meta: JSON.stringify(meta), updated_at: new Date().toISOString(),
+    };
+    let row;
+    if (!prev) {
+      row = await tx.insertInto('business_documents').values({ ...v, tenant_id: tenantId, doc_ref: docRef, module: type.split('.')[0]!, doc_type: type, created_by: actor })
+        .returningAll().executeTakeFirstOrThrow();
+      await activity(tx, tenantId, docRef, { kind: 'create', actor, to: input.status });
+    } else {
+      row = await tx.updateTable('business_documents').set(v).where('tenant_id', '=', tenantId).where('doc_ref', '=', docRef).returningAll().executeTakeFirstOrThrow();
+      if (prev.status_raw !== input.status) await activity(tx, tenantId, docRef, { kind: 'transition', actor, from: prev.status_raw, to: input.status, reason: opts.reason?.trim() });
+    }
+    return toHeader(row as unknown as Row);
   },
 
   /** Ghi chú (chatter). */
