@@ -12,15 +12,16 @@
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { hashItems, validateAgainstLibrary } from './engine.js';
 import type { Library, LibraryInput, ValidateResult } from './types.js';
+import { appRoot } from '../app-root.js';
 
 export * from './types.js';
 export { canonical, checkSchema, effectiveAt, hashItems, nearest, selectorRows, validateAgainstLibrary } from './engine.js';
 
 // Chạy từ src (tsx) hay dist (node) thì gốc repo đều cách 5 cấp (core/libraries → core → src|dist → platform → packages → gốc).
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..');
+// [2026-11-28 04:54 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-2 — gốc app qua appRoot() (đúng cả khi gói nằm trong node_modules)
+const ROOT = appRoot();
 export const LIBRARIES_DIR = path.join(ROOT, 'libraries');
 
 let cache: { libs: Map<string, Library>; errors: { id: string; message: string }[] } | null = null;

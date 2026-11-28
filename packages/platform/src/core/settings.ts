@@ -16,11 +16,11 @@
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { sql } from 'kysely';
 import type { Db } from '../db/client.js';
 import { writeAudit } from './audit.js';
 import { Errors } from './errors.js';
+import { appRoot } from './app-root.js';
 
 export interface SettingEntry {
   key: string;
@@ -68,7 +68,8 @@ export function checkSettingBasis(b: unknown): string | null {
 
 const REGISTRY_FILE = 'docs/contracts/bizcity-settings.registry.json';
 // Như core/version.ts: chạy từ src (tsx) hay dist (node) thì gốc repo đều cách 4 cấp.
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
+// [2026-11-28 04:54 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-2 — gốc app qua appRoot() (đúng cả khi gói nằm trong node_modules)
+const root = appRoot();
 
 let registry: Map<string, SettingEntry> | null = null;
 
