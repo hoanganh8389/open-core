@@ -2,6 +2,9 @@
 
 ## [Chưa phát hành]
 
+### Đổi (S004-W1-7a — open-ketoan biên dịch trên lõi: 0 lỗi kiểu mới)
+- 2026-11-29 — <!-- [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a --> `pendingMigrations(q?, opts)`: không truyền kết nối ⇒ tự mở tới `DATABASE_URL` / `opts.connectionString` (chỗ gọi cũ `pendingMigrations()` chạy nguyên — E-1…E-4). Khu cách ly: `SYSTEM_ROLES` (danh sách vai tĩnh của kế toán, E-7); `installKetoanLegacy()` gọi luôn `ketoanAuthzPreset()` (R-1). Codemod đổi nguồn thêm luật E-5…E-7. Ma trận `--only ketoan --strict`: **ĐẠT, lỗi mới 0** (trước: 7).
+
 ### Thêm (S004-W1-3b / 3c / 5a — diễn tập nâng cấp: bộ đo bản 2, dò API, chạy lại + quay lui)
 - 2026-11-29 — <!-- [2026-11-29 12:39 AM Johnny Chu - Chu Hoàng Anh] S004-W1-3b --> **`do-bat-bien.mjs` bản 2** (`bizcity_dien_tap_bat_bien@2`): nội dung từng dòng của sổ / chứng từ / danh mục (256 ô theo khoá, `--chi-tiet <mã> --o <ô>`, `--dong` + `--dong-truoc/--dong-sau` chỉ ra khoá dòng lệch); nhóm **M** Master Data (ADR-0001 MD-1…MD-4: ULID, mã chồng hiệu lực / cấp lại, ĐVT gốc + tỷ lệ, kho mồ côi, cây có vòng, loại kho); nhóm **R** báo cáo dựng lại (cân đối phát sinh, công nợ, nhập xuất kho, thuế GTGT); nhóm **S** vân lược đồ + sổ migration; **mục bắt buộc theo hồ sơ** (`--ho-so open-ketoan|core`) — thiếu bảng / cột ⇒ đo thoát 1 và so lệch; `--so --chat` đòi giống hệt. **`do-api.mjs`**: kịch bản báo cáo + ma trận quyền qua API (POST luôn `dryRun=1`), so bản A ↔ B. **`dien-tap.mjs`**: trên bản chép (không đụng nguồn) nâng cấp → chạy lại migration (giống hệt) → quay lui từ bản sao lưu (giống hệt trước) → nâng cấp lại (tái lập) → biên bản. Tự kiểm 16 ca.
 

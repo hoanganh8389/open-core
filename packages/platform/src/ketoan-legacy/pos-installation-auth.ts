@@ -8,6 +8,7 @@ import { ERROR_CODES } from '@bizcity/contracts';
 import { db } from '../db/client.js';
 import { AppError, Errors } from '../core/errors.js';
 import { hashApiKey } from '../core/security/password.js';
+import { ketoanAuthzPreset } from '../core/authz-ketoan-legacy.js';
 import { INSTALLATION_KEY_PREFIX, registerApiKeyResolver, scopePermissions, type AuthContext, type Permission } from '../core/auth.js';
 
 const BLOG_RE = /^[1-9][0-9]{0,8}$/;
@@ -42,9 +43,13 @@ export async function resolveInstallation(req: FastifyRequest, apiKey: string): 
 }
 
 let installed = false;
-/** open-ketoan gọi một lần lúc khởi động (sau khi đổi nguồn sang lõi 0.7): đăng ký mọi móc của phần chuyển tiếp. */
+/**
+ * open-ketoan gọi một lần lúc khởi động, TRƯỚC buildApp (sau khi đổi nguồn sang lõi 0.7): đăng ký mọi móc của phần chuyển tiếp.
+ * [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a (R-1) — gọi luôn ketoanAuthzPreset() (vai / quyền / phạm vi khoá của kế toán): một điểm vào duy nhất.
+ */
 export function installKetoanLegacy(): void {
   if (installed) return;
   installed = true;
+  ketoanAuthzPreset();
   registerApiKeyResolver({ prefix: INSTALLATION_KEY_PREFIX, resolve: resolveInstallation });
 }

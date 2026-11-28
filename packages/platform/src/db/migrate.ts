@@ -142,8 +142,17 @@ export async function appliedSchemaVersion(c: { query: (q: string) => Promise<{ 
   return r.rows[0]?.v ?? null;
 }
 
-/** Các file migration CHƯA áp (API dùng khi khởi động: thiếu thì không chạy, báo chạy job db-migrate). */
-export async function pendingMigrations(q: MigrationClient, opts: MigrationSet & { hooks?: MigrationHooks } = {}): Promise<string[]> {
+/**
+ * Các file migration CHƯA áp (API dùng khi khởi động: thiếu thì không chạy, báo chạy job db-migrate).
+ * [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a (E-1…E-4) — `q` tuỳ chọn như `runMigrations`: không truyền ⇒ mở kết nối riêng tới DATABASE_URL
+ *   (hoặc `opts.connectionString`) rồi đóng — chỗ gọi cũ `pendingMigrations()` của open-ketoan chạy nguyên trên lõi.
+ */
+export async function pendingMigrations(q?: MigrationClient, opts: MigrationSet & { hooks?: MigrationHooks; connectionString?: string } = {}): Promise<string[]> {
+  if (!q) {
+    const client = new pg.Client({ connectionString: opts.connectionString ?? env.DATABASE_URL });
+    await client.connect();
+    try { return await pendingMigrations(client, opts); } finally { await client.end(); }
+  }
   // [2026-11-28 05:08 PM Johnny Chu - Chu Hoàng Anh] PHASE-001 S001-3 — bỏ file nguồn khác đã có nội dung (coveredBy)
   const plan = planMigrations(opts).filter((m) => !opts.hooks?.coveredBy?.(m.file, m.source));
   const files = plan.map((m) => m.file);

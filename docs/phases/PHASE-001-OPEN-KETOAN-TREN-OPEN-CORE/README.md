@@ -32,6 +32,7 @@ open-ketoan bỏ bản `packages/platform` + `packages/contracts` riêng, **cài
 | E-2…4 | `migrate-rename.test.ts` gọi `pendingMigrations()` | như E-1 | app: test gọi qua tệp chuyển tiếp |
 | E-5, E-6 | `access.service.ts:32`, `role-assignment.service.ts:78` — `string[]` không gán được cho `Role` (union kế toán) | P2b-3: vai do app đăng ký, `Role = string` | app: dùng `Role` của `@bizcity/platform/core/roles`; khởi động gọi `ketoanAuthzPreset()` |
 | E-7 | `authz-shadow.test.ts` — `SYSTEM_ROLES` không còn | P2b-3: `systemRoleKeys()` (đọc sổ vai lúc chạy) | app: đổi tên trong test |
+| **đã lo từ lõi** <!-- [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a --> | E-1…E-4: `pendingMigrations(q?)` — không truyền kết nối thì lõi tự mở (tương thích nguồn). E-5, E-6, E-7 + R-1: vào **codemod đổi nguồn** `tools/doi-nguon/ketoan-0.7.mjs` (ép kiểu `extra.roles as Role[]`; `SYSTEM_ROLES` lấy từ `@bizcity/platform/ketoan-legacy/index`; `installKetoanLegacy()` gọi luôn `ketoanAuthzPreset()`) ⇒ **open-ketoan không phải sửa tay trước khi đổi nguồn**; ma trận `--strict`: 0 lỗi mới | — | S001-6 còn lại: chạy codemod lúc đổi nguồn (S001-7) |
 
 ## 2. Vấn đề typecheck **không** bắt được (lúc chạy)
 

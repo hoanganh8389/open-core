@@ -38,6 +38,9 @@ test('áp một lần, chạy lại không áp nữa; hook được gọi; pendi
     mkdirSync(app, { recursive: true }); writeFileSync(path.join(app, '0103_app.sql'), 'CREATE TABLE app_c (id int);');
     assert.deepEqual(await pendingMigrations(c, { sources }), ['0103_app.sql']);
     assert.deepEqual(await pendingMigrations(c, { sources, hooks: { isApplied: (f) => f === '0103_app.sql' } }), []);
+    // [2026-11-29 12:45 AM Johnny Chu - Chu Hoàng Anh] S004-W1-7a (E-1…E-4) — không truyền kết nối: tự mở tới DATABASE_URL / connectionString (chỗ gọi cũ của open-ketoan)
+    assert.deepEqual(await pendingMigrations(undefined, { sources }), ['0103_app.sql']);
+    assert.deepEqual(await pendingMigrations(undefined, { sources, connectionString: url }), ['0103_app.sql']);
   } finally { await c.end(); }
 });
 
