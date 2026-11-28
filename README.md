@@ -2,7 +2,7 @@
 
 <!-- [2026-11-27 11:20 PM Johnny Chu - Chu Hoàng Anh] C1 — chủ chốt Q-CORE-1…7 (bizcity-platform NC-003): repo mã lõi riêng, mọi gói @bizcity/* chung một số phiên bản. -->
 
-> **Trạng thái:** 🟢 **0.5.0** — trục chứng từ chung (quản lý + phản chiếu), đa tiền tệ, test runtime lõi trên Postgres; PHASE-001 phía lõi xong; PHASE-003 đang mở. **Mức đáp ứng tài liệu:** open-core 51 % · open-cake 48 % · open-ketoan 65 % ([scoreboard](docs/scoreboard/SCOREBOARD.md), đo 2026-11-28). <!-- [2026-11-28 06:57 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 -->
+> **Trạng thái:** 🟢 **0.6.0** — tìm chứng từ chuẩn hoá (`core.document.list / export`), `defineListAction` (danh sách + xuất csv / json / ndjson từ một khai báo), trục chứng từ + đa tiền tệ, test runtime lõi trên Postgres; PHASE-001 phía lõi xong; PHASE-003 và PHASE-004 đang mở. **Mức đáp ứng tài liệu:** open-core 55 % · open-cake 51 % · open-ketoan 65 % ([scoreboard](docs/scoreboard/SCOREBOARD.md), đo 2026-11-28). <!-- [2026-11-28 06:57 PM Johnny Chu - Chu Hoàng Anh] PHASE-003 S003-13 -->
 
 | Theo dõi | Ở đâu |
 |---|---|
@@ -47,7 +47,7 @@ Luật cấp hệ: [canon open-hub §2.2](https://github.com/hoanganh8389/open-h
 "@bizcity/platform":  "https://github.com/hoanganh8389/open-core/releases/download/v0.3.0/bizcity-platform-0.3.0.tgz"
 ```
 
-Test (Postgres 16 thật, `bizcity-platform` cạnh repo cho `users-check`): dựng máy chủ thử `docker run -d --name oc-test-pg -e POSTGRES_USER=octest -e POSTGRES_PASSWORD=octest -p 127.0.0.1:55499:5432 postgres:16-alpine` rồi `TEST_DATABASE_URL=postgres://octest:octest@127.0.0.1:55499/postgres pnpm test` — mỗi tệp test tạo CSDL riêng, áp migration lõi, chạy action / chứng từ / sự kiện / RLS thật (`packages/platform/test/_csdl.mjs`); không có `TEST_DATABASE_URL` thì các ca cần CSDL bỏ qua. Đóng gói: `pnpm run build && node tools/dong-goi.mjs 0.5.0`.
+Test (Postgres 16 thật, `bizcity-platform` cạnh repo cho `users-check`): dựng máy chủ thử `docker run -d --name oc-test-pg -e POSTGRES_USER=octest -e POSTGRES_PASSWORD=octest -p 127.0.0.1:55499:5432 postgres:16-alpine` rồi `TEST_DATABASE_URL=postgres://octest:octest@127.0.0.1:55499/postgres pnpm test` — mỗi tệp test tạo CSDL riêng, áp migration lõi, chạy action / chứng từ / sự kiện / RLS thật (`packages/platform/test/_csdl.mjs`); không có `TEST_DATABASE_URL` thì các ca cần CSDL bỏ qua. Đóng gói: `pnpm run build && node tools/dong-goi.mjs 0.6.0`.
 
 ## Giấy phép
 
